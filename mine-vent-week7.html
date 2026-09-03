@@ -1,0 +1,830 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Martian+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>The Dust You Can't Cough Back Up</title>
+
+<style>
+  /* Deliberate single-theme "lightbox" design — a dark reading room with pale,
+     glowing radiograph-film panels. The metaphor (dust in the lungs, seen on
+     film) only works in the dark; a light-mode variant would break it. */
+  :root{
+    --bg:#0A121C;
+    --bg-soft:#0F1D2B;
+    --film:#E9F3F6;
+    --film-dim:#CFE1E6;
+    --ink:#E7EEF2;
+    --ink-soft:#9FB4C2;
+    --ink-faint:#5E7381;
+    --line:rgba(231,238,242,0.14);
+    --line-strong:rgba(231,238,242,0.26);
+    --shadow: 0 1px 2px rgba(0,0,0,0.5), 0 18px 40px -20px rgba(0,0,0,0.75);
+
+    --cyan:#63C9DE;
+    --cyan-strong:#9FE3EF;
+    --cyan-soft:#0F2E36;
+    --warn:#E8A33D;
+    --warn-soft:#3A2A10;
+    --danger:#E8604A;
+    --danger-soft:#3A1912;
+    --good:#5FBE82;
+    --good-soft:#123321;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto;} *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;} }
+
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+    font-size:16px; line-height:1.62; -webkit-font-smoothing:antialiased;
+    background-image: radial-gradient(ellipse 900px 500px at 50% -10%, rgba(99,201,222,0.09), transparent 60%);
+  }
+  h1,h2,h3,h4{
+    font-family:"Instrument Serif", Georgia, serif;
+    font-weight:400; letter-spacing:0.002em;
+    text-wrap:balance; margin:0; line-height:1.08;
+  }
+  .mono{ font-family:"Martian Mono", ui-monospace, monospace; }
+  p{ margin:0 0 1em; max-width:66ch; }
+  p:last-child{ margin-bottom:0; }
+  a{ color:inherit; }
+  ::selection{ background:var(--cyan); color:#0A121C; }
+  button{ font-family:inherit; }
+  a:focus-visible, button:focus-visible, input:focus-visible{ outline:2px solid var(--cyan); outline-offset:3px; }
+
+  .eyebrow{
+    font-family:"Martian Mono", monospace; font-size:0.66rem;
+    letter-spacing:0.12em; text-transform:uppercase; font-weight:500;
+    display:inline-flex; align-items:center; gap:0.55em; color:var(--ink-faint);
+  }
+  .wrap{ max-width:1100px; margin:0 auto; padding:0 clamp(1.25rem,4vw,3rem); }
+  .section-pad{ padding:clamp(3.4rem,8vw,6rem) 0; }
+  img,svg{ max-width:100%; }
+  .sec-title{ font-size:clamp(2rem,4.4vw,3.1rem); font-style:italic; }
+  .sec-dek{ color:var(--ink-soft); max-width:64ch; margin-top:1rem; font-size:1.05rem; font-family:"Hanken Grotesk",sans-serif; }
+  .kicker-row{ margin-bottom:1rem; }
+  section + section{ border-top:1px solid var(--line); }
+
+  /* ============ HERO ============ */
+  #hero{ padding:clamp(4rem,9vw,6.5rem) 0 clamp(2.5rem,6vw,4rem); }
+  h1.hero-title{ font-size:clamp(2.4rem,6vw,4.4rem); max-width:20ch; font-style:italic; }
+  h1.hero-title .hl{ color:var(--cyan-strong); }
+  .hero-sub{ font-size:clamp(1.02rem,1.6vw,1.18rem); color:var(--ink-soft); max-width:60ch; margin-top:1.3rem; font-family:"Hanken Grotesk",sans-serif; }
+  .hero-meta{ margin-top:2.4rem; display:flex; flex-wrap:wrap; gap:2.2rem; }
+  .hero-meta .k{ font-family:"Martian Mono",monospace; font-size:0.66rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-faint); }
+  .hero-meta .v{ font-size:1.02rem; margin-top:0.25rem; }
+
+  .lightbox{ background:var(--film); border-radius:6px; padding:1.4rem; margin-top:2.6rem; box-shadow:var(--shadow), 0 0 60px -10px rgba(99,201,222,0.25); }
+  .lightbox svg{ display:block; width:100%; height:auto; }
+  .lightbox-cap{ font-family:"Martian Mono",monospace; font-size:0.68rem; color:var(--ink-faint); text-align:center; margin-top:0.9rem; letter-spacing:0.03em; }
+
+  /* ============ TWO DANGERS ============ */
+  .danger-grid{ display:grid; grid-template-columns:1fr auto 1fr; gap:1.6rem; align-items:center; margin-top:2.4rem; }
+  @media (max-width:760px){ .danger-grid{grid-template-columns:1fr;} }
+  .danger-card{ background:var(--bg-soft); border:1px solid var(--line); border-radius:12px; padding:1.7rem 1.6rem; }
+  .danger-card .dc-eyebrow{ font-family:"Martian Mono",monospace; font-size:0.64rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--warn); }
+  .danger-card h4{ font-size:1.7rem; margin-top:0.4rem; font-style:italic; }
+  .danger-card p{ font-size:0.94rem; color:var(--ink-soft); margin-top:0.8rem; }
+  .danger-vs{ font-family:"Instrument Serif",serif; font-style:italic; font-size:1.4rem; color:var(--ink-faint); text-align:center; }
+
+  .callout{ margin-top:1.6rem; padding:1.1rem 1.3rem; border-left:3px solid var(--danger); background:var(--danger-soft); font-size:0.95rem; border-radius:0 8px 8px 0; }
+  .callout b{ color:var(--danger); display:block; font-family:"Martian Mono",monospace; font-size:0.64rem; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:0.4rem; }
+
+  /* ============ CASE FILES ============ */
+  .case-list{ margin-top:2.2rem; display:flex; flex-direction:column; gap:1rem; }
+  .case{ background:var(--bg-soft); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  .case-head{ width:100%; display:flex; align-items:center; gap:1.1rem; padding:1.2rem 1.4rem; background:none; border:none; cursor:pointer; text-align:left; color:var(--ink); }
+  .case-head .ch-toll{ font-family:"Instrument Serif",serif; font-style:italic; font-size:2.2rem; color:var(--cyan-strong); min-width:3ch; line-height:1; }
+  .case-head .ch-body{ flex:1; }
+  .case-head .ch-name{ font-family:"Instrument Serif",serif; font-size:1.35rem; }
+  .case-head .ch-meta{ font-family:"Martian Mono",monospace; font-size:0.66rem; color:var(--ink-faint); margin-top:0.2rem; letter-spacing:0.03em; }
+  .case-head .ch-chevron{ font-size:1.3rem; color:var(--ink-faint); transition:transform 0.2s; flex-shrink:0; }
+  .case.open .ch-chevron{ transform:rotate(180deg); }
+  .case-panel{ max-height:0; overflow:hidden; transition:max-height 0.28s ease; }
+  .case.open .case-panel{ max-height:700px; }
+  .case-panel-inner{ padding:0 1.4rem 1.5rem; border-top:1px solid var(--line); }
+  .case-panel-inner p{ font-size:0.94rem; color:var(--ink-soft); margin-top:1rem; }
+  .case-panel-inner .cp-lesson{ margin-top:1rem; padding:0.85rem 1rem; background:var(--cyan-soft); color:var(--cyan-strong); border-radius:8px; font-size:0.86rem; }
+  .stat-row{ display:flex; gap:1.6rem; flex-wrap:wrap; margin-top:1rem; }
+  .stat-row .st{ background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:0.8rem 1rem; min-width:9rem; }
+  .stat-row .st .sv{ font-family:"Instrument Serif",serif; font-style:italic; font-size:1.7rem; color:var(--cyan-strong); }
+  .stat-row .st .sl{ font-family:"Martian Mono",monospace; font-size:0.62rem; color:var(--ink-faint); text-transform:uppercase; letter-spacing:0.04em; margin-top:0.15rem; }
+
+  /* ============ CALCULATOR (shared style) ============ */
+  .calc-card{ background:var(--bg-soft); border:1px solid var(--line); border-radius:16px; padding:1.9rem clamp(1.3rem,3vw,2.3rem); box-shadow:var(--shadow); margin-top:2.4rem; }
+  .calc-head{ display:flex; align-items:baseline; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+  .calc-head h3{ font-size:1.7rem; font-style:italic; }
+  .calc-num{ font-family:"Martian Mono",monospace; font-size:0.66rem; color:var(--ink-faint); letter-spacing:0.06em; text-transform:uppercase; }
+  .calc-formula{ font-family:"Martian Mono",monospace; font-size:0.86rem; background:var(--bg); border:1px solid var(--line); padding:0.65rem 1rem; border-radius:8px; margin-top:0.9rem; display:inline-block; }
+  .calc-body{ display:grid; grid-template-columns:1.05fr 0.95fr; gap:2rem; margin-top:1.4rem; align-items:start; }
+  @media (max-width:760px){ .calc-body{grid-template-columns:1fr;} }
+  .field{ margin-bottom:1.25rem; }
+  .field:last-child{ margin-bottom:0; }
+  .field label{ display:flex; justify-content:space-between; font-size:0.83rem; color:var(--ink-soft); margin-bottom:0.5rem; font-family:"Martian Mono",monospace; }
+  .field label .fval{ color:var(--cyan-strong); font-weight:600; }
+  input[type=range]{ width:100%; accent-color:var(--cyan); height:4px; cursor:pointer; }
+  .toggle-row{ display:flex; gap:0.6rem; flex-wrap:wrap; }
+  .toggle-btn{ font-family:"Martian Mono",monospace; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.03em; background:var(--bg); border:1px solid var(--line-strong); color:var(--ink); padding:0.5rem 0.9rem; border-radius:20px; cursor:pointer; }
+  .toggle-btn.active{ background:var(--cyan); border-color:var(--cyan); color:#0A121C; font-weight:600; }
+  .result-panel{ background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:1.2rem 1.3rem; display:flex; flex-direction:column; gap:0.85rem; }
+  .result-row{ display:flex; justify-content:space-between; align-items:baseline; gap:1rem; }
+  .result-row .rl{ font-size:0.8rem; color:var(--ink-soft); }
+  .result-row .rr{ font-family:"Martian Mono",monospace; font-weight:500; font-size:1.08rem; font-variant-numeric:tabular-nums; text-align:right; }
+  .result-row.big .rr{ font-size:1.6rem; color:var(--cyan-strong); }
+  .result-flag{ margin-top:0.15rem; padding:0.6rem 0.75rem; border-radius:8px; font-size:0.8rem; font-family:"Martian Mono",monospace; }
+  .result-flag.ok{ background:var(--good-soft); color:var(--good); }
+  .result-flag.bad{ background:var(--danger-soft); color:var(--danger); }
+  .result-flag.warn{ background:var(--warn-soft); color:var(--warn); }
+  .calc-note{ font-size:0.8rem; color:var(--ink-faint); margin-top:1rem; border-top:1px dashed var(--line); padding-top:0.9rem; }
+
+  /* ============ DUST GAUGE (calc visuals) ============ */
+  .gauge-wrap{ background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:1rem; }
+  .gauge-wrap svg{ display:block; width:100%; height:auto; }
+
+  /* ============ ENGINEERING CONTROLS ============ */
+  .ctrl-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:1.3rem; margin-top:2.4rem; }
+  @media (max-width:760px){ .ctrl-grid{grid-template-columns:1fr;} }
+  .ctrl-card{ background:var(--bg-soft); border:1px solid var(--line); border-radius:12px; padding:1.5rem 1.6rem; }
+  .ctrl-card .cc-eyebrow{ font-family:"Martian Mono",monospace; font-size:0.62rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--cyan); }
+  .ctrl-card h4{ font-size:1.5rem; margin-top:0.4rem; font-style:italic; }
+  .ctrl-card p{ font-size:0.92rem; color:var(--ink-soft); margin-top:0.7rem; }
+  .ctrl-card .cc-num{ margin-top:0.9rem; font-family:"Martian Mono",monospace; font-size:0.85rem; color:var(--cyan-strong); background:var(--cyan-soft); display:inline-block; padding:0.4rem 0.7rem; border-radius:6px; }
+
+  /* ============ QUIZ ============ */
+  .quiz-shell{ background:var(--bg-soft); border:1px solid var(--line); border-radius:16px; margin-top:2.4rem; overflow:hidden; box-shadow:var(--shadow); }
+  .quiz-progress{ height:4px; background:var(--line); }
+  .quiz-progress-fill{ height:100%; width:0%; background:var(--cyan); transition:width 0.3s; }
+  .quiz-body{ padding:clamp(1.4rem,3.5vw,2.4rem); }
+  .quiz-q-num{ font-family:"Martian Mono",monospace; font-size:0.66rem; color:var(--cyan); letter-spacing:0.08em; text-transform:uppercase; }
+  .quiz-scenario{ color:var(--ink-soft); font-size:0.92rem; margin-top:0.7rem; font-style:italic; }
+  .quiz-question{ font-family:"Instrument Serif",serif; font-style:italic; font-size:clamp(1.3rem,2.4vw,1.6rem); margin-top:0.6rem; line-height:1.2; }
+  .quiz-options{ display:flex; flex-direction:column; gap:0.7rem; margin-top:1.4rem; }
+  .quiz-opt{ text-align:left; background:var(--bg); border:1px solid var(--line); color:var(--ink); padding:0.85rem 1rem; border-radius:10px; cursor:pointer; font-size:0.95rem; display:flex; gap:0.7rem; transition:background 0.15s, border-color 0.15s; }
+  .quiz-opt:hover:not(:disabled){ border-color:var(--cyan); }
+  .quiz-opt .qletter{ font-family:"Martian Mono",monospace; color:var(--cyan); flex-shrink:0; }
+  .quiz-opt.correct{ background:var(--good-soft); border-color:var(--good); }
+  .quiz-opt.incorrect{ background:var(--danger-soft); border-color:var(--danger); }
+  .quiz-opt:disabled{ cursor:default; }
+  .quiz-feedback{ margin-top:1.2rem; padding:1rem 1.1rem; border-radius:10px; background:var(--bg); border-left:3px solid var(--cyan); font-size:0.9rem; color:var(--ink-soft); display:none; }
+  .quiz-feedback.show{ display:block; }
+  .quiz-nav{ display:flex; justify-content:flex-end; margin-top:1.4rem; }
+  .btn{ font-family:"Martian Mono",monospace; font-size:0.78rem; letter-spacing:0.04em; text-transform:uppercase; background:var(--cyan); color:#0A121C; border:none; padding:0.7rem 1.3rem; border-radius:20px; cursor:pointer; font-weight:600; }
+  .btn:disabled{ opacity:0.35; cursor:default; }
+  .btn.ghost{ background:transparent; border:1px solid var(--line-strong); color:var(--ink); }
+  .quiz-result{ text-align:center; }
+  .quiz-result .score-big{ font-family:"Instrument Serif",serif; font-style:italic; font-size:3.4rem; color:var(--cyan-strong); }
+  .quiz-result p{ margin:0.8rem auto 0; max-width:52ch; color:var(--ink-soft); }
+
+  /* ============ DISCUSSION ============ */
+  .disc-grid{ display:flex; flex-direction:column; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:14px; overflow:hidden; margin-top:2.2rem; }
+  .disc-item{ background:var(--bg-soft); padding:1.4rem 1.6rem; display:grid; grid-template-columns:2.4rem 1fr; gap:1rem; }
+  .disc-item .dn{ font-family:"Instrument Serif",serif; font-style:italic; font-size:2rem; color:var(--line-strong); }
+  .disc-item p{ margin:0; font-size:1rem; }
+  .disc-item .dtag{ font-family:"Martian Mono",monospace; font-size:0.62rem; color:var(--cyan); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.35rem; display:block; }
+
+  .lookahead{ background:var(--bg-soft); border:1px solid var(--line); border-radius:14px; padding:1.4rem 1.6rem; margin-top:2.2rem; display:flex; gap:1.2rem; align-items:baseline; flex-wrap:wrap; }
+  .lookahead .lw{ font-family:"Martian Mono",monospace; color:var(--cyan); font-size:0.76rem; text-transform:uppercase; letter-spacing:0.05em; }
+
+  footer{ padding:3rem 0 4rem; color:var(--ink-faint); font-size:0.85rem; border-top:1px solid var(--line); }
+
+  #instr-toggle{ position:fixed; left:1.2rem; bottom:1.2rem; z-index:180; background:var(--cyan); color:#0A121C; font-family:"Martian Mono",monospace; font-size:0.68rem; letter-spacing:0.04em; text-transform:uppercase; border:none; padding:0.65rem 1rem; border-radius:30px; cursor:pointer; box-shadow:var(--shadow); display:flex; align-items:center; gap:0.5rem; font-weight:600; }
+  #instr-panel{ position:fixed; inset:0; z-index:300; display:none; background:rgba(0,0,0,0.65); backdrop-filter:blur(2px); align-items:center; justify-content:center; padding:1.5rem; }
+  #instr-panel.open{ display:flex; }
+  .instr-card{ background:var(--bg-soft); color:var(--ink); border-radius:18px; max-width:740px; width:100%; max-height:85vh; overflow-y:auto; padding:clamp(1.5rem,4vw,2.5rem); box-shadow:var(--shadow); border:1px solid var(--line); }
+  .instr-card h3{ font-size:1.6rem; font-style:italic; }
+  .instr-close{ float:right; background:none; border:1px solid var(--line); border-radius:50%; width:2rem; height:2rem; cursor:pointer; color:var(--ink); font-size:1rem; }
+  .run-table{ width:100%; border-collapse:collapse; margin-top:1.4rem; font-size:0.9rem; }
+  .run-table th{ text-align:left; font-family:"Martian Mono",monospace; font-size:0.62rem; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-faint); border-bottom:1px solid var(--line); padding:0.5rem 0.6rem 0.5rem 0; }
+  .run-table td{ padding:0.65rem 0.6rem 0.65rem 0; border-bottom:1px solid var(--line); vertical-align:top; }
+  .run-table td.tt{ font-family:"Martian Mono",monospace; color:var(--cyan); white-space:nowrap; }
+</style>
+
+<nav id="topbar-wrap" style="position:fixed; top:0; left:0; right:0; height:3px; z-index:200;">
+  <div id="topbar-fill" style="height:100%; width:0%; background:linear-gradient(90deg, var(--cyan), var(--cyan-strong)); transition:width 0.08s linear;"></div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<section id="hero">
+  <div class="wrap">
+    <div class="eyebrow">Mine Ventilation · Week 7</div>
+    <h1 class="hero-title">The same dust that <span class="hl">explodes</span> a mine also <span class="hl">scars a lung</span> — slowly enough that nobody notices until it's done.</h1>
+    <p class="hero-sub">Coal dust suspended in air is fuel for an explosion. Coal dust and rock dust breathed in, day after day, is a disease with no cure. Today's ventilation isn't just about oxygen and gas — it's the only thing standing between a working face and both of those outcomes.</p>
+
+    <div class="hero-meta">
+      <div><div class="k">Session</div><div class="v">90 minutes</div></div>
+      <div><div class="k">Format</div><div class="v">Two calculators, one X-ray</div></div>
+      <div><div class="k">You'll leave with</div><div class="v">Why "the dust is legal" and "the dust is safe" aren't the same claim</div></div>
+    </div>
+
+    <div class="lightbox">
+      <svg viewBox="0 0 600 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of the human respiratory tract showing where different sizes of airborne dust particles lodge: larger particles caught in the nose and throat, and fine respirable particles under about 10 microns reaching deep into the alveoli.">
+        <!-- airway -->
+        <path d="M300,10 L300,70" stroke="#1B2B33" stroke-width="14" fill="none"/>
+        <path d="M300,70 Q300,100 270,120 Q220,150 200,175" stroke="#1B2B33" stroke-width="11" fill="none"/>
+        <path d="M300,70 Q300,100 330,120 Q380,150 400,175" stroke="#1B2B33" stroke-width="11" fill="none"/>
+        <circle cx="190" cy="185" r="26" fill="#28414C"/>
+        <circle cx="410" cy="185" r="26" fill="#28414C"/>
+        <circle cx="170" cy="200" r="16" fill="#28414C"/>
+        <circle cx="430" cy="200" r="16" fill="#28414C"/>
+
+        <text x="225" y="20" font-family="Martian Mono, monospace" font-size="10" fill="#5E7381" text-anchor="end">NOSE / THROAT</text>
+        <text x="300" y="125" font-family="Martian Mono, monospace" font-size="10" fill="#5E7381" text-anchor="middle">BRONCHI</text>
+        <text x="300" y="228" font-family="Martian Mono, monospace" font-size="10" fill="#5E7381" text-anchor="middle">ALVEOLI</text>
+
+        <!-- large particle, stopped early -->
+        <circle cx="300" cy="18" r="6" fill="#E8A33D"/>
+        <text x="345" y="21" font-family="Martian Mono, monospace" font-size="10" fill="#E8A33D">&gt;10 µm — filtered out</text>
+
+        <!-- respirable particle, reaching alveoli -->
+        <circle cx="190" cy="185" r="2.2" fill="#E8604A"/>
+        <circle cx="410" cy="185" r="2.2" fill="#E8604A"/>
+        <text x="300" y="250" font-family="Martian Mono, monospace" font-size="10" fill="#E8604A" text-anchor="middle">&lt;10 µm respirable — reaches deep lung, stays for good</text>
+      </svg>
+      <div class="lightbox-cap">RESPIRABLE DUST IS DEFINED BY SIZE, NOT SOURCE — SMALL ENOUGH TO SKIP THE BODY'S OWN FILTERS ENTIRELY</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TWO DANGERS ============ -->
+<section id="dangers" class="section-pad">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">01 · One hazard, two very different clocks</span></div>
+    <h2 class="sec-title">One kills in seconds. One takes decades.</h2>
+    <p class="sec-dek">Ventilation and dust control engineering has to answer to both timelines at once, with the same airflow and the same budget.</p>
+
+    <div class="danger-grid">
+      <div class="danger-card">
+        <div class="dc-eyebrow">Seconds</div>
+        <h4>Coal dust explosion</h4>
+        <p>Fine coal dust suspended in air is itself an explosive fuel — no methane required, though methane usually starts it. A single ignition can propagate an explosion for kilometres through a mine, dust cloud igniting dust cloud, unless something inert breaks the chain.</p>
+      </div>
+      <div class="danger-vs">&amp;</div>
+      <div class="danger-card">
+        <div class="dc-eyebrow">Decades</div>
+        <h4>Pneumoconiosis — "black lung"</h4>
+        <p>Respirable particles small enough to reach the alveoli never really leave. Coal dust causes coal workers' pneumoconiosis; the quartz found in surrounding rock strata causes silicosis. Both are permanent, incurable, and diagnosed only after years of exposure.</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <b>Why this matters</b>
+      The engineering answer to the first danger — rock dust — is itself an inert dust cloud. Get the ventilation and housekeeping wrong and you can be simultaneously compliant on explosion prevention while making the respirable dust problem worse. The two goals aren't automatically aligned.
+    </div>
+  </div>
+</section>
+
+<!-- ============ CASE FILES ============ -->
+<section id="cases" class="section-pad" style="background:var(--bg-soft);">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">02 · What happens when it fails</span></div>
+    <h2 class="sec-title">One explosion. One epidemic.</h2>
+    <p class="sec-dek">One case file is a single afternoon in 1979. The other is a disease curve still rising as you read this.</p>
+
+    <div class="case-list" id="case-list">
+      <div class="case" data-case="0">
+        <button class="case-head">
+          <div class="ch-toll">12</div>
+          <div class="ch-body">
+            <div class="ch-name">No. 26 Colliery — Glace Bay, Nova Scotia, 1979</div>
+            <div class="ch-meta">A SPARK, THEN THE LOOSE COAL DUST TOOK OVER</div>
+          </div>
+          <div class="ch-chevron">⌄</div>
+        </button>
+        <div class="case-panel"><div class="case-panel-inner">
+          <p>A coal shearer's cutting pick struck quartzitic sandstone, throwing a spark that ignited pocketed methane. That first, small ignition should have stayed small. Instead it propagated through loose coal dust that had built up on the mine's surfaces, growing into a full-scale explosion. Twelve men died. The Commission of Inquiry found stonedusting on mine surfaces had been inadequate — not absent, just not enough to stop the flame front from finding fresh fuel.</p>
+          <div class="cp-lesson">The lesson: rock dusting isn't a one-time housekeeping task. It has to keep pace with every bit of coal dust a mine generates, everywhere the flame front could travel.</div>
+        </div></div>
+      </div>
+
+      <div class="case" data-case="1">
+        <button class="case-head">
+          <div class="ch-toll">32.5%</div>
+          <div class="ch-body">
+            <div class="ch-name">Black lung's resurgence — Central Appalachia, 2010s–2020s</div>
+            <div class="ch-meta">THE SLOWEST DISASTER IN THIS COURSE</div>
+          </div>
+          <div class="ch-chevron">⌄</div>
+        </button>
+        <div class="case-panel"><div class="case-panel-inner">
+          <p>Among veteran underground coal miners with 25+ years of experience, X-ray screening in the past five years found black lung disease in 32.5% of them — the highest rate in nearly fifty years, up from 20.6% in 2018 and just 7% in 1999. More than 1,700 miners died of black lung between 2020 and 2023 alone. The disease is increasingly showing up in younger miners, decades earlier than it used to.</p>
+          <p>The mechanism traces back to geology, not negligence alone: as Appalachia's thickest coal seams are mined out, operators cut thinner seams — which means cutting further into the quartz-rich sandstone above and below the coal just to make a workable cut height. More rock cut means more silica in the dust cloud, and silica scars lung tissue faster than coal dust alone.</p>
+          <div class="stat-row">
+            <div class="st"><div class="sv">7%</div><div class="sl">Veteran miners affected, 1999</div></div>
+            <div class="st"><div class="sv">20.6%</div><div class="sl">Veteran miners affected, 2018</div></div>
+            <div class="st"><div class="sv">32.5%</div><div class="sl">Veteran miners affected, past 5 years</div></div>
+          </div>
+          <div class="cp-lesson">The lesson: a legal dust level from decades ago doesn't stay a safe one if the composition of the dust changes underneath it. That's exactly why the respirable silica standard exists as its own, separate limit — see the calculator below.</div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CALCULATOR 1: ROCK DUST / TIC ============ -->
+<section id="rockdust" class="section-pad">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">03 · Instrument 1</span></div>
+    <h2 class="sec-title">How inert does the floor need to be?</h2>
+    <p class="sec-dek">U.S. federal law sets a minimum total incombustible content (rock dust plus coal dust plus everything else on mine surfaces) — and raises the bar automatically as methane rises.</p>
+
+    <div class="calc-card">
+      <div class="calc-head"><h3>Required incombustible content</h3><span class="calc-num">30 CFR §75.403</span></div>
+      <div class="calc-formula">Required TIC = 80% + 0.4% for every 0.1% methane present</div>
+      <div class="calc-body">
+        <div>
+          <div class="field">
+            <label>Methane present in ventilating current <span class="fval mono" id="rd-ch4-val">0.3%</span></label>
+            <input type="range" id="rd-ch4" min="0" max="2" step="0.1" value="0.3">
+          </div>
+          <div class="field">
+            <label>Measured incombustible content of surface dust <span class="fval mono" id="rd-tic-val">78%</span></label>
+            <input type="range" id="rd-tic" min="60" max="95" step="1" value="78">
+          </div>
+          <div class="gauge-wrap">
+            <svg id="rd-svg" viewBox="0 0 400 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Gauge comparing measured incombustible content against the methane-adjusted required minimum"></svg>
+          </div>
+        </div>
+        <div class="result-panel">
+          <div class="result-row"><span class="rl">Required minimum TIC</span><span class="rr" id="rd-req">81.2%</span></div>
+          <div class="result-row big"><span class="rl">Measured TIC</span><span class="rr" id="rd-measured">78%</span></div>
+          <div class="result-row"><span class="rl">Shortfall</span><span class="rr" id="rd-shortfall">3.2 pts</span></div>
+          <div class="result-flag bad" id="rd-flag">Below standard — apply more rock dust before advancing</div>
+        </div>
+      </div>
+      <p class="calc-note">This is the exact regulatory formula, not a simplification: the baseline is 80% where methane is under 0.1%, rising 0.4 percentage points for every 0.1% methane detected. Notice how little methane it takes to meaningfully raise the bar — this is why gassier sections of a mine need visibly whiter floors and ribs.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ENGINEERING CONTROLS ============ -->
+<section id="controls" class="section-pad" style="background:var(--bg-soft);">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">04 · Stopping it at the source</span></div>
+    <h2 class="sec-title">The dust you never let become airborne.</h2>
+    <p class="sec-dek">Rock dust neutralizes coal dust after it's on a surface. These controls try to stop respirable dust from reaching a miner's lungs in the first place — right at the cutting head.</p>
+
+    <div class="ctrl-grid">
+      <div class="ctrl-card">
+        <div class="cc-eyebrow">Water sprays</div>
+        <h4>Wethead spray systems</h4>
+        <p>Dozens of nozzles positioned directly behind a continuous miner's cutter bits knock respirable particles out of the air with a fine water mist before they ever reach the operator. Spray pressure — not just flow rate — turns out to be the dominant variable for how well it works.</p>
+        <div class="cc-num">~25–30 gpm at 100 psi, 62–73 nozzles</div>
+      </div>
+      <div class="ctrl-card">
+        <div class="cc-eyebrow">Flooded-bed scrubbers</div>
+        <h4>Ventilating through a water curtain</h4>
+        <p>A fan pulls dust-laden air through a bed of water-wetted filter panels before it's exhausted back into the heading. Performance depends heavily on the configuration — doubling the filter panels roughly doubled measured collection efficiency in NIOSH field testing.</p>
+        <div class="cc-num">~40% single panel → ~72% double panel (field), up to ~98% in lab filter tests</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CALCULATOR 2: RESPIRABLE DUST + SILICA (flagship) ============ -->
+<section id="exposure" class="section-pad">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">05 · Instrument 2</span></div>
+    <h2 class="sec-title">Two limits watching the same sample.</h2>
+    <p class="sec-dek">A dust sample has to satisfy the total respirable dust limit <em>and</em> the respirable crystalline silica limit — separately. As the silica share of a sample rises, one of those two limits quietly becomes the one actually in control.</p>
+
+    <div class="calc-card">
+      <div class="calc-body">
+        <div>
+          <div class="field">
+            <label>Total respirable dust measured <span class="fval mono" id="ex-total-val">1.20 mg/m³</span></label>
+            <input type="range" id="ex-total" min="0.2" max="3.0" step="0.05" value="1.2">
+          </div>
+          <div class="field">
+            <label>Quartz (silica) share of that dust <span class="fval mono" id="ex-quartz-val">5.0%</span></label>
+            <input type="range" id="ex-quartz" min="0" max="20" step="0.5" value="5">
+          </div>
+          <div class="field">
+            <label>Miner status</label>
+            <div class="toggle-row">
+              <button class="toggle-btn active" data-val="standard">Standard miner</button>
+              <button class="toggle-btn" data-val="part90">Part 90 (prior black lung finding)</button>
+            </div>
+          </div>
+
+          <div class="gauge-wrap" style="margin-top:1.2rem;">
+            <svg id="ex-svg" viewBox="0 0 400 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Two gauges comparing total respirable dust and respirable silica against their separate legal limits"></svg>
+          </div>
+        </div>
+        <div class="result-panel">
+          <div class="result-row"><span class="rl">Total dust limit (8-hr TWA)</span><span class="rr" id="ex-total-limit">1.50 mg/m³</span></div>
+          <div class="result-row"><span class="rl">Respirable silica in sample</span><span class="rr" id="ex-silica">0.060 mg/m³</span></div>
+          <div class="result-row"><span class="rl">Silica limit (all mines, 2024 rule)</span><span class="rr">0.050 mg/m³</span></div>
+          <div class="result-row big"><span class="rl">Binding constraint</span><span class="rr" id="ex-binding">Silica</span></div>
+          <div class="result-flag bad" id="ex-flag">Non-compliant — silica limit exceeded even though total dust is legal</div>
+        </div>
+      </div>
+      <p class="calc-note">Limits shown are current U.S. MSHA standards: 1.5 mg/m³ total respirable coal dust for standard miners (0.5 mg/m³ for Part 90 miners under 2014's rule), and 0.05 mg/m³ respirable crystalline silica for all mines under the 2024 rule (coal compliance deadline April 2025). At just above 3.3% quartz content, the silica limit becomes tighter than the total-dust limit — exactly the thin-seam scenario driving today's black lung resurgence.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ QUIZ ============ -->
+<section id="quiz" class="section-pad" style="background:var(--bg-soft);">
+  <div class="wrap" style="max-width:760px;">
+    <div class="kicker-row"><span class="eyebrow">06 · Checkpoint</span></div>
+    <h2 class="sec-title">Two hazards, six scenarios.</h2>
+    <p class="sec-dek">Pulling on today's calculators and case files.</p>
+
+    <div class="quiz-shell">
+      <div class="quiz-progress"><div class="quiz-progress-fill" id="quiz-progress-fill"></div></div>
+      <div class="quiz-body" id="quiz-body"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DISCUSSION ============ -->
+<section id="discuss" class="section-pad">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">07 · Debrief</span></div>
+    <h2 class="sec-title">For the last 15 minutes: talk it through.</h2>
+    <p class="sec-dek">In pairs or small groups.</p>
+
+    <div class="disc-grid">
+      <div class="disc-item">
+        <div class="dn">1</div>
+        <div><span class="dtag">Two clocks</span><p>An explosion kills in seconds; black lung takes decades. Do you think a mine's safety culture and its regulators actually weigh these two risks the way their real severity deserves — or does the immediate, visible danger get more attention than the slow one?</p></div>
+      </div>
+      <div class="disc-item">
+        <div class="dn">2</div>
+        <div><span class="dtag">Compliance vs. safety</span><p>Today's exposure calculator shows a sample that's legal on total dust but illegal on silica. What does that tell you about treating "under the legal limit" as the same claim as "safe to breathe"?</p></div>
+      </div>
+      <div class="disc-item">
+        <div class="dn">3</div>
+        <div><span class="dtag">Geology as risk factor</span><p>The black lung resurgence traces back to geology — thinner seams forcing more rock to be cut. Is this a problem ventilation and dust-suppression engineering can fully solve, or does it eventually become a question of which seams should be mined at all?</p></div>
+      </div>
+      <div class="disc-item">
+        <div class="dn">4</div>
+        <div><span class="dtag">Regulatory lag</span><p>The current 1.5 mg/m³ total dust standard dates to 2014; the separate 0.05 mg/m³ silica standard only took effect in 2024 — after the resurgence had already been documented for years. What does that gap suggest about how mining regulation responds to new evidence?</p></div>
+      </div>
+      <div class="disc-item">
+        <div class="dn">5</div>
+        <div><span class="dtag">Career</span><p>Water sprays and scrubbers only work if they're maintained, inspected, and actually running. As a future engineer, what would make you confident a dust-control system is doing its job on a given shift, rather than just installed and forgotten?</p></div>
+      </div>
+    </div>
+
+    <div class="lookahead">
+      <span class="lw">Still ahead</span>
+      <span>Week 12, Heat &amp; Climate Control, returns to Week 2's psychrometrics to look at what happens when the air itself — not just what's suspended in it — becomes the hazard.</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    Mine Ventilation — Week 7 seminar material. Rock dust standard per 30 CFR §75.403 and its 2011 final rule. Respirable dust and silica limits per MSHA's 2014 respirable dust rule and 2024 respirable crystalline silica rule (Federal Register 2024-06920). No. 26 Colliery case per the Nova Scotia Commission of Inquiry as summarized by the Museum of Industry (Nova Scotia) and the UMWA Journal. Black lung statistics per NPR (Aug 2026) and CDC MMWR 65(49). Water spray and scrubber figures per NIOSH (J. Organiscak) and NIOSHTIC-2 record 00198412 — field efficiency figures vary by configuration; treat single numbers as illustrative, not guaranteed performance. Always verify current limits and site-specific dust sampling against your jurisdiction's regulator.
+  </div>
+</footer>
+
+<button id="instr-toggle" aria-haspopup="dialog" aria-controls="instr-panel">◐ Instructor view</button>
+<div id="instr-panel" role="dialog" aria-modal="true" aria-labelledby="instr-title">
+  <div class="instr-card">
+    <button class="instr-close" id="instr-close" aria-label="Close instructor view">✕</button>
+    <span class="eyebrow" style="color:var(--cyan);">For the instructor</span>
+    <h3 id="instr-title">Suggested 90-minute run of show</h3>
+    <table class="run-table">
+      <tr><th>Time</th><th>Segment</th></tr>
+      <tr><td class="tt">0:00–0:08</td><td>Open on the hero lightbox diagram. Ask cold: "if a dust mask stops the big particles you can feel and taste, why is the smaller, invisible dust the dangerous one?"</td></tr>
+      <tr><td class="tt">0:08–0:16</td><td>Two-dangers cards + callout. Establish that today covers both an acute and a chronic hazard, driven by the same source.</td></tr>
+      <tr><td class="tt">0:16–0:28</td><td>Case files in two groups. No. 26 Colliery group reports the explosion mechanism; black lung group reports the resurgence statistics and the thin-seam explanation.</td></tr>
+      <tr><td class="tt">0:28–0:40</td><td>Rock dust calculator in pairs. Have them find how little methane it takes to push the required TIC past a typical measured value.</td></tr>
+      <tr><td class="tt">0:40–0:48</td><td>Engineering controls cards — water sprays and scrubbers. Connect back to why neither one alone gets you to zero.</td></tr>
+      <tr><td class="tt">0:48–1:03</td><td>Respirable dust/silica calculator. Have every pair find the quartz percentage where the binding constraint flips from total dust to silica.</td></tr>
+      <tr><td class="tt">1:03–1:15</td><td>Run the 6-question checkpoint as a live class poll.</td></tr>
+      <tr><td class="tt">1:15–1:27</td><td>Small-group discussion prompts.</td></tr>
+      <tr><td class="tt">1:27–1:30</td><td>Close on the "still ahead" note.</td></tr>
+    </table>
+    <p style="margin-top:1.4rem; color:var(--ink-soft); font-size:0.9rem;">Safe to project this page directly to students — this panel is only visible to whoever clicks the button.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var fill = document.getElementById('topbar-fill');
+  function onScroll(){
+    var h = document.documentElement;
+    var scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    fill.style.width = scrolled + '%';
+  }
+  document.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  /* ---------- case files accordion ---------- */
+  var cases = document.querySelectorAll('.case');
+  cases.forEach(function(c){
+    var head = c.querySelector('.case-head');
+    head.addEventListener('click', function(){
+      var wasOpen = c.classList.contains('open');
+      cases.forEach(function(o){ o.classList.remove('open'); });
+      if(!wasOpen) c.classList.add('open');
+    });
+  });
+
+  /* ---------- Calculator 1: rock dust / TIC ---------- */
+  var rdCh4 = document.getElementById('rd-ch4'), rdTic = document.getElementById('rd-tic');
+  var svgns = "http://www.w3.org/2000/svg";
+  function el(tag, attrs){ var e = document.createElementNS(svgns, tag); for(var k in attrs){ e.setAttribute(k, attrs[k]); } return e; }
+
+  function calcRockDust(){
+    var ch4 = parseFloat(rdCh4.value);
+    var measured = parseFloat(rdTic.value);
+    document.getElementById('rd-ch4-val').textContent = ch4.toFixed(1) + '%';
+    document.getElementById('rd-tic-val').textContent = measured.toFixed(0) + '%';
+
+    var required = 80 + 4*ch4;
+    var shortfall = required - measured;
+
+    document.getElementById('rd-req').textContent = required.toFixed(1) + '%';
+    document.getElementById('rd-measured').textContent = measured.toFixed(0) + '%';
+    document.getElementById('rd-shortfall').textContent = (shortfall >= 0 ? shortfall.toFixed(1) + ' pts short' : Math.abs(shortfall).toFixed(1) + ' pts to spare');
+
+    var flag = document.getElementById('rd-flag');
+    if(measured >= required){
+      flag.className = 'result-flag ok';
+      flag.textContent = 'Meets standard — incombustible content is sufficient';
+    } else {
+      flag.className = 'result-flag bad';
+      flag.textContent = 'Below standard — apply more rock dust before advancing';
+    }
+
+    drawRockDustGauge(measured, required);
+  }
+
+  function drawRockDustGauge(measured, required){
+    var svg = document.getElementById('rd-svg');
+    while(svg.firstChild){ svg.removeChild(svg.firstChild); }
+    var x0 = 20, x1 = 380, y = 55, scaleMin = 60, scaleMax = 95;
+    function xOf(v){ return x0 + (v-scaleMin)/(scaleMax-scaleMin)*(x1-x0); }
+    function clampLabelX(x){ return Math.max(x0+42, Math.min(x1-42, x)); }
+
+    svg.appendChild(el('line',{x1:x0,y1:y,x2:x1,y2:y,stroke:'var(--line-strong)','stroke-width':6,'stroke-linecap':'round'}));
+
+    var measuredColor = measured >= required ? 'var(--good)' : 'var(--danger)';
+    svg.appendChild(el('line',{x1:x0,y1:y,x2:xOf(Math.min(measured,scaleMax)),y2:y,stroke:measuredColor,'stroke-width':6,'stroke-linecap':'round'}));
+
+    // required marker — label always ABOVE the bar
+    var rx = xOf(Math.min(Math.max(required,scaleMin),scaleMax));
+    svg.appendChild(el('line',{x1:rx,y1:y-16,x2:rx,y2:y+16,stroke:'var(--cyan-strong)','stroke-width':2.5}));
+    var t1 = el('text',{x:clampLabelX(rx),y:y-24,'font-family':'Martian Mono, monospace','font-size':9,fill:'var(--cyan-strong)','text-anchor':'middle'}); t1.textContent='REQUIRED '+required.toFixed(1)+'%'; svg.appendChild(t1);
+
+    // measured marker — label always BELOW the bar, so it never collides with the required label
+    var mx = xOf(Math.min(Math.max(measured,scaleMin),scaleMax));
+    svg.appendChild(el('circle',{cx:mx,cy:y,r:7,fill:measuredColor,stroke:'var(--bg)','stroke-width':2}));
+    var t2 = el('text',{x:clampLabelX(mx),y:y+28,'font-family':'Martian Mono, monospace','font-size':9,fill:measuredColor,'text-anchor':'middle'}); t2.textContent='MEASURED '+measured.toFixed(0)+'%'; svg.appendChild(t2);
+  }
+
+  rdCh4.addEventListener('input', calcRockDust);
+  rdTic.addEventListener('input', calcRockDust);
+  calcRockDust();
+
+  /* ---------- Calculator 2: respirable dust + silica ---------- */
+  var exTotal = document.getElementById('ex-total'), exQuartz = document.getElementById('ex-quartz');
+  var statusBtns = document.querySelectorAll('#exposure .toggle-btn');
+  var exState = { part90: false };
+  var SILICA_LIMIT = 0.05;
+
+  function calcExposure(){
+    var total = parseFloat(exTotal.value);
+    var quartzPct = parseFloat(exQuartz.value);
+    document.getElementById('ex-total-val').textContent = total.toFixed(2) + ' mg/m³';
+    document.getElementById('ex-quartz-val').textContent = quartzPct.toFixed(1) + '%';
+
+    var totalLimit = exState.part90 ? 0.5 : 1.5;
+    var quartzConc = total * quartzPct/100;
+
+    document.getElementById('ex-total-limit').textContent = totalLimit.toFixed(2) + ' mg/m³';
+    document.getElementById('ex-silica').textContent = quartzConc.toFixed(3) + ' mg/m³';
+
+    var totalOk = total <= totalLimit;
+    var silicaOk = quartzConc <= SILICA_LIMIT;
+    var totalMargin = totalLimit - total;
+    var silicaMargin = SILICA_LIMIT - quartzConc;
+
+    var binding;
+    if(!totalOk && !silicaOk){ binding = 'Both'; }
+    else if(!silicaOk){ binding = 'Silica'; }
+    else if(!totalOk){ binding = 'Total dust'; }
+    else { binding = (silicaMargin < totalMargin) ? 'Silica (tighter margin)' : 'Total dust (tighter margin)'; }
+    document.getElementById('ex-binding').textContent = binding;
+
+    var flag = document.getElementById('ex-flag');
+    if(totalOk && silicaOk){
+      flag.className = 'result-flag ok';
+      flag.textContent = 'Compliant with both limits';
+    } else if(!totalOk && !silicaOk){
+      flag.className = 'result-flag bad';
+      flag.textContent = 'Non-compliant — both total dust and silica limits exceeded';
+    } else if(!silicaOk){
+      flag.className = 'result-flag bad';
+      flag.textContent = 'Non-compliant — silica limit exceeded even though total dust is legal';
+    } else {
+      flag.className = 'result-flag bad';
+      flag.textContent = 'Non-compliant — total dust limit exceeded';
+    }
+
+    drawExposureGauges(total, totalLimit, quartzConc);
+  }
+
+  function drawExposureGauges(total, totalLimit, quartzConc){
+    var svg = document.getElementById('ex-svg');
+    while(svg.firstChild){ svg.removeChild(svg.firstChild); }
+
+    function bar(y, label, value, limit, scaleMax, unit){
+      var x0 = 110, x1 = 320;
+      function xOf(v){ return x0 + Math.min(v,scaleMax)/scaleMax*(x1-x0); }
+      var ok = value <= limit;
+      var color = ok ? 'var(--good)' : 'var(--danger)';
+
+      var lbl = el('text',{x:0,y:y+5,'font-family':'Martian Mono, monospace','font-size':10,fill:'var(--ink-soft)','text-anchor':'start'}); lbl.textContent=label; svg.appendChild(lbl);
+      svg.appendChild(el('line',{x1:x0,y1:y,x2:x1,y2:y,stroke:'var(--line-strong)','stroke-width':10,'stroke-linecap':'round'}));
+      svg.appendChild(el('line',{x1:x0,y1:y,x2:xOf(value),y2:y,stroke:color,'stroke-width':10,'stroke-linecap':'round'}));
+
+      var lx = xOf(limit);
+      svg.appendChild(el('line',{x1:lx,y1:y-12,x2:lx,y2:y+12,stroke:'var(--cyan-strong)','stroke-width':2.5}));
+
+      var vt = el('text',{x:x1+8,y:y+4,'font-family':'Martian Mono, monospace','font-size':10,fill:color,'text-anchor':'start'}); vt.textContent=value.toFixed(value<1?3:2)+' '+unit; svg.appendChild(vt);
+    }
+
+    bar(30, 'TOTAL', total, totalLimit, 3.0, '');
+    bar(90, 'SILICA', quartzConc, SILICA_LIMIT, 0.15, '');
+
+    var note = el('text',{x:110,y:118,'font-family':'Martian Mono, monospace','font-size':8,fill:'var(--ink-faint)','text-anchor':'start'}); note.textContent='cyan tick = legal limit for each'; svg.appendChild(note);
+  }
+
+  statusBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      statusBtns.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      exState.part90 = (btn.getAttribute('data-val') === 'part90');
+      calcExposure();
+    });
+  });
+  exTotal.addEventListener('input', calcExposure);
+  exQuartz.addEventListener('input', calcExposure);
+  calcExposure();
+
+  /* ---------- QUIZ ---------- */
+  var QUESTIONS = [
+    {
+      scenario: "A section of a coal mine has 0.5% methane detected in the ventilating current.",
+      q: "Using 30 CFR §75.403's formula, what total incombustible content must the mine surfaces meet?",
+      options: [
+        "80% — the baseline never changes.",
+        "82% — the baseline plus 0.4 percentage points for each 0.1% of methane present.",
+        "84.5% — methane doubles the baseline requirement.",
+        "It cannot be calculated without knowing coal seam thickness."
+      ],
+      correct: 1,
+      feedback: "80% baseline + (0.5/0.1 × 0.4%) = 80% + 2.0% = 82%. Methane raises the bar in fixed 0.4-point steps for every 0.1% detected."
+    },
+    {
+      scenario: "The No. 26 Colliery explosion (1979) began with a spark from a cutting pick striking rock and igniting pocketed methane.",
+      q: "Why did investigators conclude the disaster grew from a small ignition into a 12-fatality explosion?",
+      options: [
+        "The mine had no rock dust at all.",
+        "Stonedusting on mine surfaces was present but inadequate, allowing loose coal dust to fuel the propagating explosion.",
+        "The methane concentration was too low to explode, so coal dust was irrelevant.",
+        "The explosion was caused entirely by an electrical fault unrelated to dust."
+      ],
+      correct: 1,
+      feedback: "The methane ignition was the spark; the explosion's scale came from inadequately rock-dusted coal dust fueling the propagating flame front — exactly what the incombustible-content standard exists to prevent."
+    },
+    {
+      scenario: "A respirable dust sample measures 1.2 mg/m³ total dust with 5% quartz content, for a standard miner (not Part 90).",
+      q: "Is this sample compliant with current MSHA standards?",
+      options: [
+        "Yes — 1.2 mg/m³ is under the 1.5 mg/m³ total dust limit, so it's fully compliant.",
+        "No — the quartz fraction works out to 0.06 mg/m³ respirable silica, which exceeds the separate 0.05 mg/m³ silica limit even though total dust is legal.",
+        "No — 1.2 mg/m³ already exceeds the total dust limit on its own.",
+        "Compliance can't be determined without knowing the shift length."
+      ],
+      correct: 1,
+      feedback: "Total dust (1.2 mg/m³) is under its 1.5 mg/m³ limit, but 5% of 1.2 mg/m³ is 0.06 mg/m³ of respirable silica — above the flat 0.05 mg/m³ silica limit that applies regardless of total dust compliance."
+    },
+    {
+      scenario: "Using the exposure calculator, you slowly raise the quartz percentage while holding total dust fixed at a legal level.",
+      q: "At roughly what quartz percentage does silica become the tighter (binding) constraint, given the current limits?",
+      options: [
+        "Around 50% quartz.",
+        "Around 25% quartz.",
+        "Around 3.3% quartz — because 0.05 ÷ 1.5 ≈ 0.033.",
+        "Silica can never become the binding constraint if total dust is legal."
+      ],
+      correct: 2,
+      feedback: "The silica limit (0.05 mg/m³) divided by the total dust limit (1.5 mg/m³) is about 3.3% — above that quartz share, a sample can be fully legal on total dust while already illegal on silica."
+    },
+    {
+      scenario: "Black lung disease rates among veteran Appalachian coal miners have risen sharply since the late 1990s, now affecting about a third of miners with 25+ years underground.",
+      q: "What geological explanation connects this resurgence to today's silica discussion?",
+      options: [
+        "Miners are working longer shifts than in the past.",
+        "As thick coal seams are exhausted, thinner seams require cutting further into surrounding quartz-rich rock, raising the silica content of the dust cloud.",
+        "Modern mining machinery produces more total dust than older equipment.",
+        "The resurgence is unrelated to mining conditions and reflects only improved diagnostic technology."
+      ],
+      correct: 1,
+      feedback: "Thinner remaining seams force operators to cut into the quartz-rich rock strata around the coal just to achieve a workable cutting height — raising the silica share of the dust and accelerating lung damage relative to coal dust alone."
+    },
+    {
+      scenario: "A mine's engineering team has excellent water sprays and a double-panel flooded-bed scrubber, achieving roughly 72% dust collection efficiency.",
+      q: "Based on today's material, is 72% collection efficiency alone sufficient to guarantee compliance?",
+      options: [
+        "Yes — any collection efficiency above 50% guarantees legal compliance automatically.",
+        "Not necessarily — compliance depends on the resulting concentration reaching the miner's breathing zone against both the total dust and silica limits, not on collection efficiency in isolation.",
+        "Yes, because scrubbers are the only control that matters for silica specifically.",
+        "No — scrubbers have no measurable effect on respirable dust levels."
+      ],
+      correct: 1,
+      feedback: "Collection efficiency reduces dust, but whether the resulting concentration is compliant still depends on the source dust generation rate, ventilation, and both separate legal limits — a good scrubber helps but doesn't by itself guarantee compliance."
+    }
+  ];
+
+  var qState = { i:0, score:0, answered:false };
+  var quizBody = document.getElementById('quiz-body');
+  var quizFill = document.getElementById('quiz-progress-fill');
+
+  function renderQuiz(){
+    if(qState.i >= QUESTIONS.length){ renderResult(); return; }
+    var item = QUESTIONS[qState.i];
+    qState.answered = false;
+    quizFill.style.width = (qState.i / QUESTIONS.length * 100) + '%';
+
+    var html = '';
+    html += '<div class="quiz-q-num">Question ' + (qState.i+1) + ' of ' + QUESTIONS.length + '</div>';
+    html += '<div class="quiz-scenario">' + item.scenario + '</div>';
+    html += '<div class="quiz-question">' + item.q + '</div>';
+    html += '<div class="quiz-options">';
+    item.options.forEach(function(opt, idx){
+      var letter = String.fromCharCode(65+idx);
+      html += '<button class="quiz-opt" data-idx="'+idx+'"><span class="qletter">'+letter+'</span><span>'+opt+'</span></button>';
+    });
+    html += '</div>';
+    html += '<div class="quiz-feedback" id="quiz-feedback"></div>';
+    html += '<div class="quiz-nav"><button class="btn" id="quiz-next" disabled>Next →</button></div>';
+    quizBody.innerHTML = html;
+
+    var opts = quizBody.querySelectorAll('.quiz-opt');
+    opts.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(qState.answered) return;
+        qState.answered = true;
+        var idx = parseInt(btn.getAttribute('data-idx'),10);
+        opts.forEach(function(o){ o.disabled = true; });
+        if(idx === item.correct){
+          btn.classList.add('correct');
+          qState.score++;
+        } else {
+          btn.classList.add('incorrect');
+          opts[item.correct].classList.add('correct');
+        }
+        var fb = document.getElementById('quiz-feedback');
+        fb.textContent = item.feedback;
+        fb.classList.add('show');
+        document.getElementById('quiz-next').disabled = false;
+      });
+    });
+    document.getElementById('quiz-next').addEventListener('click', function(){
+      qState.i++;
+      renderQuiz();
+    });
+  }
+
+  function renderResult(){
+    quizFill.style.width = '100%';
+    var msg;
+    if(qState.score === QUESTIONS.length) msg = "Perfect run. You could read a dust sampling report and know exactly which limit is actually binding.";
+    else if(qState.score >= QUESTIONS.length - 2) msg = "Solid. Go back and push the quartz slider in the exposure calculator past 3.3% if you haven't — watching a legal sample turn illegal makes the missed questions click.";
+    else msg = "This is exactly why the tools come before the quiz. Scroll back up, run the rock dust calculator at a few methane levels, then push the exposure calculator's quartz slider up.";
+
+    quizBody.innerHTML =
+      '<div class="quiz-result">' +
+        '<div class="quiz-q-num">Checkpoint complete</div>' +
+        '<div class="score-big">' + qState.score + ' / ' + QUESTIONS.length + '</div>' +
+        '<p>' + msg + '</p>' +
+        '<div class="quiz-nav" style="justify-content:center; margin-top:1.6rem;"><button class="btn ghost" id="quiz-retry">Retry checkpoint</button></div>' +
+      '</div>';
+    document.getElementById('quiz-retry').addEventListener('click', function(){
+      qState = {i:0, score:0, answered:false};
+      renderQuiz();
+    });
+  }
+  renderQuiz();
+
+  /* ---------- instructor panel ---------- */
+  var instrToggle = document.getElementById('instr-toggle');
+  var instrPanel = document.getElementById('instr-panel');
+  var instrClose = document.getElementById('instr-close');
+  instrToggle.addEventListener('click', function(){ instrPanel.classList.add('open'); });
+  instrClose.addEventListener('click', function(){ instrPanel.classList.remove('open'); });
+  instrPanel.addEventListener('click', function(e){ if(e.target === instrPanel) instrPanel.classList.remove('open'); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') instrPanel.classList.remove('open'); });
+
+})();
+</script>

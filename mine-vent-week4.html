@@ -1,0 +1,741 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chivo:wght@600;700;900&family=Work+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>The Ratio That Saw It Coming</title>
+
+<style>
+  /* Deliberate single-theme "control room" design — colors painted explicitly, no light/dark switching. */
+  :root{
+    --bg:#0B0D10;
+    --bg-soft:#12151A;
+    --surface:#171B21;
+    --surface-raised:#1D222A;
+    --ink:#E7ECF0;
+    --ink-soft:#98A3AE;
+    --ink-faint:#64707C;
+    --line:rgba(231,236,240,0.12);
+    --line-strong:rgba(231,236,240,0.24);
+    --shadow: 0 1px 2px rgba(0,0,0,0.5), 0 14px 34px -16px rgba(0,0,0,0.7);
+
+    --alarm:#E2574C;
+    --alarm-soft:#3A1E1B;
+    --caution:#E0A83E;
+    --caution-soft:#3A2E14;
+    --phosphor:#4FD68C;
+    --phosphor-strong:#7EE8AC;
+    --phosphor-soft:#163325;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto;} *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;} }
+
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Work Sans", ui-sans-serif, system-ui, sans-serif;
+    font-size:16px; line-height:1.62; -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{
+    font-family:"Chivo", "Arial Narrow", sans-serif;
+    font-weight:800; text-wrap:balance; margin:0; line-height:1.05;
+  }
+  .mono{ font-family:"DM Mono", ui-monospace, monospace; }
+  p{ margin:0 0 1em; max-width:66ch; }
+  p:last-child{ margin-bottom:0; }
+  a{ color:inherit; }
+  ::selection{ background:var(--phosphor); color:#06110B; }
+  button{ font-family:inherit; }
+  a:focus-visible, button:focus-visible, input:focus-visible{ outline:2px solid var(--phosphor); outline-offset:3px; }
+
+  .eyebrow{
+    font-family:"DM Mono", monospace; font-size:0.72rem;
+    letter-spacing:0.14em; text-transform:uppercase; font-weight:500;
+    display:inline-flex; align-items:center; gap:0.55em; color:var(--ink-faint);
+  }
+  .wrap{ max-width:1100px; margin:0 auto; padding:0 clamp(1.25rem,4vw,3rem); }
+  .section-pad{ padding:clamp(3.4rem,8vw,6rem) 0; }
+  img,svg{ max-width:100%; }
+  .sec-title{ font-size:clamp(1.9rem,4.2vw,2.9rem); }
+  .sec-dek{ color:var(--ink-soft); max-width:64ch; margin-top:1rem; font-size:1.05rem; font-family:"Work Sans",sans-serif; }
+  .kicker-row{ margin-bottom:1rem; }
+  section + section{ border-top:1px solid var(--line); }
+
+  /* ============ HERO ============ */
+  #hero{ padding:clamp(4rem,9vw,6.5rem) 0 clamp(2.5rem,6vw,4rem);
+    background:radial-gradient(ellipse 900px 500px at 15% -10%, rgba(79,214,140,0.07), transparent 60%);
+  }
+  h1.hero-title{ font-size:clamp(2.3rem,5.6vw,4rem); max-width:20ch; }
+  h1.hero-title .hl{ color:var(--alarm); }
+  .hero-sub{ font-size:clamp(1.02rem,1.6vw,1.18rem); color:var(--ink-soft); max-width:60ch; margin-top:1.3rem; }
+  .hero-meta{ margin-top:2.4rem; display:flex; flex-wrap:wrap; gap:2.2rem; }
+  .hero-meta .k{ font-family:"DM Mono",monospace; font-size:0.68rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-faint); }
+  .hero-meta .v{ font-size:1.02rem; margin-top:0.25rem; }
+
+  .hero-chart{ background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:1.3rem; margin-top:2.6rem; box-shadow:var(--shadow); }
+  .hero-chart svg{ display:block; width:100%; height:auto; }
+  .hero-chart-cap{ font-family:"DM Mono",monospace; font-size:0.72rem; color:var(--ink-faint); margin-top:0.7rem; line-height:1.5; }
+
+  /* ============ CASE FILE ============ */
+  .case-timeline{ margin-top:2.4rem; display:flex; flex-direction:column; }
+  .tl-item{ display:grid; grid-template-columns:120px 1fr; gap:1.4rem; padding:1.1rem 0; border-top:1px solid var(--line); }
+  .case-timeline .tl-item:last-child{ border-bottom:1px solid var(--line); }
+  .tl-time{ font-family:"DM Mono",monospace; font-size:0.82rem; color:var(--ink-faint); padding-top:0.15rem; }
+  .tl-body h4{ font-size:1.1rem; font-family:"Work Sans",sans-serif; font-weight:700; text-transform:none; }
+  .tl-body p{ color:var(--ink-soft); font-size:0.94rem; margin-top:0.35rem; }
+  .tl-item.crit .tl-time{ color:var(--alarm); }
+  .tl-item.crit{ background:linear-gradient(90deg, var(--alarm-soft), transparent 60%); }
+  .case-src{ font-size:0.78rem; color:var(--ink-faint); margin-top:1.4rem; }
+  .pull-quote{
+    margin:1.6rem 0 0; padding:1.1rem 1.3rem; border-left:3px solid var(--alarm);
+    background:var(--alarm-soft); font-size:1rem; font-style:italic; color:var(--ink);
+  }
+
+  /* ============ CONCEPT CARDS: SENSORS ============ */
+  .concept-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:14px; overflow:hidden; margin-top:2.4rem; }
+  @media (max-width:900px){ .concept-grid{grid-template-columns:1fr;} }
+  .concept-card{ background:var(--surface); padding:1.6rem 1.4rem; }
+  .concept-card .cc-eyebrow{ font-family:"DM Mono",monospace; font-size:0.66rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--phosphor); }
+  .concept-card h4{ font-size:1.4rem; margin-top:0.4rem; }
+  .concept-card p{ font-size:0.92rem; color:var(--ink-soft); margin-top:0.7rem; }
+  .concept-card .weak{ margin-top:1rem; padding:0.7rem 0.8rem; background:var(--alarm-soft); border-radius:8px; font-size:0.86rem; }
+  .concept-card .weak b{ color:var(--alarm); display:block; font-family:"DM Mono",monospace; font-size:0.66rem; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:0.3rem; }
+
+  /* ============ SENSOR MATCHER ============ */
+  .matcher-grid{ display:flex; flex-direction:column; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:14px; overflow:hidden; margin-top:2.4rem; }
+  .matcher-item{ background:var(--surface); }
+  .matcher-q{
+    width:100%; text-align:left; background:none; border:none; color:var(--ink); cursor:pointer;
+    padding:1.2rem 1.4rem; display:flex; justify-content:space-between; align-items:center; gap:1rem;
+  }
+  .matcher-q:hover{ background:var(--surface-raised); }
+  .matcher-q .mq-text{ font-size:1rem; }
+  .matcher-q .mq-toggle{ font-family:"DM Mono",monospace; color:var(--phosphor); flex-shrink:0; }
+  .matcher-a{ max-height:0; overflow:hidden; transition:max-height 0.35s ease; }
+  .matcher-a.open{ max-height:260px; }
+  .matcher-a-inner{ padding:0 1.4rem 1.3rem; }
+  .matcher-answer{ display:inline-block; font-family:"DM Mono",monospace; font-size:0.76rem; letter-spacing:0.06em; text-transform:uppercase; padding:0.3rem 0.7rem; border-radius:20px; margin-bottom:0.7rem; }
+  .matcher-answer.catalytic{ background:var(--caution-soft); color:var(--caution); }
+  .matcher-answer.electrochemical{ background:var(--phosphor-soft); color:var(--phosphor); }
+  .matcher-answer.infrared{ background:rgba(126,211,255,0.12); color:#7ED3FF; }
+  .matcher-a-inner p{ color:var(--ink-soft); font-size:0.92rem; }
+
+  /* ============ CALCULATOR ============ */
+  .calc-card{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:1.9rem clamp(1.3rem,3vw,2.3rem); box-shadow:var(--shadow); margin-top:2.4rem; }
+  .calc-head{ display:flex; align-items:baseline; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+  .calc-head h3{ font-size:1.6rem; }
+  .calc-formula{ font-family:"DM Mono",monospace; font-size:0.9rem; background:var(--bg-soft); border:1px solid var(--line); padding:0.65rem 1rem; border-radius:8px; margin-top:0.9rem; display:inline-block; }
+  .calc-body{ display:grid; grid-template-columns:1.05fr 0.95fr; gap:2rem; margin-top:1.4rem; align-items:start; }
+  @media (max-width:760px){ .calc-body{grid-template-columns:1fr;} }
+  .field{ margin-bottom:1.25rem; }
+  .field:last-child{ margin-bottom:0; }
+  .field label{ display:flex; justify-content:space-between; font-size:0.85rem; color:var(--ink-soft); margin-bottom:0.5rem; font-family:"DM Mono",monospace; }
+  .field label .fval{ color:var(--phosphor); font-weight:600; }
+  input[type=range]{ width:100%; accent-color:var(--phosphor); height:4px; cursor:pointer; }
+  .result-panel{ background:var(--bg-soft); border:1px solid var(--line); border-radius:10px; padding:1.2rem 1.3rem; display:flex; flex-direction:column; gap:0.85rem; }
+  .result-row{ display:flex; justify-content:space-between; align-items:baseline; gap:1rem; }
+  .result-row .rl{ font-size:0.82rem; color:var(--ink-soft); }
+  .result-row .rr{ font-family:"DM Mono",monospace; font-weight:500; font-size:1.12rem; font-variant-numeric:tabular-nums; text-align:right; }
+  .result-row.big .rr{ font-size:2rem; color:var(--phosphor); text-shadow:0 0 16px rgba(79,214,140,0.35); }
+  .result-flag{ margin-top:0.15rem; padding:0.6rem 0.75rem; border-radius:7px; font-size:0.82rem; font-family:"DM Mono",monospace; }
+  .flag-none{ background:var(--phosphor-soft); color:var(--phosphor); }
+  .flag-weak{ background:var(--caution-soft); color:var(--caution); }
+  .flag-strong{ background:var(--alarm-soft); color:var(--alarm); }
+  .calc-note{ font-size:0.82rem; color:var(--ink-faint); margin-top:1rem; border-top:1px dashed var(--line); padding-top:0.9rem; }
+  .preset-row{ display:flex; gap:0.6rem; flex-wrap:wrap; margin-top:1rem; }
+  .preset-btn{ font-family:"DM Mono",monospace; font-size:0.74rem; background:var(--bg-soft); border:1px solid var(--line); color:var(--ink-soft); padding:0.4rem 0.75rem; border-radius:20px; cursor:pointer; }
+  .preset-btn:hover{ border-color:var(--phosphor); color:var(--ink); }
+
+  /* ============ SAMPLING STRATEGY ============ */
+  .strategy-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:14px; overflow:hidden; margin-top:2.4rem; }
+  @media (max-width:900px){ .strategy-grid{grid-template-columns:1fr;} }
+  .strategy-card{ background:var(--surface); padding:1.5rem 1.3rem; }
+  .strategy-card .sc-num{ font-family:"DM Mono",monospace; font-size:0.66rem; color:var(--ink-faint); letter-spacing:0.1em; text-transform:uppercase; }
+  .strategy-card h4{ font-size:1.3rem; margin-top:0.4rem; }
+  .strategy-card p{ font-size:0.9rem; color:var(--ink-soft); margin-top:0.6rem; }
+  .strategy-card .sc-tag{ margin-top:0.9rem; font-family:"DM Mono",monospace; font-size:0.72rem; color:var(--phosphor); }
+
+  /* ============ QUIZ ============ */
+  .quiz-shell{ background:var(--surface); border:1px solid var(--line); border-radius:16px; margin-top:2.4rem; overflow:hidden; box-shadow:var(--shadow); }
+  .quiz-progress{ height:4px; background:var(--line); }
+  .quiz-progress-fill{ height:100%; width:0%; background:var(--phosphor); transition:width 0.3s; }
+  .quiz-body{ padding:clamp(1.4rem,3.5vw,2.4rem); }
+  .quiz-q-num{ font-family:"DM Mono",monospace; font-size:0.72rem; color:var(--phosphor); letter-spacing:0.1em; text-transform:uppercase; }
+  .quiz-scenario{ color:var(--ink-soft); font-size:0.92rem; margin-top:0.7rem; font-style:italic; }
+  .quiz-question{ font-family:"Chivo",sans-serif; font-weight:700; font-size:clamp(1.2rem,2.4vw,1.5rem); margin-top:0.6rem; line-height:1.2; }
+  .quiz-options{ display:flex; flex-direction:column; gap:0.7rem; margin-top:1.4rem; }
+  .quiz-opt{ text-align:left; background:var(--bg-soft); border:1px solid var(--line); color:var(--ink); padding:0.85rem 1rem; border-radius:10px; cursor:pointer; font-size:0.95rem; display:flex; gap:0.7rem; transition:background 0.15s, border-color 0.15s; }
+  .quiz-opt:hover:not(:disabled){ border-color:var(--phosphor); }
+  .quiz-opt .qletter{ font-family:"DM Mono",monospace; color:var(--phosphor); flex-shrink:0; }
+  .quiz-opt.correct{ background:var(--phosphor-soft); border-color:var(--phosphor); }
+  .quiz-opt.incorrect{ background:var(--alarm-soft); border-color:var(--alarm); }
+  .quiz-opt:disabled{ cursor:default; }
+  .quiz-feedback{ margin-top:1.2rem; padding:1rem 1.1rem; border-radius:10px; background:var(--bg-soft); border-left:3px solid var(--phosphor); font-size:0.9rem; color:var(--ink-soft); display:none; }
+  .quiz-feedback.show{ display:block; }
+  .quiz-nav{ display:flex; justify-content:flex-end; margin-top:1.4rem; }
+  .btn{ font-family:"DM Mono",monospace; font-size:0.82rem; letter-spacing:0.05em; text-transform:uppercase; background:var(--phosphor); color:#06110B; border:none; padding:0.7rem 1.3rem; border-radius:9px; cursor:pointer; font-weight:600; }
+  .btn:disabled{ opacity:0.35; cursor:default; }
+  .btn.ghost{ background:transparent; border:1px solid var(--line); color:var(--ink); }
+  .quiz-result{ text-align:center; }
+  .quiz-result .score-big{ font-family:"DM Mono",monospace; font-size:3.2rem; color:var(--phosphor); font-weight:500; }
+  .quiz-result p{ margin:0.8rem auto 0; max-width:52ch; color:var(--ink-soft); }
+
+  /* ============ DISCUSSION ============ */
+  .disc-grid{ display:flex; flex-direction:column; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:14px; overflow:hidden; margin-top:2.2rem; }
+  .disc-item{ background:var(--surface); padding:1.4rem 1.6rem; display:grid; grid-template-columns:2.4rem 1fr; gap:1rem; }
+  .disc-item .dn{ font-family:"Chivo",sans-serif; font-size:1.8rem; color:var(--line-strong); }
+  .disc-item p{ margin:0; font-size:1rem; }
+  .disc-item .dtag{ font-family:"DM Mono",monospace; font-size:0.66rem; color:var(--phosphor); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.35rem; display:block; }
+
+  .lookahead{ background:var(--bg-soft); border:1px solid var(--line); border-radius:14px; padding:1.4rem 1.6rem; margin-top:2.2rem; display:flex; gap:1.2rem; align-items:baseline; flex-wrap:wrap; }
+  .lookahead .lw{ font-family:"DM Mono",monospace; color:var(--phosphor); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.06em; }
+
+  footer{ padding:3rem 0 4rem; color:var(--ink-faint); font-size:0.85rem; border-top:1px solid var(--line); }
+
+  #instr-toggle{ position:fixed; left:1.2rem; bottom:1.2rem; z-index:180; background:var(--phosphor); color:#06110B; font-family:"DM Mono",monospace; font-size:0.72rem; letter-spacing:0.06em; text-transform:uppercase; border:none; padding:0.65rem 1rem; border-radius:30px; cursor:pointer; box-shadow:var(--shadow); display:flex; align-items:center; gap:0.5rem; }
+  #instr-panel{ position:fixed; inset:0; z-index:300; display:none; background:rgba(0,0,0,0.6); backdrop-filter:blur(2px); align-items:center; justify-content:center; padding:1.5rem; }
+  #instr-panel.open{ display:flex; }
+  .instr-card{ background:var(--surface); color:var(--ink); border-radius:18px; max-width:740px; width:100%; max-height:85vh; overflow-y:auto; padding:clamp(1.5rem,4vw,2.5rem); box-shadow:var(--shadow); border:1px solid var(--line); }
+  .instr-card h3{ font-size:1.6rem; }
+  .instr-close{ float:right; background:none; border:1px solid var(--line); border-radius:50%; width:2rem; height:2rem; cursor:pointer; color:var(--ink); font-size:1rem; }
+  .run-table{ width:100%; border-collapse:collapse; margin-top:1.4rem; font-size:0.9rem; }
+  .run-table th{ text-align:left; font-family:"DM Mono",monospace; font-size:0.66rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-faint); border-bottom:1px solid var(--line); padding:0.5rem 0.6rem 0.5rem 0; }
+  .run-table td{ padding:0.65rem 0.6rem 0.65rem 0; border-bottom:1px solid var(--line); vertical-align:top; }
+  .run-table td.tt{ font-family:"DM Mono",monospace; color:var(--phosphor); white-space:nowrap; }
+</style>
+
+<nav id="topbar-wrap" style="position:fixed; top:0; left:0; right:0; height:3px; z-index:200;">
+  <div id="topbar-fill" style="height:100%; width:0%; background:linear-gradient(90deg, var(--phosphor), var(--alarm)); transition:width 0.08s linear;"></div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<section id="hero">
+  <div class="wrap">
+    <div class="eyebrow">Mine Ventilation · Week 4</div>
+    <h1 class="hero-title">The sensor was right. <span class="hl">Eleven people died anyway.</span></h1>
+    <p class="hero-sub">Gas monitoring isn't hard because instruments are unreliable — modern sensors are good. It's hard because a correct reading is worthless the moment someone decides not to act on it. Today's seminar is half electronics, half organizational honesty.</p>
+
+    <div class="hero-meta">
+      <div><div class="k">Session</div><div class="v">90 minutes</div></div>
+      <div><div class="k">Format</div><div class="v">One case file, two live instruments</div></div>
+      <div><div class="k">You'll leave with</div><div class="v">A Graham's Ratio calculator you can reuse in your own gas analyses</div></div>
+    </div>
+
+    <div class="hero-chart">
+      <svg viewBox="0 0 560 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illustrative chart comparing an understated CO trend line against the true steeper rise">
+        <line x1="40" y1="180" x2="540" y2="180" stroke="var(--line-strong)" stroke-width="1"/>
+        <line x1="40" y1="20" x2="40" y2="180" stroke="var(--line-strong)" stroke-width="1"/>
+        <text x="40" y="14" font-family="DM Mono, monospace" font-size="10" fill="var(--ink-faint)">CO</text>
+        <text x="540" y="196" font-family="DM Mono, monospace" font-size="10" fill="var(--ink-faint)" text-anchor="end">TIME →</text>
+        <!-- understated line -->
+        <polyline points="40,170 150,160 260,150 370,138 480,128 540,120" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" stroke-dasharray="5 4"/>
+        <text x="536" y="112" text-anchor="end" font-family="DM Mono, monospace" font-size="10" fill="var(--ink-faint)">what the graph showed</text>
+        <!-- true line -->
+        <polyline points="40,170 150,150 260,110 370,68 480,38 540,22" fill="none" stroke="var(--alarm)" stroke-width="3"/>
+        <text x="536" y="30" text-anchor="end" font-family="DM Mono, monospace" font-size="10" fill="var(--alarm)">what the gas was actually doing</text>
+        <circle cx="540" cy="22" r="4" fill="var(--alarm)"/>
+      </svg>
+      <div class="hero-chart-cap">Illustrative reconstruction — the original figures from Moura No. 2 aren't preserved in the public record. What is documented: a plotted CO trend was drawn incorrectly and "did not show the true steep increase."</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CASE FILE ============ -->
+<section id="case" class="section-pad">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">01 · Case file</span></div>
+    <h2 class="sec-title">Moura No. 2 — 7 August 1994</h2>
+    <p class="sec-dek">Central Queensland, Australia. Two explosions. Eleven of the twenty-one miners underground did not come home. The monitoring system had already told everyone it was coming.</p>
+
+    <div class="case-timeline">
+      <div class="tl-item">
+        <div class="tl-time">Afternoon</div>
+        <div class="tl-body"><h4>A single monitor, 20 metres from the seals</h4><p>The sealed 512 Panel — where coal had begun spontaneously heating — was being watched by one gas monitor positioned 20 metres from the seals. Coverage was thin for what was building behind them.</p></div>
+      </div>
+      <div class="tl-item crit">
+        <div class="tl-time">6:30 pm</div>
+        <div class="tl-body"><h4>Management already knew</h4><p>Calculations available to management projected CO would reach roughly 130–140 ppm, with explosive conditions becoming imminent. The information existed. The shift went ahead anyway.</p></div>
+      </div>
+      <div class="tl-item crit">
+        <div class="tl-time">Evening</div>
+        <div class="tl-body"><h4>"Not to raise it with anyone on the shift"</h4><p>The shift supervisor was instructed not to share the warning signs — rising CO, reports of a tar-like smell — with the crew he was sending underground.</p></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-time">~11:30 pm–midnight</div>
+        <div class="tl-body"><h4>Methane approaches the explosive range</h4><p>Conditions in and around the sealed panel were consistent with methane climbing toward the 5%+ range this seminar's Week 1 material covers — while work continued elsewhere in the mine.</p></div>
+      </div>
+      <div class="tl-item crit">
+        <div class="tl-time">Just after midnight</div>
+        <div class="tl-body"><h4>Two explosions</h4><p>Spontaneous combustion in the sealed panel ignited accumulated methane. A second explosion followed; its precise cause was never conclusively determined. Eleven miners were killed.</p></div>
+      </div>
+    </div>
+
+    <div class="pull-quote">The shift supervisor "did not recall" multiple warnings passed to him about tar smells and CO readings, and later admitted he did not understand what the gas levels on his own monitoring computer actually meant.</div>
+
+    <div class="case-src">Source: Warden's Inquiry into the accident at Moura No. 2 underground mine; Australasian Mine Safety Journal, "Moura No.2 Mine Disaster — Written in Blood."</div>
+  </div>
+</section>
+
+<!-- ============ SENSOR CONCEPT CARDS ============ -->
+<section id="sensors" class="section-pad">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">02 · How a sensor actually works</span></div>
+    <h2 class="sec-title">Three technologies, three different ways to fail.</h2>
+    <p class="sec-dek">Every gas monitor in a mine is one of these three underneath the housing. Each has a specific atmosphere where it quietly stops telling the truth.</p>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="cc-eyebrow">Catalytic (pellistor)</div>
+        <h4>Burns the gas to detect it</h4>
+        <p>A heated catalytic bead (~500°C) oxidizes combustible gas on contact; the heat released changes the bead's resistance, which is read as concentration. Cheap, robust, the default choice for routine methane monitoring.</p>
+        <div class="weak"><b>Fails quietly when</b>Oxygen is deficient. The sensor detects gas by burning it — no oxygen, no reaction, no reliable reading, precisely in the abnormal atmosphere you'd most need it to work.</div>
+      </div>
+      <div class="concept-card">
+        <div class="cc-eyebrow">Electrochemical</div>
+        <h4>A tiny fuel cell for toxic gas</h4>
+        <p>Target gas diffuses into an electrochemical cell and reacts at an electrode, producing a current proportional to concentration. The standard choice for personal CO, H₂S, and O₂ monitors.</p>
+        <div class="weak"><b>Fails quietly when</b>The cell simply ages out — electrochemical cells have a finite service life and gradually lose sensitivity, which is why calibration schedules exist and get enforced.</div>
+      </div>
+      <div class="concept-card">
+        <div class="cc-eyebrow">Infrared (NDIR)</div>
+        <h4>Measures light, not combustion</h4>
+        <p>Gas absorbs a specific infrared wavelength passing through a sample chamber; the amount absorbed gives concentration. Works fine in oxygen-deficient or inert atmospheres, since nothing needs to burn.</p>
+        <div class="weak"><b>Fails quietly when</b>A different gas absorbs a similar wavelength (cross-sensitivity), or when it's asked to do a pellistor's job at a fraction of the price — cost is the real limiting factor underground.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SENSOR MATCHER ============ -->
+<section id="matcher" class="section-pad">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">03 · Instrument 1</span></div>
+    <h2 class="sec-title">Which sensor would you trust here?</h2>
+    <p class="sec-dek">Five real deployment scenarios. Guess the right technology before you tap to reveal it.</p>
+
+    <div class="matcher-grid" id="matcher-grid">
+      <div class="matcher-item">
+        <button class="matcher-q" data-m="1"><span class="mq-text">A heading has dropped to 9% oxygen. You still need to know if methane is present.</span><span class="mq-toggle">+</span></button>
+        <div class="matcher-a" id="matcher-a-1"><div class="matcher-a-inner">
+          <span class="matcher-answer infrared">Infrared</span>
+          <p>Catalytic sensors need oxygen to burn the target gas — below roughly 10–12% O₂ they become unreliable or fail outright, exactly when you most need a correct reading. Infrared measures light absorption, not combustion, so it keeps working in oxygen-deficient or inert atmospheres.</p>
+        </div></div>
+      </div>
+      <div class="matcher-item">
+        <button class="matcher-q" data-m="2"><span class="mq-text">Silicone-based hydraulic fluid is used nearby, and its vapor keeps drifting past the monitor.</span><span class="mq-toggle">+</span></button>
+        <div class="matcher-a" id="matcher-a-2"><div class="matcher-a-inner">
+          <span class="matcher-answer infrared">Infrared</span>
+          <p>Silicone vapor "poisons" a catalytic bead — it coats the catalyst surface and permanently kills its sensitivity. Infrared has no catalyst to poison, which is exactly why it's the standard choice around silicone lubricants and sealants.</p>
+        </div></div>
+      </div>
+      <div class="matcher-item">
+        <button class="matcher-q" data-m="3"><span class="mq-text">You need cheap, robust methane monitors on dozens of continuous miners, in normal atmospheres, replaced often.</span><span class="mq-toggle">+</span></button>
+        <div class="matcher-a" id="matcher-a-3"><div class="matcher-a-inner">
+          <span class="matcher-answer catalytic">Catalytic</span>
+          <p>In a normal atmosphere with adequate oxygen and no poisoning risk, a pellistor is cheap, well understood, and good enough — which is exactly why it's still the default for this kind of high-volume routine deployment.</p>
+        </div></div>
+      </div>
+      <div class="matcher-item">
+        <button class="matcher-q" data-m="4"><span class="mq-text">A sealed goaf area needs unattended, long-term CO monitoring, and the atmosphere inside may already be oxygen-depleted.</span><span class="mq-toggle">+</span></button>
+        <div class="matcher-a" id="matcher-a-4"><div class="matcher-a-inner">
+          <span class="matcher-answer infrared">Infrared</span>
+          <p>Sealed areas are exactly where oxygen depletion is most likely — the same condition that silently disables a catalytic sensor. This is one reason tube-bundle systems feeding a central infrared analyzer are common for sealed-area monitoring.</p>
+        </div></div>
+      </div>
+      <div class="matcher-item">
+        <button class="matcher-q" data-m="5"><span class="mq-text">You need a low-cost, compact personal monitor that alarms on toxic CO exposure for an individual worker.</span><span class="mq-toggle">+</span></button>
+        <div class="matcher-a" id="matcher-a-5"><div class="matcher-a-inner">
+          <span class="matcher-answer electrochemical">Electrochemical</span>
+          <p>Electrochemical cells are compact, low-power, and specific to toxic gases like CO and H₂S — the standard technology inside the personal monitor clipped to a miner's belt.</p>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GRAHAM'S RATIO CALCULATOR ============ -->
+<section id="calc" class="section-pad">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">04 · Instrument 2</span></div>
+    <h2 class="sec-title">Graham's Ratio: hunting a fire you can't see.</h2>
+    <p class="sec-dek">This is the exact kind of number a sealed-panel gas analysis at a mine like Moura would have produced. It uses nitrogen — a gas combustion doesn't touch — as a reference point to catch oxygen loss that dilution alone can't explain.</p>
+
+    <div class="calc-card">
+      <div class="calc-head"><h3>Graham's Ratio</h3></div>
+      <div class="calc-formula">GR = [ CO% / (0.265 × N₂% − O₂%) ] × 100</div>
+      <div class="calc-body">
+        <div>
+          <div class="field">
+            <label>Oxygen (O₂) <span class="fval mono" id="g-o2-val">19.5%</span></label>
+            <input type="range" id="g-o2" min="14" max="21" step="0.1" value="19.5">
+          </div>
+          <div class="field">
+            <label>Carbon dioxide (CO₂) <span class="fval mono" id="g-co2-val">1.0%</span></label>
+            <input type="range" id="g-co2" min="0" max="6" step="0.1" value="1.0">
+          </div>
+          <div class="field">
+            <label>Carbon monoxide (CO) <span class="fval mono" id="g-co-val">300 ppm</span></label>
+            <input type="range" id="g-co" min="0" max="3000" step="10" value="300">
+          </div>
+          <div class="preset-row">
+            <button class="preset-btn" id="preset-fresh">Fresh air (baseline)</button>
+            <button class="preset-btn" id="preset-escalating">Escalating heating (illustrative)</button>
+          </div>
+        </div>
+        <div class="result-panel">
+          <div class="result-row"><span class="rl">Nitrogen (N₂, by difference)</span><span class="rr" id="g-n2">79.5%</span></div>
+          <div class="result-row big"><span class="rl">Graham's Ratio</span><span class="rr" id="g-gr">1.91</span></div>
+          <div class="result-flag flag-weak" id="g-flag">Developing signature — consistent with early-stage heating</div>
+        </div>
+      </div>
+      <p class="calc-note">The bands above are widely taught rules of thumb, not a universal regulatory cutoff — real mines calibrate their own action levels against baseline oxidation tests of their specific coal. What Moura shows is that even a textbook-correct number is worthless without someone empowered to act on its <em>trend</em>, not just a single reading. (This ratio assumes negligible methane in the sample; where methane is present, corrected variants are used instead.)</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SAMPLING STRATEGY ============ -->
+<section id="strategy" class="section-pad">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">05 · Sampling strategy</span></div>
+    <h2 class="sec-title">Three ways to actually get the reading.</h2>
+    <p class="sec-dek">A sensor is only as good as how — and how often — you ask it a question.</p>
+
+    <div class="strategy-grid">
+      <div class="strategy-card">
+        <div class="sc-num">01</div>
+        <h4>Fixed-point sensors</h4>
+        <p>Permanently installed, continuously reporting to surface, usually feeding an automatic shutdown at set thresholds (recall Week 1's 1.0%/1.5% methane levels). Needs power and maintenance access at the sensor location.</p>
+        <div class="sc-tag">Best for: working areas, real-time automatic response</div>
+      </div>
+      <div class="strategy-card">
+        <div class="sc-num">02</div>
+        <h4>Tube bundle systems</h4>
+        <p>Small-bore tubes draw air samples from multiple remote points back to a central analyzer on surface. No power or personnel needed at the sample point — the only practical way to watch inside a sealed, inaccessible goaf area over time.</p>
+        <div class="sc-tag">Best for: sealed areas, spontaneous combustion trend-watching</div>
+      </div>
+      <div class="strategy-card">
+        <div class="sc-num">03</div>
+        <h4>Handheld / spot checks</h4>
+        <p>Instant, portable, goes wherever a person can go — including exactly the accessible, active workings a fixed system might miss. Only as good as the moment it's taken; says nothing about five minutes ago or five minutes from now.</p>
+        <div class="sc-tag">Best for: verification, active workings, personal exposure checks</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ QUIZ ============ -->
+<section id="quiz" class="section-pad">
+  <div class="wrap" style="max-width:760px;">
+    <div class="kicker-row"><span class="eyebrow">06 · Checkpoint</span></div>
+    <h2 class="sec-title">Read the instrument, and the room.</h2>
+    <p class="sec-dek">Six scenarios pulling on today's case file and two instruments.</p>
+
+    <div class="quiz-shell">
+      <div class="quiz-progress"><div class="quiz-progress-fill" id="quiz-progress-fill"></div></div>
+      <div class="quiz-body" id="quiz-body"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DISCUSSION ============ -->
+<section id="discuss" class="section-pad">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">07 · Debrief</span></div>
+    <h2 class="sec-title">For the last 15 minutes: talk it through.</h2>
+    <p class="sec-dek">In pairs or small groups.</p>
+
+    <div class="disc-grid">
+      <div class="disc-item">
+        <div class="dn">1</div>
+        <div><span class="dtag">Root cause</span><p>Moura's monitoring system worked exactly as designed. The failure was entirely human and organizational. Does that change what you think "improving mine safety" should prioritize — better instruments, or better decision systems around instruments that already work?</p></div>
+      </div>
+      <div class="disc-item">
+        <div class="dn">2</div>
+        <div><span class="dtag">Personal ethics</span><p>The shift supervisor was told "not to raise it with anyone on the shift." If you were a junior engineer who saw dangerous readings and were told to stay quiet, what would you actually, concretely do — not what you think you're supposed to say in an interview?</p></div>
+      </div>
+      <div class="disc-item">
+        <div class="dn">3</div>
+        <div><span class="dtag">Design insight</span><p>Graham's Ratio deliberately measures nitrogen — a gas that does nothing — as its reference point. Where else in engineering might measuring what <em>doesn't</em> change be the key to detecting what does?</p></div>
+      </div>
+      <div class="disc-item">
+        <div class="dn">4</div>
+        <div><span class="dtag">Failure modes</span><p>A catalytic sensor can silently under-read exactly in the oxygen-deficient atmosphere where you'd most need an accurate one. As a design choice, how do you protect against a sensor that fails quietly instead of loudly?</p></div>
+      </div>
+      <div class="disc-item">
+        <div class="dn">5</div>
+        <div><span class="dtag">Career</span><p>You'll rely on both people and sensors for your whole career. Moura shows the people can fail even when the sensors don't. Which failure mode do you think is actually harder to design around?</p></div>
+      </div>
+    </div>
+
+    <div class="lookahead">
+      <span class="lw">Still ahead</span>
+      <span>Week 9–10, Auxiliary &amp; Booster Ventilation, comes back to exactly the dead-end-heading buildup math from Week 1 — this time with the sensors from today watching it happen in real time.</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    Mine Ventilation — Week 4 seminar material. Moura No. 2 case details from the Warden's Inquiry into the accident at Moura No. 2 underground mine and the Australasian Mine Safety Journal. Sensor technology characteristics from International Gas Detectors. Graham's Ratio formula as commonly published in mine gas analysis references; numeric action bands are illustrative rules of thumb, not a universal regulatory standard — always calibrate to site-specific baseline data and follow your jurisdiction's regulations.
+  </div>
+</footer>
+
+<button id="instr-toggle" aria-haspopup="dialog" aria-controls="instr-panel">◐ Instructor view</button>
+<div id="instr-panel" role="dialog" aria-modal="true" aria-labelledby="instr-title">
+  <div class="instr-card">
+    <button class="instr-close" id="instr-close" aria-label="Close instructor view">✕</button>
+    <span class="eyebrow" style="color:var(--phosphor);">For the instructor</span>
+    <h3 id="instr-title">Suggested 90-minute run of show</h3>
+    <table class="run-table">
+      <tr><th>Time</th><th>Segment</th></tr>
+      <tr><td class="tt">0:00–0:08</td><td>Open on the hero line. Ask cold: "if the sensor is correct, how does anyone still die?" Let the discomfort sit before revealing Moura.</td></tr>
+      <tr><td class="tt">0:08–0:22</td><td>Walk the case timeline as a class. Pause at "not to raise it with anyone on the shift" — let it land before moving on.</td></tr>
+      <tr><td class="tt">0:22–0:30</td><td>Sensor concept cards — three technologies, three failure modes.</td></tr>
+      <tr><td class="tt">0:30–0:42</td><td>Sensor matcher in pairs. Have them commit to a guess out loud before revealing each answer.</td></tr>
+      <tr><td class="tt">0:42–0:58</td><td>Graham's Ratio calculator. Have pairs find the "unstable near baseline" behavior deliberately — it's a real, teachable limitation of the ratio, not a bug.</td></tr>
+      <tr><td class="tt">0:58–1:05</td><td>Sampling strategy cards — quick discussion on which of the three would have actually caught Moura's heating earlier.</td></tr>
+      <tr><td class="tt">1:05–1:18</td><td>Run the 6-question checkpoint as a live class poll.</td></tr>
+      <tr><td class="tt">1:18–1:27</td><td>Small-group discussion prompts — prompt 2 tends to generate the most honest conversation if you give it room.</td></tr>
+      <tr><td class="tt">1:27–1:30</td><td>Close on the "still ahead" note.</td></tr>
+    </table>
+    <p style="margin-top:1.4rem; color:var(--ink-soft); font-size:0.9rem;">Safe to project this page directly to students — this panel is only visible to whoever clicks the button.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var fill = document.getElementById('topbar-fill');
+  function onScroll(){
+    var h = document.documentElement;
+    var scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    fill.style.width = scrolled + '%';
+  }
+  document.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  /* ---------- sensor matcher accordion ---------- */
+  document.querySelectorAll('.matcher-q').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var id = 'matcher-a-' + btn.getAttribute('data-m');
+      var panel = document.getElementById(id);
+      var isOpen = panel.classList.contains('open');
+      document.querySelectorAll('.matcher-a').forEach(function(p){ p.classList.remove('open'); });
+      document.querySelectorAll('.matcher-q .mq-toggle').forEach(function(t){ t.textContent = '+'; });
+      if(!isOpen){
+        panel.classList.add('open');
+        btn.querySelector('.mq-toggle').textContent = '–';
+      }
+    });
+  });
+
+  /* ---------- Graham's Ratio calculator ---------- */
+  var gO2 = document.getElementById('g-o2'), gCO2 = document.getElementById('g-co2'), gCO = document.getElementById('g-co');
+  function calcGraham(){
+    var O2 = parseFloat(gO2.value), CO2 = parseFloat(gCO2.value), COppm = parseFloat(gCO.value);
+    document.getElementById('g-o2-val').textContent = O2.toFixed(1) + '%';
+    document.getElementById('g-co2-val').textContent = CO2.toFixed(1) + '%';
+    document.getElementById('g-co-val').textContent = COppm.toFixed(0) + ' ppm';
+
+    var N2 = 100 - O2 - CO2;
+    document.getElementById('g-n2').textContent = N2.toFixed(1) + '%';
+
+    var COpct = COppm / 10000;
+    var denom = 0.265 * N2 - O2;
+    var flag = document.getElementById('g-flag');
+    var grEl = document.getElementById('g-gr');
+
+    if(COpct > 0 && denom < 0.3){
+      grEl.textContent = 'unstable';
+      flag.className = 'result-flag flag-weak';
+      flag.textContent = 'Too close to fresh-air baseline for a meaningful ratio — a known limitation of this index';
+      return;
+    }
+
+    var gr = denom > 0 ? (COpct / denom) * 100 : 0;
+    grEl.textContent = gr.toFixed(2);
+
+    if(gr < 0.5){
+      flag.className = 'result-flag flag-none';
+      flag.textContent = 'No significant oxidation signature detected';
+    } else if(gr < 1.0){
+      flag.className = 'result-flag flag-weak';
+      flag.textContent = 'Weak signature — monitor the trend closely';
+    } else if(gr < 2.0){
+      flag.className = 'result-flag flag-weak';
+      flag.textContent = 'Developing signature — consistent with early-stage heating';
+    } else {
+      flag.className = 'result-flag flag-strong';
+      flag.textContent = 'Strong signature — consistent with active spontaneous combustion';
+    }
+  }
+  [gO2,gCO2,gCO].forEach(function(el){ el.addEventListener('input', calcGraham); });
+  calcGraham();
+
+  document.getElementById('preset-fresh').addEventListener('click', function(){
+    gO2.value = 20.9; gCO2.value = 0.04; gCO.value = 0;
+    calcGraham();
+  });
+  document.getElementById('preset-escalating').addEventListener('click', function(){
+    gO2.value = 18; gCO2.value = 2; gCO.value = 1200;
+    calcGraham();
+  });
+
+  /* ---------- QUIZ ---------- */
+  var QUESTIONS = [
+    {
+      scenario: "At Moura No. 2, the gas monitoring system correctly showed CO climbing toward dangerous levels for hours before the explosion.",
+      q: "What was the primary failure that led to eleven deaths?",
+      options: [
+        "The gas sensors malfunctioned and gave a false 'safe' reading.",
+        "No gas monitor existed in the sealed panel at all.",
+        "Organizational failure: management knew the danger and sent workers underground anyway, instructing a supervisor to stay quiet.",
+        "The workers ignored their own training and disabled the monitors."
+      ],
+      correct: 2,
+      feedback: "This is the hardest part of the lesson: the instruments worked. Management had calculations projecting explosive conditions hours before the blast, and the shift went ahead — with the supervisor told not to raise it with the crew."
+    },
+    {
+      scenario: "A catalytic (pellistor) combustible-gas sensor detects methane by burning it on a heated catalyst bead.",
+      q: "What atmosphere makes this sensor type unreliable — right when you'd most need it?",
+      options: [
+        "High humidity environments.",
+        "Oxygen-deficient atmospheres, since the sensor needs oxygen to oxidize the target gas.",
+        "Very cold temperatures below 0°C.",
+        "Atmospheres with high methane concentration only."
+      ],
+      correct: 1,
+      feedback: "No oxygen, no combustion reaction, no reliable reading — a pellistor can silently under-read exactly in the abnormal, oxygen-deficient atmosphere where accuracy matters most."
+    },
+    {
+      scenario: "You're told a catalytic sensor near a hydraulics workshop has been 'poisoned.'",
+      q: "What does that mean?",
+      options: [
+        "The battery has drained completely.",
+        "Silicone, sulfur, or lead compounds have coated the catalyst surface, permanently degrading its sensitivity.",
+        "The sensor has been exposed to too much oxygen.",
+        "Someone has tampered with the calibration settings."
+      ],
+      correct: 1,
+      feedback: "Poisoning is a real, physical, usually permanent degradation of the catalyst surface — not a calibration issue. Silicone vapor is one of the most common poisoning agents around mining equipment."
+    },
+    {
+      scenario: "Graham's Ratio is GR = [CO / (0.265·N2 − O2)] × 100.",
+      q: "Why does the formula include N2 — a gas combustion doesn't consume — instead of just comparing CO directly to O2?",
+      options: [
+        "N2 is included only to make the formula look more scientific; it has no functional purpose.",
+        "N2 acts as an inert reference: because it isn't consumed by combustion, deviations in the normal O2/N2 ratio reveal real oxygen loss from oxidation, not just dilution.",
+        "N2 is toxic and needs to be tracked for worker safety reasons.",
+        "N2 replaces oxygen during combustion, so it must be subtracted."
+      ],
+      correct: 1,
+      feedback: "Nitrogen is essentially inert underground — it doesn't get consumed by oxidation. That makes it a stable reference: if oxygen has dropped more than the nitrogen level alone would explain, something is actually consuming that oxygen — like a developing fire."
+    },
+    {
+      scenario: "An engineer gets a single Graham's Ratio reading of 1.3 from a sealed panel.",
+      q: "What's the most correct next step?",
+      options: [
+        "Evacuate the entire mine immediately based on this one number.",
+        "Ignore it — 1.3 is a meaningless number with no significance.",
+        "Track the ratio over multiple readings and watch the trend, since one snapshot can't distinguish real developing heating from normal variation.",
+        "Recalibrate the sensor and assume the reading is wrong."
+      ],
+      correct: 2,
+      feedback: "This is the Moura lesson applied directly: a single number is a snapshot, not a verdict. Gas indices like Graham's Ratio are built to be tracked over time — the trend is the signal, not any one reading."
+    },
+    {
+      scenario: "You need to monitor a sealed goaf area for early signs of spontaneous combustion, with no power or safe personnel access at the sample point, over a period of months.",
+      q: "Which monitoring approach fits best?",
+      options: [
+        "Handheld spot checks, performed as frequently as possible.",
+        "A fixed-point sensor installed inside the sealed area.",
+        "A tube bundle system drawing samples back to a central surface analyzer.",
+        "Relying on smell and visual inspection alone."
+      ],
+      correct: 2,
+      feedback: "Tube bundle systems are built for exactly this: no power or personnel needed at the sample point, just small-bore tubing carrying air back to an analyzer on surface — the practical way to watch somewhere nobody can safely go."
+    }
+  ];
+
+  var qState = { i:0, score:0, answered:false };
+  var quizBody = document.getElementById('quiz-body');
+  var quizFill = document.getElementById('quiz-progress-fill');
+
+  function renderQuiz(){
+    if(qState.i >= QUESTIONS.length){ renderResult(); return; }
+    var item = QUESTIONS[qState.i];
+    qState.answered = false;
+    quizFill.style.width = (qState.i / QUESTIONS.length * 100) + '%';
+
+    var html = '';
+    html += '<div class="quiz-q-num">Question ' + (qState.i+1) + ' of ' + QUESTIONS.length + '</div>';
+    html += '<div class="quiz-scenario">' + item.scenario + '</div>';
+    html += '<div class="quiz-question">' + item.q + '</div>';
+    html += '<div class="quiz-options">';
+    item.options.forEach(function(opt, idx){
+      var letter = String.fromCharCode(65+idx);
+      html += '<button class="quiz-opt" data-idx="'+idx+'"><span class="qletter">'+letter+'</span><span>'+opt+'</span></button>';
+    });
+    html += '</div>';
+    html += '<div class="quiz-feedback" id="quiz-feedback"></div>';
+    html += '<div class="quiz-nav"><button class="btn" id="quiz-next" disabled>Next →</button></div>';
+    quizBody.innerHTML = html;
+
+    var opts = quizBody.querySelectorAll('.quiz-opt');
+    opts.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(qState.answered) return;
+        qState.answered = true;
+        var idx = parseInt(btn.getAttribute('data-idx'),10);
+        opts.forEach(function(o){ o.disabled = true; });
+        if(idx === item.correct){
+          btn.classList.add('correct');
+          qState.score++;
+        } else {
+          btn.classList.add('incorrect');
+          opts[item.correct].classList.add('correct');
+        }
+        var fb = document.getElementById('quiz-feedback');
+        fb.textContent = item.feedback;
+        fb.classList.add('show');
+        document.getElementById('quiz-next').disabled = false;
+      });
+    });
+    document.getElementById('quiz-next').addEventListener('click', function(){
+      qState.i++;
+      renderQuiz();
+    });
+  }
+
+  function renderResult(){
+    quizFill.style.width = '100%';
+    var msg;
+    if(qState.score === QUESTIONS.length) msg = "Perfect run. You're reading both the instrument and the room correctly.";
+    else if(qState.score >= QUESTIONS.length - 2) msg = "Solid. Revisit the case timeline for whichever question caught you out — the technical answers all trace back to a specific moment in that timeline.";
+    else msg = "This is exactly why the case comes before the quiz. Scroll back up and re-read the timeline, then try the Graham's Ratio presets before retrying.";
+
+    quizBody.innerHTML =
+      '<div class="quiz-result">' +
+        '<div class="quiz-q-num">Checkpoint complete</div>' +
+        '<div class="score-big">' + qState.score + ' / ' + QUESTIONS.length + '</div>' +
+        '<p>' + msg + '</p>' +
+        '<div class="quiz-nav" style="justify-content:center; margin-top:1.6rem;"><button class="btn ghost" id="quiz-retry">Retry checkpoint</button></div>' +
+      '</div>';
+    document.getElementById('quiz-retry').addEventListener('click', function(){
+      qState = {i:0, score:0, answered:false};
+      renderQuiz();
+    });
+  }
+  renderQuiz();
+
+  /* ---------- instructor panel ---------- */
+  var instrToggle = document.getElementById('instr-toggle');
+  var instrPanel = document.getElementById('instr-panel');
+  var instrClose = document.getElementById('instr-close');
+  instrToggle.addEventListener('click', function(){ instrPanel.classList.add('open'); });
+  instrClose.addEventListener('click', function(){ instrPanel.classList.remove('open'); });
+  instrPanel.addEventListener('click', function(e){ if(e.target === instrPanel) instrPanel.classList.remove('open'); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') instrPanel.classList.remove('open'); });
+
+})();
+</script>

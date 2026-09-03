@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Inspector's Checklist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   THEME: "Carbon-copy government form" — a deliberate single
+   fixed LIGHT theme, not a light/dark toggle.
+   Justification: this week's real subject is a printed,
+   stamped regulatory record — MSHA citation forms, ventilation
+   plan approval letters, carbon-copy inspection reports. That
+   vernacular is inherently paper and ink, not a screen-glow
+   medium. The structural devices here (checkbox rows, a rotated
+   rubber ink stamp, ledger tables) are specific to this week and
+   distinct from Week 6's paper signage and Week 9's vellum
+   redline drafting theme, despite all three sharing a light base.
+   ============================================================ */
+:root{
+  --paper:#E7E2D3;
+  --paper-raised:#F1EDE1;
+  --paper-card:#FBF9F3;
+  --ink:#1E2A38;
+  --ink-soft:#5B6572;
+  --ink-faint:#8A8F92;
+  --stamp-red:#A6303B;
+  --stamp-red-soft:rgba(166,48,59,0.10);
+  --stamp-green:#2E6B4F;
+  --stamp-green-soft:rgba(46,107,79,0.10);
+  --amber:#A3792F;
+  --amber-soft:rgba(163,121,47,0.12);
+  --line:rgba(30,42,56,0.16);
+  --line-strong:rgba(30,42,56,0.32);
+  --font-display:'Special Elite',cursive;
+  --font-body:'Source Serif 4',serif;
+  --font-mono:'Courier Prime',monospace;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--font-body);
+  line-height:1.65;
+  font-size:16px;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px);
+  background-size:100% 2.1rem;
+  background-attachment:local;
+}
+.wrap{max-width:1080px;margin:0 auto;padding:0 2rem;}
+.section-pad{padding:5rem 0;border-top:1px dashed var(--line-strong);}
+h1,h2,h3{font-family:var(--font-display);font-weight:400;margin:0;}
+.eyebrow{font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--stamp-red);}
+.sec-title{font-size:clamp(1.6rem,3.1vw,2.3rem);line-height:1.18;margin:0.6rem 0 1.1rem;color:var(--ink);}
+.sec-dek{max-width:64ch;color:var(--ink-soft);font-size:1.05rem;}
+.mono{font-family:var(--font-mono);}
+
+/* ---------- topbar ---------- */
+#topbar{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  background:rgba(231,226,211,0.94);backdrop-filter:blur(4px);
+  border-bottom:1px solid var(--line-strong);
+}
+.topbar-inner{max-width:1080px;margin:0 auto;padding:0.75rem 2rem;display:flex;align-items:center;justify-content:space-between;font-family:var(--font-mono);font-size:0.76rem;color:var(--ink-soft);}
+.topbar-inner b{color:var(--stamp-red);}
+#progress-track{position:fixed;top:0;left:0;height:3px;background:var(--stamp-red);z-index:60;width:0%;transition:width 0.1s;}
+
+/* ---------- hero ---------- */
+#hero{padding:7.5rem 0 4rem;}
+#hero h1{font-size:clamp(1.9rem,4.4vw,3.1rem);line-height:1.16;}
+#hero h1 .accent{color:var(--stamp-red);}
+.hero-dek{max-width:62ch;color:var(--ink-soft);font-size:1.1rem;margin:1.4rem 0 2rem;}
+.hero-meta{display:flex;gap:2.5rem;flex-wrap:wrap;margin-bottom:2.6rem;}
+.hero-meta div span{display:block;}
+.hero-meta .hm-label{font-family:var(--font-mono);font-size:0.68rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:0.25rem;}
+.hero-meta .hm-val{font-weight:700;font-size:1.02rem;}
+.drawing-box{background:var(--paper-raised);border:1px solid var(--line-strong);border-radius:2px;padding:1.4rem 1.4rem 1rem;box-shadow:3px 3px 0 rgba(30,42,56,0.08);}
+.drawing-cap{font-family:var(--font-mono);font-size:0.72rem;color:var(--ink-faint);text-align:center;margin-top:0.6rem;letter-spacing:0.02em;}
+
+/* ---------- principle ---------- */
+.principle-box{background:var(--paper-raised);border-left:4px solid var(--stamp-red);border-radius:2px;padding:1.6rem 1.8rem;margin:2.2rem 0;}
+.pb-label{font-family:var(--font-mono);font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--stamp-red);margin-bottom:0.6rem;}
+.principle-box blockquote{margin:0 0 0.7rem;font-size:1.05rem;font-style:italic;color:var(--ink);}
+.principle-box cite{font-size:0.85rem;color:var(--ink-soft);font-style:normal;}
+
+.notice-box{background:var(--amber-soft);border:1px dashed var(--amber);border-radius:2px;padding:1.3rem 1.5rem;margin-top:1.6rem;}
+.notice-box .nb-label{font-family:var(--font-mono);font-size:0.68rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--amber);margin-bottom:0.5rem;}
+
+/* ---------- criteria/reg cards ---------- */
+.crit-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1.8rem;}
+@media(max-width:900px){.crit-grid{grid-template-columns:repeat(2,1fr);}}
+.crit-card{background:var(--paper-card);border:1px solid var(--line-strong);border-radius:2px;padding:1.2rem;}
+.crit-card .cc-num{font-family:var(--font-mono);font-size:0.68rem;color:var(--stamp-red);letter-spacing:0.06em;}
+.crit-card h4{font-size:1.05rem;margin:0.5rem 0 0.5rem;font-family:var(--font-body);font-weight:700;}
+.crit-card p{font-size:0.88rem;color:var(--ink-soft);margin:0;}
+
+/* ---------- case files ---------- */
+.case{border:1px solid var(--line-strong);border-radius:2px;margin-bottom:1rem;overflow:hidden;background:var(--paper-card);}
+.case-head{display:flex;align-items:center;gap:1.2rem;padding:1.2rem 1.4rem;cursor:pointer;user-select:none;}
+.case-head:hover{background:var(--paper-raised);}
+.case-stat{font-family:var(--font-display);font-size:1.3rem;color:var(--stamp-red);min-width:7rem;}
+.case.positive .case-stat{color:var(--stamp-green);}
+.case-head-text{flex:1;}
+.case-head-text .ct{font-weight:700;font-size:1.02rem;}
+.case-head-text .cs{font-family:var(--font-mono);font-size:0.74rem;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.03em;}
+.case-chev{color:var(--ink-faint);transition:transform 0.2s;font-family:var(--font-mono);}
+.case.open .case-chev{transform:rotate(180deg);}
+.case-body{max-height:0;overflow:hidden;transition:max-height 0.3s ease;}
+.case.open .case-body{max-height:900px;}
+.case-body-inner{padding:0 1.4rem 1.4rem;color:var(--ink-soft);font-size:0.96rem;}
+.case-tag{display:inline-block;font-family:var(--font-mono);font-size:0.68rem;background:var(--paper-raised);border:1px solid var(--line-strong);border-radius:2px;padding:0.15rem 0.5rem;margin-right:0.4rem;color:var(--ink-soft);}
+.case-callout{background:var(--stamp-red-soft);border-left:3px solid var(--stamp-red);border-radius:2px;padding:0.9rem 1.1rem;margin-top:0.9rem;font-size:0.92rem;}
+.case.positive .case-callout{background:var(--stamp-green-soft);border-left-color:var(--stamp-green);}
+
+/* ---------- calculator shared ---------- */
+.calc-panel{background:var(--paper-raised);border:1px solid var(--line-strong);border-radius:2px;padding:2rem;margin-top:2rem;display:grid;grid-template-columns:1fr 1fr;gap:2rem;}
+@media(max-width:820px){.calc-panel{grid-template-columns:1fr;}}
+.field-group{background:var(--paper-card);border:1px solid var(--line);border-radius:2px;padding:1rem 1.1rem;margin-bottom:0.9rem;}
+.fg-title{font-family:var(--font-mono);font-size:0.7rem;letter-spacing:0.05em;text-transform:uppercase;color:var(--ink-faint);display:flex;justify-content:space-between;margin-bottom:0.6rem;}
+.fg-title .fg-result{font-weight:700;}
+.fg-title .fg-result.pass{color:var(--stamp-green);}
+.fg-title .fg-result.fail{color:var(--stamp-red);}
+.field{margin-bottom:0.7rem;}
+.field:last-child{margin-bottom:0;}
+.field label{display:flex;justify-content:space-between;font-size:0.88rem;margin-bottom:0.35rem;color:var(--ink-soft);}
+.field .fval{color:var(--ink);font-weight:700;font-family:var(--font-mono);}
+input[type="range"]{width:100%;accent-color:var(--stamp-red);}
+.toggle-row{display:flex;gap:0.5rem;}
+.toggle-btn{flex:1;background:var(--paper-card);border:1px solid var(--line-strong);color:var(--ink-soft);font-family:var(--font-mono);font-size:0.78rem;padding:0.5rem;border-radius:2px;cursor:pointer;}
+.toggle-btn.active{background:var(--stamp-green);border-color:var(--stamp-green);color:#fff;font-weight:700;}
+.result-panel{background:var(--paper-card);border:1px solid var(--line);border-radius:2px;padding:1.3rem 1.4rem;}
+.result-row{display:flex;justify-content:space-between;padding:0.55rem 0;border-bottom:1px dashed var(--line);font-size:0.94rem;}
+.result-row:last-child{border-bottom:none;}
+.result-row .rl{color:var(--ink-soft);}
+.result-row .rr{font-family:var(--font-mono);font-weight:700;}
+.result-row.big .rr{font-size:1.25rem;}
+.result-row .rr.pass{color:var(--stamp-green);}
+.result-row .rr.fail{color:var(--stamp-red);}
+.result-flag{border-radius:2px;padding:0.8rem 1rem;font-size:0.88rem;margin-top:0.8rem;font-weight:700;border:1px solid transparent;}
+.result-flag.ok{background:var(--stamp-green-soft);color:var(--stamp-green);border-color:var(--stamp-green);}
+.result-flag.warn{background:var(--stamp-red-soft);color:var(--stamp-red);border-color:var(--stamp-red);}
+.result-flag.caution{background:var(--amber-soft);color:var(--amber);border-color:var(--amber);}
+.svg-wrap{margin-top:1.2rem;background:var(--paper-card);border:1px solid var(--line);border-radius:2px;padding:0.8rem;}
+.svg-wrap svg{width:100%;height:auto;display:block;}
+.calc-note{font-size:0.85rem;color:var(--ink-faint);margin-top:1rem;padding-top:1rem;border-top:1px dashed var(--line-strong);}
+
+/* ---------- stat cards ---------- */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.8rem;}
+@media(max-width:820px){.stat-grid{grid-template-columns:1fr;}}
+.stat-card{background:var(--paper-card);border:1px solid var(--line-strong);border-radius:2px;padding:1.4rem 1.5rem;}
+.stat-card .sv{font-family:var(--font-display);font-size:1.9rem;color:var(--stamp-red);}
+.stat-card .sl{font-size:0.9rem;color:var(--ink-soft);margin-top:0.4rem;}
+.stat-card .ss{font-family:var(--font-mono);font-size:0.72rem;color:var(--ink-faint);margin-top:0.6rem;}
+
+/* ---------- quiz ---------- */
+.quiz-box{background:var(--paper-raised);border:1px solid var(--line-strong);border-radius:2px;padding:2rem;margin-top:2rem;}
+.quiz-qnum{font-family:var(--font-mono);font-size:0.72rem;color:var(--stamp-red);letter-spacing:0.06em;text-transform:uppercase;}
+.quiz-scenario{font-style:italic;color:var(--ink-soft);margin:0.7rem 0;font-size:0.96rem;}
+.quiz-q{font-size:1.12rem;font-weight:700;margin-bottom:1.2rem;font-family:var(--font-body);}
+.quiz-options{display:flex;flex-direction:column;gap:0.7rem;}
+.quiz-opt{text-align:left;background:var(--paper-card);border:1px solid var(--line-strong);color:var(--ink);padding:0.85rem 1rem;border-radius:2px;cursor:pointer;font-size:0.95rem;display:flex;gap:0.7rem;transition:background 0.15s,border-color 0.15s;font-family:var(--font-body);}
+.quiz-opt:hover:not(:disabled){border-color:var(--stamp-red);}
+.quiz-opt .qletter{font-family:var(--font-mono);color:var(--stamp-red);flex-shrink:0;}
+.quiz-opt.correct{background:var(--stamp-green-soft);border-color:var(--stamp-green);}
+.quiz-opt.incorrect{background:var(--stamp-red-soft);border-color:var(--stamp-red);}
+.quiz-opt:disabled{cursor:default;}
+.quiz-explain{background:var(--paper-card);border-left:3px solid var(--stamp-red);border-radius:2px;padding:0.9rem 1.1rem;margin-top:1.2rem;font-size:0.92rem;color:var(--ink-soft);}
+.quiz-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.4rem;}
+.quiz-next{background:var(--stamp-red);color:#fff;border:none;font-family:var(--font-mono);font-weight:700;padding:0.7rem 1.4rem;border-radius:2px;cursor:pointer;font-size:0.85rem;}
+.quiz-next:disabled{opacity:0.35;cursor:default;}
+.quiz-score{font-family:var(--font-mono);font-size:0.85rem;color:var(--ink-soft);}
+
+/* ---------- discuss ---------- */
+.disc-list{border:1px solid var(--line-strong);border-radius:2px;overflow:hidden;margin-top:1.8rem;}
+.disc-item{display:flex;gap:1.4rem;padding:1.4rem;border-bottom:1px dashed var(--line);background:var(--paper-card);}
+.disc-item:last-child{border-bottom:none;}
+.disc-num{font-family:var(--font-display);font-size:1.4rem;color:var(--stamp-red);width:2rem;flex-shrink:0;}
+.disc-tag{font-family:var(--font-mono);font-size:0.68rem;color:var(--stamp-red);text-transform:uppercase;letter-spacing:0.05em;}
+.closing-note{background:var(--paper-raised);border:1px solid var(--line-strong);border-left:4px solid var(--stamp-green);border-radius:2px;padding:1.5rem 1.7rem;margin-top:1.6rem;}
+.closing-note .cn-label{font-family:var(--font-mono);font-size:0.68rem;color:var(--stamp-green);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.5rem;}
+
+/* ---------- footer ---------- */
+footer{padding:3.5rem 0;border-top:1px dashed var(--line-strong);}
+footer .fnote{font-size:0.8rem;color:var(--ink-faint);line-height:1.9;}
+
+/* ---------- instructor panel ---------- */
+#instr-toggle{position:fixed;bottom:1.4rem;left:1.4rem;z-index:70;background:var(--ink);color:var(--paper);border:none;border-radius:2px;padding:0.7rem 1.2rem;font-family:var(--font-mono);font-size:0.78rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.25);}
+#instr-panel{position:fixed;inset:0;background:rgba(30,26,20,0.55);z-index:80;display:none;align-items:flex-start;justify-content:center;padding:4rem 1.5rem;overflow:auto;}
+#instr-panel.open{display:flex;}
+.instr-inner{background:var(--paper-card);border:1px solid var(--line-strong);border-radius:2px;max-width:760px;width:100%;padding:2rem;}
+.instr-inner h3{font-size:1.1rem;font-family:var(--font-body);font-weight:700;}
+.instr-close{float:right;background:none;border:1px solid var(--line-strong);color:var(--ink-soft);border-radius:50%;width:2rem;height:2rem;cursor:pointer;font-size:1rem;}
+.run-table{width:100%;border-collapse:collapse;margin-top:1rem;font-size:0.9rem;}
+.run-table th{text-align:left;font-family:var(--font-mono);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--ink-faint);padding-bottom:0.5rem;border-bottom:1px solid var(--line-strong);}
+.run-table td{padding:0.6rem 0.6rem 0.6rem 0;border-bottom:1px dashed var(--line);vertical-align:top;color:var(--ink-soft);}
+.run-table td:first-child{font-family:var(--font-mono);color:var(--stamp-red);white-space:nowrap;}
+</style>
+</head>
+<body>
+
+<div id="progress-track"></div>
+<div id="topbar">
+  <div class="topbar-inner">
+    <span><b>MINE VENTILATION</b> · WEEK 11</span>
+    <span>VENTILATION SYSTEM AUDITS &amp; COMPLIANCE</span>
+  </div>
+</div>
+
+<!-- ============ HERO ============ -->
+<section id="hero">
+  <div class="wrap">
+    <span class="eyebrow">Mine ventilation · Week 11 · closing session</span>
+    <h1>Every calculator this semester assumed <span class="accent">you</span> designed the system. Now you're the one checking someone else's.</h1>
+    <p class="hero-dek">A ventilation plan isn't finished when it's designed — it's reviewed every six months by MSHA, measured against hard regulatory minimums, and enforced with real citations and real dollar penalties. This week you sit on the other side of the clipboard.</p>
+    <div class="hero-meta">
+      <div><span class="hm-label">Session</span><span class="hm-val">90 minutes</span></div>
+      <div><span class="hm-label">Format</span><span class="hm-val">Two calculators, three case files</span></div>
+      <div><span class="hm-label">You'll leave with</span><span class="hm-val">What an inspector actually checks, in order</span></div>
+    </div>
+
+    <div class="drawing-box">
+      <svg viewBox="0 0 620 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illustrative MSHA-style inspection form with four checked ventilation requirements, two passing and two failing, next to a rotated red CITED rubber stamp reading two of four points failing.">
+        <rect x="40" y="30" width="380" height="240" fill="#FBF9F3" stroke="#1E2A38" stroke-width="1.5"/>
+        <text x="60" y="55" font-family="Courier Prime, monospace" font-size="11" fill="#5B6572" letter-spacing="0.5">MSHA INSPECTION WORKSHEET — 30 CFR PART 75 (ILLUSTRATIVE)</text>
+        <line x1="60" y1="66" x2="400" y2="66" stroke="#1E2A38" stroke-width="1"/>
+
+        <!-- Row 1: face quantity - PASS -->
+        <rect x="60" y="86" width="18" height="18" fill="none" stroke="#2E6B4F" stroke-width="1.5"/>
+        <path d="M63 95 L68 100 L76 88" fill="none" stroke="#2E6B4F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="88" y="99" font-family="Courier Prime, monospace" font-size="11" fill="#1E2A38">§75.325 face quantity — 3,200 / 3,000 cfm</text>
+
+        <!-- Row 2: crosscut quantity - FAIL -->
+        <rect x="60" y="126" width="18" height="18" fill="none" stroke="#A6303B" stroke-width="1.5"/>
+        <path d="M62 128 L76 142 M76 128 L62 142" stroke="#A6303B" stroke-width="2" stroke-linecap="round"/>
+        <text x="88" y="139" font-family="Courier Prime, monospace" font-size="11" fill="#1E2A38">§75.325 last crosscut — 8,700 / 9,000 cfm</text>
+
+        <!-- Row 3: longwall quantity - PASS -->
+        <rect x="60" y="166" width="18" height="18" fill="none" stroke="#2E6B4F" stroke-width="1.5"/>
+        <path d="M63 175 L68 180 L76 168" fill="none" stroke="#2E6B4F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="88" y="179" font-family="Courier Prime, monospace" font-size="11" fill="#1E2A38">§75.325 longwall face — 31,000 / 30,000 cfm</text>
+
+        <!-- Row 4: velocity - FAIL -->
+        <rect x="60" y="206" width="18" height="18" fill="none" stroke="#A6303B" stroke-width="1.5"/>
+        <path d="M62 208 L76 222 M76 208 L62 222" stroke="#A6303B" stroke-width="2" stroke-linecap="round"/>
+        <text x="88" y="219" font-family="Courier Prime, monospace" font-size="11" fill="#1E2A38">§75.326 mean entry velocity — 55 / 60 ft/min</text>
+
+        <text x="60" y="252" font-family="Courier Prime, monospace" font-size="10" fill="#8A8F92">Figures illustrative — set your own in the calculator below.</text>
+
+        <!-- rubber stamp -->
+        <g transform="rotate(-12 520 195)">
+          <ellipse cx="520" cy="195" rx="92" ry="68" fill="none" stroke="#A6303B" stroke-width="4"/>
+          <ellipse cx="520" cy="195" rx="80" ry="56" fill="none" stroke="#A6303B" stroke-width="1.5"/>
+          <text x="520" y="188" font-family="Special Elite, cursive" font-size="30" fill="#A6303B" text-anchor="middle">CITED</text>
+          <text x="520" y="216" font-family="Courier Prime, monospace" font-size="12" fill="#A6303B" text-anchor="middle" font-weight="700">2 OF 4 POINTS FAIL</text>
+        </g>
+      </svg>
+      <div class="drawing-cap">THE SAME FOUR NUMBERS, VIEWED AS A PASS/FAIL CHECKLIST INSTEAD OF A DESIGN TARGET</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PRINCIPLE ============ -->
+<section id="principle" class="section-pad">
+  <div class="wrap">
+    <span class="eyebrow">01 · The plan has a life after it's approved</span>
+    <h2 class="sec-title">Approval isn't the finish line. It's a live document.</h2>
+    <p class="sec-dek">Every underground coal mine in the US operates under a written ventilation plan the district manager must approve before a single cut is made under it — and that plan doesn't get filed away. It gets re-examined on a fixed schedule for the life of the mine.</p>
+
+    <div class="principle-box">
+      <div class="pb-label">30 CFR §75.370 — current regulatory text</div>
+      <blockquote>"The ventilation plan for each mine shall be reviewed every 6 months by an authorized representative of the Secretary to assure that it is suitable to current conditions... No proposed ventilation plan shall be implemented before it is approved by the district manager."</blockquote>
+      <cite>— eCFR, Title 30, §75.370</cite>
+    </div>
+
+    <div class="crit-grid">
+      <div class="crit-card">
+        <div class="cc-num">WHO SUBMITS</div>
+        <h4>The operator, in writing</h4>
+        <p>Submitted to the district manager, with miners' representatives notified at least 5 days ahead and given a chance to comment before approval.</p>
+      </div>
+      <div class="crit-card">
+        <div class="cc-num">WHO CAN PUSH BACK</div>
+        <h4>Either side, on the record</h4>
+        <p><em>Carbon County Coal Co.</em> (FMSHRC, 1984): the Commission ruled MSHA can't impose generic, one-size-fits-all provisions on a plan — only requirements genuinely suited to that specific mine's conditions.</p>
+      </div>
+      <div class="crit-card">
+        <div class="cc-num">WHAT'S LIVE RIGHT NOW</div>
+        <h4>The rule is still being rewritten</h4>
+        <p>MSHA proposed a 2025 rule change ("Ventilation Plan Approval Criteria") to limit district managers to only the provisions explicitly listed in §75.371 — narrowing the discretion Carbon County's precedent was fought over.</p>
+      </div>
+      <div class="crit-card">
+        <div class="cc-num">WHAT HAPPENS IF DENIED</div>
+        <h4>No implementation, period</h4>
+        <p>A rejected plan cannot be run under while contested — the operator must revise and resubmit, or litigate, before mining under new ventilation controls.</p>
+      </div>
+    </div>
+
+    <div class="notice-box">
+      <div class="nb-label">Still an open question</div>
+      The 2025 proposed rule sits at the center of this week's real tension: should a district manager who knows one specific mine's roof, gas, and geology be able to add conditions beyond the codified list — or does that discretion invite exactly the kind of inconsistent, unappealable demands Carbon County Coal Co. pushed back on forty years ago?
+    </div>
+  </div>
+</section>
+
+<!-- ============ INSPECTION FREQUENCY ============ -->
+<section id="frequency" class="section-pad">
+  <div class="wrap">
+    <span class="eyebrow">02 · How often the inspector actually shows up</span>
+    <h2 class="sec-title">The Mine Act sets a hard floor, not a suggestion.</h2>
+    <p class="sec-dek">Inspection frequency isn't discretionary — it's written directly into the Federal Mine Safety and Health Act of 1977, and gassier mines get checked far more often than that floor.</p>
+
+    <div class="crit-grid">
+      <div class="crit-card">
+        <div class="cc-num">30 U.S.C. §813(a)</div>
+        <h4>Underground mines — 4×/year</h4>
+        <p>Every underground coal <em>and</em> metal/nonmetal mine gets a minimum of four complete inspections a year — the same statutory floor for both.</p>
+      </div>
+      <div class="crit-card">
+        <div class="cc-num">30 U.S.C. §813(a)</div>
+        <h4>Surface mines — 2×/year</h4>
+        <p>Surface coal and metal/nonmetal operations get a minimum of two complete inspections a year under the same section.</p>
+      </div>
+      <div class="crit-card">
+        <div class="cc-num">30 U.S.C. §813(i)</div>
+        <h4>Gassy mines — spot checks every 5 days</h4>
+        <p>Mines liberating over 1,000,000 ft³ of methane per 24 hours get spot inspections every 5 working days — tiers step down to every 10 or 15 days at lower liberation rates.</p>
+      </div>
+      <div class="crit-card">
+        <div class="cc-num">UPPER BIG BRANCH, 2010</div>
+        <h4>Frequency means nothing if you know they're coming</h4>
+        <p>Dispatchers were instructed to warn underground crews when inspectors arrived — turning a mandated surprise inspection into a scheduled one. See the case file below.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CASE FILES ============ -->
+<section id="cases" class="section-pad">
+  <div class="wrap">
+    <span class="eyebrow">03 · Three records from the enforcement file</span>
+    <h2 class="sec-title">What the paperwork looked like before and after.</h2>
+    <p class="sec-dek">One mine gamed the inspection system entirely. One racked up violations fast enough to trigger a rarely-used federal designation. One simply argued its case — and won.</p>
+
+    <div class="case" id="case-ubb">
+      <div class="case-head" data-case="case-ubb">
+        <div class="case-stat">369 citations</div>
+        <div class="case-head-text">
+          <div class="ct">Upper Big Branch Mine, West Virginia — April 5, 2010</div>
+          <div class="cs">Illegal advance notice · inadequate air quantities · 29 dead</div>
+        </div>
+        <div class="case-chev">▾</div>
+      </div>
+      <div class="case-body"><div class="case-body-inner">
+        <p><span class="case-tag">EXPLOSION</span><span class="case-tag">29 DEAD</span><span class="case-tag">$10.8M PENALTY</span> MSHA's post-disaster investigation found the mine's ventilation system produced "erratic changes in air flow and direction," and that no methane examinations were conducted on the longwall tailgate — the ignition point — in the weeks before the explosion. A roof fall, caused by installing only one row of required cable bolts instead of two, further restricted airflow leaving the longwall face, letting methane accumulate.</p>
+        <p>None of this should have gone undetected for long — except dispatchers testified they were instructed to warn underground miners whenever an MSHA inspector arrived on site, defeating the entire premise of a mandated inspection. The mine's security chief was later criminally convicted for lying to investigators about the practice.</p>
+        <div class="case-callout">MSHA issued 369 citations and orders to the operator, 21 of them "flagrant," totaling $10,825,368 in penalties — at the time, the largest fine in agency history. A separate global settlement covering related liabilities later reached roughly $209 million.</div>
+      </div></div>
+    </div>
+
+    <div class="case" id="case-brody">
+      <div class="case-head" data-case="case-brody">
+        <div class="case-stat">253 S&amp;S</div>
+        <div class="case-head-text">
+          <div class="ct">Brody Mine No. 1, West Virginia — Pattern of Violations, 2013</div>
+          <div class="cs">253 significant-and-substantial violations in 12 months · POV notice · fatalities followed</div>
+        </div>
+        <div class="case-chev">▾</div>
+      </div>
+      <div class="case-body"><div class="case-body-inner">
+        <p><span class="case-tag">POV NOTICE</span><span class="case-tag">253 S&amp;S VIOLATIONS</span> Brody Mining LLC, a Patriot Coal subsidiary, racked up 253 significant-and-substantial violations in the twelve months ending August 2013 — far past either threshold in MSHA's Pattern of Violations rule (30 CFR Part 104), which flags mines exceeding roughly 50–100+ S&amp;S citations in a year depending on which qualifying criteria apply. The mine had also underreported injuries: a later audit turned up 29 unreported injuries and 1,757 lost workdays.</p>
+        <p>MSHA issued a POV notice in October 2013. Brody's own administrative law judge initially vacated it — but the full Federal Mine Safety and Health Review Commission reversed that decision in September 2015, upholding MSHA's authority to designate the mine.</p>
+        <div class="case-callout">Two miners were killed at this same mine on May 12, 2014 — after the POV notice, before the Commission's 2015 ruling. A designation meant to force faster correction didn't move fast enough to prevent it.</div>
+      </div></div>
+    </div>
+
+    <div class="case positive" id="case-carbon">
+      <div class="case-head" data-case="case-carbon">
+        <div class="case-stat">Operator won</div>
+        <div class="case-head-text">
+          <div class="ct">Carbon County Coal Co. — FMSHRC, May 1984</div>
+          <div class="cs">A real limit on how much a district manager can add to a plan</div>
+        </div>
+        <div class="case-chev">▾</div>
+      </div>
+      <div class="case-body"><div class="case-body-inner">
+        <p><span class="case-tag">PRECEDENT</span><span class="case-tag">DUE PROCESS WORKING</span> MSHA tried to require Carbon County's ventilation plan to be built around a fan's "free discharge capacity" rather than the operator's proposed "installed capacity" figure — a generic engineering preference, not something specific to that mine's actual roof, gas, or geology.</p>
+        <p>The Commission held that MSHA cannot mechanically fold generic guidelines into a plan approval. A provision has to be genuinely "suitable to the conditions and mining system" of that particular mine — anything broader belongs in a formal rulemaking that applies to everyone, with everyone's chance to comment, not a one-off condition slipped into a single plan approval.</p>
+        <div class="case-callout">This is still the doctrinal basis operators use today to contest an overreaching plan condition — and it's exactly the discretion the 2025 proposed rule is trying to codify away entirely, from the other direction.</div>
+      </div></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ CALCULATOR 1: DOES THIS PLAN PASS ============ -->
+<section id="audit" class="section-pad">
+  <div class="wrap">
+    <span class="eyebrow">04 · Instrument 1 — The flagship</span>
+    <h2 class="sec-title">Does this plan actually pass?</h2>
+    <p class="sec-dek">Four real, current thresholds from 30 CFR §75.325 and §75.326, plus the methane action levels from §75.323. Set what an inspector actually measured at each point and see whether the numbers hold up — exactly the arithmetic behind a real citation.</p>
+
+    <div class="calc-panel">
+      <div>
+        <div class="field-group">
+          <div class="fg-title">§75.325 — working face <span class="fg-result" id="a-face-flag">106.7% of min</span></div>
+          <div class="field">
+            <label>Measured airflow at working face <span class="fval" id="a-face-val">3200 cfm</span></label>
+            <input type="range" id="a-face" min="2000" max="6000" step="50" value="3200">
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="fg-title">§75.325 — last open crosscut <span class="fg-result" id="a-cross-flag">96.7% of min</span></div>
+          <div class="field">
+            <label>Measured airflow at last open crosscut <span class="fval" id="a-cross-val">8700 cfm</span></label>
+            <input type="range" id="a-cross" min="6000" max="15000" step="100" value="8700">
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="fg-title">§75.325 — longwall/shortwall face <span class="fg-result" id="a-lw-flag">103.3% of min</span></div>
+          <div class="field">
+            <label>Measured airflow at longwall face <span class="fval" id="a-lw-val">31000 cfm</span></label>
+            <input type="range" id="a-lw" min="20000" max="45000" step="500" value="31000">
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="fg-title">§75.326 — mean entry velocity <span class="fg-result" id="a-vel-flag">91.7% of min</span></div>
+          <div class="field">
+            <label>Measured face air velocity <span class="fval" id="a-vel-val">55 ft/min</span></label>
+            <input type="range" id="a-vel" min="30" max="120" step="1" value="55">
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="fg-title">§75.323 — methane at working place</div>
+          <div class="field">
+            <label>Measured methane concentration <span class="fval" id="a-ch4-val">0.8%</span></label>
+            <input type="range" id="a-ch4" min="0" max="2.5" step="0.05" value="0.8">
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="result-panel">
+          <div class="result-row"><span class="rl">Face quantity (req. 3,000 cfm)</span><span class="rr pass" id="a-r-face">3200 cfm — PASS</span></div>
+          <div class="result-row"><span class="rl">Crosscut quantity (req. 9,000 cfm)</span><span class="rr fail" id="a-r-cross">8700 cfm — FAIL</span></div>
+          <div class="result-row"><span class="rl">Longwall quantity (req. 30,000 cfm)</span><span class="rr pass" id="a-r-lw">31000 cfm — PASS</span></div>
+          <div class="result-row"><span class="rl">Face velocity (req. 60 ft/min)</span><span class="rr fail" id="a-r-vel">55 ft/min — FAIL</span></div>
+          <div class="result-row big"><span class="rl">Overall audit result</span><span class="rr fail" id="a-r-overall">2 of 4 FAIL</span></div>
+          <div id="a-flag" class="result-flag warn">Citations likely under §75.325 and §75.326 — plan does not pass as measured.</div>
+          <div id="a-ch4-flag" class="result-flag ok">Methane below 1.0% — no action required under §75.323.</div>
+          <div class="svg-wrap">
+            <svg id="a-svg" viewBox="0 0 420 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Bar chart showing each measurement as a percentage of its required regulatory minimum, with bars under 100 percent marked as failing"></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="calc-note">Requirements verified against current eCFR text: §75.325 (3,000 cfm working face / 9,000 cfm last open crosscut, bituminous and lignite mines / 30,000 cfm longwall or shortwall face), §75.326 (60 ft/min mean entry velocity, exhausting systems), §75.323 (1.0% methane triggers a ventilation adjustment and equipment de-energization; 1.5% triggers withdrawal).</div>
+  </div>
+</section>
+
+<!-- ============ TOP CITED STANDARDS ============ -->
+<section id="topcited" class="section-pad">
+  <div class="wrap">
+    <span class="eyebrow">05 · What actually gets cited most</span>
+    <h2 class="sec-title">Ventilation compliance cracks the top 10 — surrounded by housekeeping.</h2>
+    <p class="sec-dek">MSHA publishes its most frequently cited standards every year. The list is dominated by things like loose combustible material and missing machine guards — which makes it notable when a ventilation-specific standard shows up at all.</p>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="sv">#1 · 3,412</div>
+        <div class="sl">§75.400, accumulation of combustible materials — the single most frequently cited MSHA standard across all mine types, most years running.</div>
+        <div class="ss">MSHA, Top 10 Most Frequently Cited Standards, 2024</div>
+      </div>
+      <div class="stat-card">
+        <div class="sv">#7 · 1,956</div>
+        <div class="sl">§75.370(a)(1), ventilation plan submission and compliance — the only ventilation-specific standard to reach the overall top 10 that year.</div>
+        <div class="ss">MSHA, Top 10 Most Frequently Cited Standards, 2024</div>
+      </div>
+      <div class="stat-card">
+        <div class="sv">1,956 citations</div>
+        <div class="sl">That single number represents 1,956 separate real instances of a mine operating outside its own approved plan — not a hypothetical, a documented enforcement pattern.</div>
+        <div class="ss">Same MSHA dataset</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CALCULATOR 2: PENALTY POINTS ============ -->
+<section id="penalty" class="section-pad">
+  <div class="wrap">
+    <span class="eyebrow">06 · Instrument 2 — What a citation actually costs</span>
+    <h2 class="sec-title">Turn a violation into a dollar figure.</h2>
+    <p class="sec-dek">Every MSHA civil penalty runs through the same real point system under 30 CFR Part 100: gravity, negligence, operator size, and violation history all add points, which convert to a dollar amount on a published table. Build a violation from its four factors and see what it actually costs.</p>
+
+    <div class="calc-panel">
+      <div>
+        <div class="field-group">
+          <div class="fg-title">Gravity (max 88 pts)</div>
+          <div class="field">
+            <label>Likelihood, severity, persons affected <span class="fval" id="p-grav-val">40 pts</span></label>
+            <input type="range" id="p-grav" min="0" max="88" step="1" value="40">
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="fg-title">Negligence (max 50 pts)</div>
+          <div class="field">
+            <label>How avoidable the violation was <span class="fval" id="p-neg-val">20 pts</span></label>
+            <input type="range" id="p-neg" min="0" max="50" step="1" value="20">
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="fg-title">Operator size (max 25 pts)</div>
+          <div class="field">
+            <label>Production tonnage / hours worked <span class="fval" id="p-size-val">15 pts</span></label>
+            <input type="range" id="p-size" min="0" max="25" step="1" value="15">
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="fg-title">Violation history (max 45 pts)</div>
+          <div class="field">
+            <label>Prior citations at this mine <span class="fval" id="p-hist-val">25 pts</span></label>
+            <input type="range" id="p-hist" min="0" max="45" step="1" value="25">
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="fg-title">Good faith abatement</div>
+          <div class="toggle-row">
+            <button class="toggle-btn active" id="p-gf-off" data-gf="0">NOT TIMELY ABATED</button>
+            <button class="toggle-btn" id="p-gf-on" data-gf="1">TIMELY ABATED (−10%)</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="result-panel">
+          <div class="result-row"><span class="rl">Total penalty points</span><span class="rr" id="p-r-points">100 pts</span></div>
+          <div class="result-row"><span class="rl">Base penalty (Part 100 table)</span><span class="rr" id="p-r-base">$4,152</span></div>
+          <div class="result-row big"><span class="rl">Final assessed penalty</span><span class="rr" id="p-r-final">$4,152</span></div>
+          <div id="p-flag" class="result-flag caution">Mid-range violation — well below the flagrant tier, but a real, collectible penalty.</div>
+        </div>
+        <div class="calc-note" style="margin-top:1rem;padding-top:0;border-top:none;">For scale: Upper Big Branch's 369 citations totaled $10,825,368 — an average of roughly $29,337 per citation, well above what most single mid-range violations cost on their own. The regulatory maximum for a single non-flagrant violation is currently $90,649; a "flagrant" violation under §110(b)(2) of the Mine Act can reach $332,376.</div>
+      </div>
+    </div>
+    <div class="calc-note">Dollar figures interpolated between the published Part 100 point breakpoints (60→$168, 70→$374, 80→$839, 90→$1,866, 100→$4,152, 110→$9,239, 120→$20,560, 140+→$90,649 max) — the real table has finer per-point gradations than shown here; this reproduces its actual shape and exact values at each published breakpoint. Flagrant-violation maximum current as of the January 2025 inflation adjustment, held flat for 2026.</div>
+  </div>
+</section>
+
+<!-- ============ SURVEY / CLOSURE ERROR ============ -->
+<section id="survey" class="section-pad">
+  <div class="wrap">
+    <span class="eyebrow">07 · Trusting your own measurements</span>
+    <h2 class="sec-title">Before you audit the mine, audit your survey.</h2>
+    <p class="sec-dek">Every calculator this semester assumed the input numbers were simply correct. In the field, they come from a pressure-quantity survey walked through the actual workings — and every survey carries its own measurement error.</p>
+
+    <div class="principle-box">
+      <div class="pb-label">A real, dated field tolerance</div>
+      <blockquote>"A final result of 3 to 4 feet [of elevation-equivalent pressure error], or 0.04 to 0.06 inch water gage, representing the error of closure, is to be expected" for a closed-loop pressure-traverse survey.</blockquote>
+      <cite>— U.S. Bureau of Mines / MSHA Pittsburgh Health Technology Center, "A Coal Mine Ventilation Survey Method," 1975</cite>
+    </div>
+
+    <div class="notice-box">
+      <div class="nb-label">There's no tidy percentage to memorize here</div>
+      Unlike the airflow thresholds above, there is no single, universally-cited "acceptable percent closure error" for a ventilation network survey across the field's major references — this 1975 figure is a specific absolute tolerance for one particular survey technique, not a general standard. The report itself warns that a small closure error can still hide compensating mistakes, which is why real practice leans on independent check-loops rather than trusting one number.
+    </div>
+  </div>
+</section>
+
+<!-- ============ QUIZ ============ -->
+<section id="quiz" class="section-pad">
+  <div class="wrap">
+    <span class="eyebrow">08 · Checkpoint</span>
+    <h2 class="sec-title">Six scenarios before the debrief.</h2>
+    <p class="sec-dek">Pulling on today's calculators and case files — and closing out the semester.</p>
+
+    <div class="quiz-box" id="quiz-box"></div>
+  </div>
+</section>
+
+<!-- ============ DISCUSSION ============ -->
+<section id="discuss" class="section-pad">
+  <div class="wrap">
+    <span class="eyebrow">09 · Debrief</span>
+    <h2 class="sec-title">For the last 15 minutes: talk it through.</h2>
+    <p class="sec-dek">In pairs or small groups.</p>
+
+    <div class="disc-list">
+      <div class="disc-item">
+        <div class="disc-num">1</div>
+        <div>
+          <div class="disc-tag">Discretion vs. codification</div>
+          <p>The 2025 proposed rule would limit district managers to only the provisions codified in §75.371. Carbon County Coal Co. shows discretion can be abused — but does removing it entirely trade one problem for a worse one?</p>
+        </div>
+      </div>
+      <div class="disc-item">
+        <div class="disc-num">2</div>
+        <div>
+          <div class="disc-tag">Is the penalty enough?</div>
+          <p>The maximum regular civil penalty for a single violation is $90,649. Is that a meaningful deterrent for a large multinational operator the same way it might be for a small one — and should the formula account for that difference more directly than it does?</p>
+        </div>
+      </div>
+      <div class="disc-item">
+        <div class="disc-num">3</div>
+        <div>
+          <div class="disc-tag">Enforcement speed</div>
+          <p>Brody Mine received its Pattern of Violations notice in October 2013. Two miners died there in May 2014, before the notice was even upheld on appeal. What would it take for an enforcement designation to change conditions in months rather than years?</p>
+        </div>
+      </div>
+      <div class="disc-item">
+        <div class="disc-num">4</div>
+        <div>
+          <div class="disc-tag">Defeating the inspection itself</div>
+          <p>Upper Big Branch's advance-notice scheme meant the entire inspection frequency requirement was pointless in practice. With today's tracking and communication systems (Week 10), what would make an inspection actually unannounced again?</p>
+        </div>
+      </div>
+      <div class="disc-item">
+        <div class="disc-num">5</div>
+        <div>
+          <div class="disc-tag">Closing the semester</div>
+          <p>Looking back across every calculator this term — dilution, network solving, booster reach, dust, heat, governing criteria, escape time, refuge sizing, and now compliance — which single number would you check first if you were the inspector walking into an unfamiliar mine, and why?</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="closing-note">
+      <div class="cn-label">Closing this arc</div>
+      This closes the semester's run from first-principles design through emergency response to regulatory audit. The ventilation system was never just a network of fans and airways — it was always also the paperwork, the inspection schedule, and the penalty table standing behind it, whether or not anyone in the mine ever thinks about them on an ordinary shift.
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="fnote">
+      Sources: 30 CFR §75.370, §75.371, §75.323, §75.325, §75.326, current eCFR text · Federal Mine Safety and Health Act of 1977, 30 U.S.C. §813, via Cornell LII and MSHA · Federal Register, "Ventilation Plan Approval Criteria" proposed rule, Docket MSHA–2025–0084 (July 1, 2025) · FMSHRC Blue Book, <em>Carbon County Coal Company</em> (May 1984) · FMSHRC ALJ decision, <em>Jim Walter Resources v. Secretary of Labor</em> (1994) · MSHA, "Top 10 Most Frequently Cited MSHA Standards 2024" · 30 CFR Part 100, current eCFR text, and Fisher Phillips / NASP reporting on 2025–2026 penalty inflation adjustments · MSHA, Pattern of Violations program (30 CFR Part 104) and DOL news release on <em>Brody Mining LLC</em>, October 2015 · MSHA Executive Summary and DOL news release, Upper Big Branch Mine fatal accident investigation, December 2011 · U.S. Bureau of Mines / MSHA Pittsburgh Health Technology Center, "A Coal Mine Ventilation Survey Method," 1975 (via OSTI).
+    </div>
+  </div>
+</footer>
+
+<button id="instr-toggle">⚑ INSTRUCTOR VIEW</button>
+<div id="instr-panel">
+  <div class="instr-inner">
+    <button class="instr-close" id="instr-close">×</button>
+    <div class="eyebrow">FOR THE INSTRUCTOR</div>
+    <h3>Suggested 90-minute run of show</h3>
+    <table class="run-table">
+      <tr><th>Time</th><th>Segment</th></tr>
+      <tr><td>0:00–0:08</td><td>Open on the hero citation form. Ask cold: "which of these four checkboxes would you expect to fail most often in a real mine, and why?"</td></tr>
+      <tr><td>0:08–0:18</td><td>Plan approval principle — 6-month review cycle, Carbon County precedent, and the live 2025 proposed rule as a real ongoing debate.</td></tr>
+      <tr><td>0:18–0:24</td><td>Inspection frequency cards — tie the gassy-mine spot-check tiers back to Week 1's dilution content.</td></tr>
+      <tr><td>0:24–0:42</td><td>Three case files — UBB, Brody, Carbon County. Assign one each to small groups; have each report what a well-functioning audit system would have needed to catch the failure faster (or, for Carbon County, why the process worked).</td></tr>
+      <tr><td>0:42–0:58</td><td>Audit calculator in pairs. Have every pair find a combination where all four points pass, then break exactly one.</td></tr>
+      <tr><td>0:58–1:04</td><td>Top-cited-standards cards — a quick "guess the rank" exercise before revealing the real numbers.</td></tr>
+      <tr><td>1:04–1:18</td><td>Penalty points calculator. Have students price out Upper Big Branch's worst single violation as a guided estimate.</td></tr>
+      <tr><td>1:18–1:26</td><td>Run the 6-question checkpoint as a live class poll.</td></tr>
+      <tr><td>1:26–1:30</td><td>Close on the semester wrap-up note.</td></tr>
+    </table>
+    <p style="margin-top:1.2rem;font-size:0.85rem;color:var(--ink-soft);">Safe to project this page directly to students — this panel is only visible to whoever clicks the button.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- topbar / scroll progress ---------- */
+  window.addEventListener('scroll', function(){
+    var h = document.documentElement;
+    var scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    document.getElementById('progress-track').style.width = scrolled + '%';
+  });
+
+  /* ---------- case accordion ---------- */
+  document.querySelectorAll('.case-head').forEach(function(head){
+    head.addEventListener('click', function(){
+      head.closest('.case').classList.toggle('open');
+    });
+  });
+  document.getElementById('case-ubb').classList.add('open');
+
+  function el(tag, attrs){
+    var e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for(var k in attrs){ e.setAttribute(k, attrs[k]); }
+    return e;
+  }
+
+  /* ---------- Calculator 1: Does this plan pass? ---------- */
+  var aFace = document.getElementById('a-face'), aCross = document.getElementById('a-cross'),
+      aLw = document.getElementById('a-lw'), aVel = document.getElementById('a-vel'), aCh4 = document.getElementById('a-ch4');
+
+  var REQ = { face: 3000, cross: 9000, lw: 30000, vel: 60 };
+
+  function pctLabel(ratio){
+    return ratio.toFixed(1) + '% of min';
+  }
+
+  function calcAudit(){
+    var face = parseFloat(aFace.value), cross = parseFloat(aCross.value),
+        lw = parseFloat(aLw.value), vel = parseFloat(aVel.value), ch4 = parseFloat(aCh4.value);
+
+    var items = [
+      {key:'face', label:'Face quantity', val:face, req:REQ.face, unit:'cfm', flagId:'a-face-flag', rowId:'a-r-face', valId:'a-face-val'},
+      {key:'cross', label:'Crosscut quantity', val:cross, req:REQ.cross, unit:'cfm', flagId:'a-cross-flag', rowId:'a-r-cross', valId:'a-cross-val'},
+      {key:'lw', label:'Longwall quantity', val:lw, req:REQ.lw, unit:'cfm', flagId:'a-lw-flag', rowId:'a-r-lw', valId:'a-lw-val'},
+      {key:'vel', label:'Face velocity', val:vel, req:REQ.vel, unit:'ft/min', flagId:'a-vel-flag', rowId:'a-r-vel', valId:'a-vel-val'}
+    ];
+
+    var failCount = 0;
+    items.forEach(function(it){
+      it.ratio = (it.val / it.req) * 100;
+      it.pass = it.val >= it.req;
+      if(!it.pass) failCount++;
+
+      document.getElementById(it.valId).textContent = it.val.toFixed(0) + ' ' + it.unit;
+      var flagEl = document.getElementById(it.flagId);
+      flagEl.textContent = pctLabel(it.ratio);
+      flagEl.className = 'fg-result ' + (it.pass ? 'pass' : 'fail');
+
+      var rowEl = document.getElementById(it.rowId);
+      rowEl.textContent = it.val.toFixed(0) + ' ' + it.unit + ' — ' + (it.pass ? 'PASS' : 'FAIL');
+      rowEl.className = 'rr ' + (it.pass ? 'pass' : 'fail');
+    });
+
+    document.getElementById('a-ch4-val').textContent = ch4.toFixed(2) + '%';
+    var overallEl = document.getElementById('a-r-overall');
+    var passCount = items.length - failCount;
+    overallEl.textContent = passCount + ' of ' + items.length + (failCount === 0 ? ' PASS' : ' FAIL');
+    overallEl.className = 'rr ' + (failCount === 0 ? 'pass' : 'fail');
+
+    var flag = document.getElementById('a-flag');
+    if(failCount === 0){
+      flag.className = 'result-flag ok';
+      flag.textContent = 'All four points meet or exceed their regulatory minimum — plan passes as measured.';
+    } else {
+      flag.className = 'result-flag warn';
+      var failNames = items.filter(function(it){ return !it.pass; }).map(function(it){ return it.label; }).join(' and ');
+      flag.textContent = failCount + ' of ' + items.length + ' points below minimum (' + failNames + ') — plan does not pass as measured.';
+    }
+
+    var ch4Flag = document.getElementById('a-ch4-flag');
+    if(ch4 < 1.0){
+      ch4Flag.className = 'result-flag ok';
+      ch4Flag.textContent = 'Methane below 1.0% — no action required under §75.323.';
+    } else if(ch4 < 1.5){
+      ch4Flag.className = 'result-flag caution';
+      ch4Flag.textContent = 'Methane at or above 1.0% — de-energize equipment and adjust ventilation immediately under §75.323(b).';
+    } else {
+      ch4Flag.className = 'result-flag warn';
+      ch4Flag.textContent = 'Methane at or above 1.5% — withdraw all persons and disconnect power under §75.323(b).';
+    }
+
+    drawAuditBars(items);
+  }
+
+  function drawAuditBars(items){
+    var svg = document.getElementById('a-svg');
+    while(svg.firstChild){ svg.removeChild(svg.firstChild); }
+    var x0 = 150, x1 = 330;
+    var rowH = 32, top = 36;
+    var maxVal = Math.max.apply(null, items.map(function(it){ return it.ratio; })) || 1;
+    var scaleMax = Math.max(maxVal, 100);
+
+    items.forEach(function(it, i){
+      var y = top + i * rowH;
+      var w = Math.max(2, (it.ratio / scaleMax) * (x1 - x0));
+      var color = it.pass ? '#2E6B4F' : '#A6303B';
+
+      var lbl = el('text',{x:x0-8,y:y+4,'font-family':'Courier Prime, monospace','font-size':10,fill:'#5B6572','text-anchor':'end'}); lbl.textContent = it.label; svg.appendChild(lbl);
+      svg.appendChild(el('rect',{x:x0,y:y-8,width:x1-x0,height:16,fill:'none',stroke:'rgba(30,42,56,0.25)','stroke-width':1}));
+      svg.appendChild(el('rect',{x:x0,y:y-8,width:w,height:16,fill:color}));
+
+      var vt = el('text',{x:x0+w+8,y:y+4,'font-family':'Courier Prime, monospace','font-size':10,fill:color,'text-anchor':'start'}); vt.textContent = it.ratio.toFixed(1) + '%'; svg.appendChild(vt);
+    });
+
+    // 100% reference line
+    var refX = x0 + (100/scaleMax) * (x1-x0);
+    svg.appendChild(el('line',{x1:refX,y1:top-8,x2:refX,y2:top+(items.length-1)*rowH+8,stroke:'#1E2A38','stroke-width':1,'stroke-dasharray':'3,3'}));
+    var refLbl = el('text',{x:refX,y:16,'font-family':'Courier Prime, monospace','font-size':9,fill:'#1E2A38','text-anchor':'middle'}); refLbl.textContent='100% (minimum)'; svg.appendChild(refLbl);
+  }
+
+  [aFace, aCross, aLw, aVel, aCh4].forEach(function(inp){ inp.addEventListener('input', calcAudit); });
+  calcAudit();
+
+  /* ---------- Calculator 2: Penalty points ---------- */
+  var pGrav = document.getElementById('p-grav'), pNeg = document.getElementById('p-neg'),
+      pSize = document.getElementById('p-size'), pHist = document.getElementById('p-hist');
+  var gfOffBtn = document.getElementById('p-gf-off'), gfOnBtn = document.getElementById('p-gf-on');
+  var goodFaith = false;
+
+  gfOffBtn.addEventListener('click', function(){ goodFaith = false; gfOffBtn.classList.add('active'); gfOnBtn.classList.remove('active'); calcPenalty(); });
+  gfOnBtn.addEventListener('click', function(){ goodFaith = true; gfOnBtn.classList.add('active'); gfOffBtn.classList.remove('active'); calcPenalty(); });
+
+  var BREAKPOINTS = [
+    {pts:0, val:168}, {pts:60, val:168}, {pts:70, val:374}, {pts:80, val:839},
+    {pts:90, val:1866}, {pts:100, val:4152}, {pts:110, val:9239}, {pts:120, val:20560}, {pts:140, val:90649}
+  ];
+
+  function pointsToPenalty(pts){
+    if(pts <= 60) return 168;
+    if(pts >= 140) return 90649;
+    for(var i=0;i<BREAKPOINTS.length-1;i++){
+      var a = BREAKPOINTS[i], b = BREAKPOINTS[i+1];
+      if(pts >= a.pts && pts <= b.pts){
+        var frac = (pts - a.pts) / (b.pts - a.pts);
+        return a.val + frac * (b.val - a.val);
+      }
+    }
+    return 90649;
+  }
+
+  function fmtUSD(n){
+    return '$' + Math.round(n).toLocaleString('en-US');
+  }
+
+  function calcPenalty(){
+    var grav = parseFloat(pGrav.value), neg = parseFloat(pNeg.value),
+        size = parseFloat(pSize.value), hist = parseFloat(pHist.value);
+
+    document.getElementById('p-grav-val').textContent = grav.toFixed(0) + ' pts';
+    document.getElementById('p-neg-val').textContent = neg.toFixed(0) + ' pts';
+    document.getElementById('p-size-val').textContent = size.toFixed(0) + ' pts';
+    document.getElementById('p-hist-val').textContent = hist.toFixed(0) + ' pts';
+
+    var totalPts = grav + neg + size + hist;
+    var base = pointsToPenalty(totalPts);
+    var final = goodFaith ? base * 0.9 : base;
+
+    document.getElementById('p-r-points').textContent = totalPts.toFixed(0) + ' pts';
+    document.getElementById('p-r-base').textContent = fmtUSD(base);
+    document.getElementById('p-r-final').textContent = fmtUSD(final);
+
+    var flag = document.getElementById('p-flag');
+    if(totalPts >= 140){
+      flag.className = 'result-flag warn';
+      flag.textContent = 'At or above the 140-point ceiling — assessed at the maximum regular-violation penalty.';
+    } else if(totalPts >= 100){
+      flag.className = 'result-flag warn';
+      flag.textContent = 'High-point violation — penalty is climbing steeply toward the regulatory maximum.';
+    } else if(totalPts >= 60){
+      flag.className = 'result-flag caution';
+      flag.textContent = 'Mid-range violation — well below the flagrant tier, but a real, collectible penalty.';
+    } else {
+      flag.className = 'result-flag ok';
+      flag.textContent = 'Low-point violation — at or near the minimum assessed penalty.';
+    }
+  }
+
+  [pGrav, pNeg, pSize, pHist].forEach(function(inp){ inp.addEventListener('input', calcPenalty); });
+  calcPenalty();
+
+  /* ---------- QUIZ ---------- */
+  var QUESTIONS = [
+    {
+      scenario: "An inspector measures 8,400 cfm at the last open crosscut of a bituminous mine's active pillar section.",
+      q: "Against the §75.325 requirement, does this pass?",
+      opts: [
+        "Yes — any airflow above zero satisfies the standard.",
+        "No — the requirement is 9,000 cfm at the last open crosscut, and 8,400 falls short.",
+        "Yes — the requirement only applies to longwall sections.",
+        "It depends only on the face velocity, not the crosscut quantity."
+      ],
+      correct: 1,
+      explain: "§75.325 requires at least 9,000 cfm reaching the last open crosscut in bituminous/lignite pillar workings. 8,400 cfm is about 93% of that minimum — a real, citable shortfall, the same arithmetic the audit calculator runs."
+    },
+    {
+      q: "A working place tests at 1.2% methane. Under §75.323, what's required right now?",
+      opts: [
+        "Nothing — the threshold for any action is 2.0%.",
+        "Withdraw all personnel immediately.",
+        "De-energize electrically powered equipment and adjust ventilation until it's back below 1.0% — but withdrawal isn't required yet.",
+        "Shut down the entire mine pending an MSHA investigation."
+      ],
+      correct: 2,
+      explain: "1.0% is the trigger to de-energize equipment and correct ventilation; withdrawal isn't required under §75.323(b) until methane reaches 1.5% or more. 1.2% sits in the corrective-action band, not the evacuation band."
+    },
+    {
+      q: "What is MSHA's single most frequently cited standard, across essentially all mine types?",
+      opts: [
+        "§75.370, ventilation plan compliance",
+        "§75.400, accumulation of combustible materials",
+        "§75.323, excessive methane",
+        "§75.326, mean entry air velocity"
+      ],
+      correct: 1,
+      explain: "§75.400 (accumulation of combustible materials — essentially housekeeping around coal dust and loose material) is consistently MSHA's #1 most-cited standard, with §75.370's ventilation-plan-compliance rule reaching #7 in 2024 — a far less common citation, but a ventilation-specific one."
+    },
+    {
+      q: "A violation scores exactly 100 total points under the Part 100 penalty formula (gravity + negligence + size + history), with no good-faith abatement credit. What's the assessed penalty?",
+      opts: [
+        "$839",
+        "$1,866",
+        "$4,152",
+        "$90,649"
+      ],
+      correct: 2,
+      explain: "100 points lands exactly on a published Part 100 breakpoint: $4,152. $839 and $1,866 correspond to 80 and 90 points; $90,649 is the maximum, reserved for 140+ points."
+    },
+    {
+      q: "What ultimately happened with Brody Mine No. 1's Pattern of Violations notice?",
+      opts: [
+        "MSHA withdrew it after the operator's first appeal.",
+        "An ALJ initially vacated it, but the full Commission reversed and upheld MSHA's authority in 2015 — after two miners had already died at the mine in 2014.",
+        "It was upheld immediately with no legal challenge.",
+        "It only applied to surface operations, not the underground workings."
+      ],
+      correct: 1,
+      explain: "Brody's ALJ vacated the October 2013 POV notice; the full FMSHRC reversed that decision in September 2015. Two miners were killed at the mine in May 2014 — in the gap between the notice and the final ruling upholding it."
+    },
+    {
+      q: "What did the Commission actually rule in Carbon County Coal Co. (1984)?",
+      opts: [
+        "That MSHA has unlimited authority to add any provision it wants to a ventilation plan.",
+        "That ventilation plans don't need district manager approval at all.",
+        "That MSHA cannot impose generic, one-size-fits-all provisions on a specific mine's plan — only conditions genuinely suited to that mine's actual conditions.",
+        "That operators can ignore an approved plan once mining begins."
+      ],
+      correct: 2,
+      explain: "Carbon County drew a real line: a plan condition has to be tailored to the specific mine, not a generic engineering preference MSHA wants applied everywhere — that kind of broad requirement belongs in formal rulemaking, not a single plan approval."
+    }
+  ];
+
+  var quizState = { idx:0, score:0, answered:false };
+  var quizBox = document.getElementById('quiz-box');
+
+  function renderQuestion(){
+    var q = QUESTIONS[quizState.idx];
+    var html = '<div class="quiz-qnum">QUESTION ' + (quizState.idx+1) + ' OF ' + QUESTIONS.length + '</div>';
+    if(q.scenario){ html += '<div class="quiz-scenario">' + q.scenario + '</div>'; }
+    html += '<div class="quiz-q">' + q.q + '</div>';
+    html += '<div class="quiz-options">';
+    var letters = ['A','B','C','D'];
+    q.opts.forEach(function(opt, idx){
+      html += '<button class="quiz-opt" data-idx="'+idx+'"><span class="qletter">'+letters[idx]+'</span><span>'+opt+'</span></button>';
+    });
+    html += '</div>';
+    html += '<div id="quiz-explain-slot"></div>';
+    html += '<div class="quiz-nav"><span class="quiz-score">SCORE: ' + quizState.score + ' / ' + QUESTIONS.length + '</span><button class="quiz-next" id="quiz-next-btn" disabled>' + (quizState.idx === QUESTIONS.length-1 ? 'FINISH' : 'NEXT →') + '</button></div>';
+    quizBox.innerHTML = html;
+    quizState.answered = false;
+
+    var opts = quizBox.querySelectorAll('.quiz-opt');
+    opts.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(quizState.answered) return;
+        quizState.answered = true;
+        var idx = parseInt(btn.getAttribute('data-idx'), 10);
+        opts.forEach(function(b){ b.disabled = true; });
+        if(idx === q.correct){
+          btn.classList.add('correct');
+          quizState.score++;
+        } else {
+          btn.classList.add('incorrect');
+          opts[q.correct].classList.add('correct');
+        }
+        document.getElementById('quiz-explain-slot').innerHTML = '<div class="quiz-explain">' + q.explain + '</div>';
+        document.getElementById('quiz-next-btn').disabled = false;
+        quizBox.querySelector('.quiz-score').textContent = 'SCORE: ' + quizState.score + ' / ' + QUESTIONS.length;
+      });
+    });
+
+    document.getElementById('quiz-next-btn').addEventListener('click', function(){
+      if(quizState.idx < QUESTIONS.length - 1){
+        quizState.idx++;
+        renderQuestion();
+      } else {
+        quizBox.innerHTML = '<div class="quiz-q">Checkpoint complete — ' + quizState.score + ' / ' + QUESTIONS.length + ' correct.</div><p style="color:var(--ink-soft);">Review any missed questions with your discussion group before moving on.</p>';
+      }
+    });
+  }
+  renderQuestion();
+
+  /* ---------- Instructor panel ---------- */
+  var instrToggle = document.getElementById('instr-toggle');
+  var instrPanel = document.getElementById('instr-panel');
+  var instrClose = document.getElementById('instr-close');
+  instrToggle.addEventListener('click', function(){ instrPanel.classList.add('open'); });
+  instrClose.addEventListener('click', function(){ instrPanel.classList.remove('open'); });
+  instrPanel.addEventListener('click', function(e){ if(e.target === instrPanel){ instrPanel.classList.remove('open'); } });
+
+})();
+</script>
+</body>
+</html>

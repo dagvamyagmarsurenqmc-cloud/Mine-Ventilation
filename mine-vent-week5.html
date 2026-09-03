@@ -1,0 +1,701 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Manrope:wght@400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+<title>The Mine Is One Circuit</title>
+
+<style>
+  /* Deliberate single-theme "circuit board" design — colors painted explicitly, no light/dark switching. */
+  :root{
+    --bg:#0A2419;
+    --bg-soft:#0F2E20;
+    --surface:#143829;
+    --surface-raised:#194330;
+    --ink:#EAF3EC;
+    --ink-soft:#A9C2B2;
+    --ink-faint:#6E8A79;
+    --line:rgba(234,243,236,0.14);
+    --line-strong:rgba(234,243,236,0.26);
+    --shadow: 0 1px 2px rgba(0,0,0,0.45), 0 14px 34px -16px rgba(0,0,0,0.7);
+
+    --trace:#D9A441;
+    --trace-strong:#F2C965;
+    --trace-soft:#3A2E12;
+    --signal:#5FD0E0;
+    --signal-strong:#8FE3EE;
+    --signal-soft:#123338;
+    --warn:#DB6B4F;
+    --warn-soft:#3A2018;
+    --good:#6FCB8E;
+    --good-soft:#173324;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto;} *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;} }
+
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Manrope", ui-sans-serif, system-ui, sans-serif;
+    font-size:16px; line-height:1.62; -webkit-font-smoothing:antialiased;
+    background-image: radial-gradient(circle at 1px 1px, rgba(234,243,236,0.06) 1px, transparent 0);
+    background-size:24px 24px;
+  }
+  h1,h2,h3,h4{
+    font-family:"Rajdhani", "Arial Narrow", sans-serif;
+    font-weight:700; text-transform:uppercase; letter-spacing:0.01em;
+    text-wrap:balance; margin:0; line-height:1.05;
+  }
+  .mono{ font-family:"Fira Code", ui-monospace, monospace; }
+  p{ margin:0 0 1em; max-width:66ch; }
+  p:last-child{ margin-bottom:0; }
+  a{ color:inherit; }
+  ::selection{ background:var(--trace); color:#0A2419; }
+  button{ font-family:inherit; }
+  a:focus-visible, button:focus-visible, input:focus-visible{ outline:2px solid var(--trace); outline-offset:3px; }
+
+  .eyebrow{
+    font-family:"Fira Code", monospace; font-size:0.7rem;
+    letter-spacing:0.14em; text-transform:uppercase; font-weight:500;
+    display:inline-flex; align-items:center; gap:0.55em; color:var(--ink-faint);
+  }
+  .wrap{ max-width:1100px; margin:0 auto; padding:0 clamp(1.25rem,4vw,3rem); }
+  .section-pad{ padding:clamp(3.4rem,8vw,6rem) 0; }
+  img,svg{ max-width:100%; }
+  .sec-title{ font-size:clamp(1.9rem,4.2vw,2.9rem); }
+  .sec-dek{ color:var(--ink-soft); max-width:64ch; margin-top:1rem; font-size:1.05rem; font-family:"Manrope",sans-serif; text-transform:none; letter-spacing:0; }
+  .kicker-row{ margin-bottom:1rem; }
+  section + section{ border-top:1px solid var(--line); }
+
+  /* ============ HERO ============ */
+  #hero{ padding:clamp(4rem,9vw,6.5rem) 0 clamp(2.5rem,6vw,4rem); }
+  h1.hero-title{ font-size:clamp(2.3rem,5.8vw,4.2rem); max-width:20ch; }
+  h1.hero-title .hl{ color:var(--trace); }
+  .hero-sub{ font-size:clamp(1.02rem,1.6vw,1.18rem); color:var(--ink-soft); max-width:60ch; margin-top:1.3rem; font-family:"Manrope",sans-serif; text-transform:none; }
+  .hero-meta{ margin-top:2.4rem; display:flex; flex-wrap:wrap; gap:2.2rem; }
+  .hero-meta .k{ font-family:"Fira Code",monospace; font-size:0.68rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-faint); }
+  .hero-meta .v{ font-size:1.02rem; margin-top:0.25rem; }
+
+  .schematic{ background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:1.3rem; margin-top:2.6rem; box-shadow:var(--shadow); }
+  .schematic svg{ display:block; width:100%; height:auto; }
+  .schematic-cap{ font-family:"Fira Code",monospace; font-size:0.72rem; color:var(--ink-faint); text-align:center; margin-top:0.7rem; letter-spacing:0.03em; }
+
+  /* ============ CONCEPT: CIRCUIT ANALOGY ============ */
+  .analogy-grid{ display:grid; grid-template-columns:1fr auto 1fr; gap:1.6rem; align-items:center; margin-top:2.4rem; }
+  @media (max-width:760px){ .analogy-grid{grid-template-columns:1fr;} }
+  .analogy-card{ background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:1.6rem 1.5rem; }
+  .analogy-card .ac-eyebrow{ font-family:"Fira Code",monospace; font-size:0.66rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--trace); }
+  .analogy-card h4{ font-size:1.5rem; margin-top:0.4rem; text-transform:none; }
+  .analogy-card .ac-formula{ font-family:"Fira Code",monospace; font-size:1.05rem; margin-top:0.7rem; color:var(--signal); }
+  .analogy-card p{ font-size:0.92rem; color:var(--ink-soft); margin-top:0.8rem; }
+  .analogy-vs{ font-family:"Rajdhani",sans-serif; font-weight:700; font-size:1.3rem; color:var(--ink-faint); text-align:center; }
+
+  .callout{ margin-top:1.6rem; padding:1.1rem 1.3rem; border-left:3px solid var(--warn); background:var(--warn-soft); font-size:0.95rem; }
+  .callout b{ color:var(--warn); display:block; font-family:"Fira Code",monospace; font-size:0.68rem; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:0.4rem; }
+
+  /* ============ CALCULATOR (shared style) ============ */
+  .calc-card{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:1.9rem clamp(1.3rem,3vw,2.3rem); box-shadow:var(--shadow); margin-top:2.4rem; }
+  .calc-head{ display:flex; align-items:baseline; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+  .calc-head h3{ font-size:1.6rem; text-transform:none; }
+  .calc-num{ font-family:"Fira Code",monospace; font-size:0.72rem; color:var(--ink-faint); letter-spacing:0.08em; text-transform:uppercase; }
+  .calc-formula{ font-family:"Fira Code",monospace; font-size:0.9rem; background:var(--bg-soft); border:1px solid var(--line); padding:0.65rem 1rem; border-radius:8px; margin-top:0.9rem; display:inline-block; }
+  .calc-body{ display:grid; grid-template-columns:1.05fr 0.95fr; gap:2rem; margin-top:1.4rem; align-items:start; }
+  @media (max-width:760px){ .calc-body{grid-template-columns:1fr;} }
+  .field{ margin-bottom:1.25rem; }
+  .field:last-child{ margin-bottom:0; }
+  .field label{ display:flex; justify-content:space-between; font-size:0.85rem; color:var(--ink-soft); margin-bottom:0.5rem; font-family:"Fira Code",monospace; }
+  .field label .fval{ color:var(--trace); font-weight:600; }
+  input[type=range]{ width:100%; accent-color:var(--trace); height:4px; cursor:pointer; }
+  .result-panel{ background:var(--bg-soft); border:1px solid var(--line); border-radius:10px; padding:1.2rem 1.3rem; display:flex; flex-direction:column; gap:0.85rem; }
+  .result-row{ display:flex; justify-content:space-between; align-items:baseline; gap:1rem; }
+  .result-row .rl{ font-size:0.82rem; color:var(--ink-soft); }
+  .result-row .rr{ font-family:"Fira Code",monospace; font-weight:500; font-size:1.12rem; font-variant-numeric:tabular-nums; text-align:right; }
+  .result-row.big .rr{ font-size:1.7rem; color:var(--trace-strong); }
+  .result-flag{ margin-top:0.15rem; padding:0.6rem 0.75rem; border-radius:7px; font-size:0.82rem; font-family:"Fira Code",monospace; background:var(--signal-soft); color:var(--signal); }
+  .calc-note{ font-size:0.82rem; color:var(--ink-faint); margin-top:1rem; border-top:1px dashed var(--line); padding-top:0.9rem; }
+
+  /* ============ NETWORK DIAGRAM ============ */
+  .net-diagram{ background:var(--bg-soft); border:1px solid var(--line); border-radius:12px; padding:1rem; }
+  .net-diagram svg{ display:block; width:100%; height:auto; }
+  .net-legend{ display:flex; gap:1.4rem; flex-wrap:wrap; margin-top:0.8rem; font-family:"Fira Code",monospace; font-size:0.72rem; color:var(--ink-faint); }
+  .net-legend span{ display:inline-flex; align-items:center; gap:0.4rem; }
+  .net-legend .sw{ width:16px; height:3px; display:inline-block; border-radius:2px; }
+
+  /* ============ QUIZ ============ */
+  .quiz-shell{ background:var(--surface); border:1px solid var(--line); border-radius:16px; margin-top:2.4rem; overflow:hidden; box-shadow:var(--shadow); }
+  .quiz-progress{ height:4px; background:var(--line); }
+  .quiz-progress-fill{ height:100%; width:0%; background:var(--trace); transition:width 0.3s; }
+  .quiz-body{ padding:clamp(1.4rem,3.5vw,2.4rem); }
+  .quiz-q-num{ font-family:"Fira Code",monospace; font-size:0.72rem; color:var(--trace); letter-spacing:0.1em; text-transform:uppercase; }
+  .quiz-scenario{ color:var(--ink-soft); font-size:0.92rem; margin-top:0.7rem; font-style:italic; }
+  .quiz-question{ font-family:"Rajdhani",sans-serif; text-transform:none; font-weight:700; font-size:clamp(1.25rem,2.4vw,1.55rem); margin-top:0.6rem; line-height:1.2; }
+  .quiz-options{ display:flex; flex-direction:column; gap:0.7rem; margin-top:1.4rem; }
+  .quiz-opt{ text-align:left; background:var(--bg-soft); border:1px solid var(--line); color:var(--ink); padding:0.85rem 1rem; border-radius:10px; cursor:pointer; font-size:0.95rem; display:flex; gap:0.7rem; transition:background 0.15s, border-color 0.15s; }
+  .quiz-opt:hover:not(:disabled){ border-color:var(--trace); }
+  .quiz-opt .qletter{ font-family:"Fira Code",monospace; color:var(--trace); flex-shrink:0; }
+  .quiz-opt.correct{ background:var(--good-soft); border-color:var(--good); }
+  .quiz-opt.incorrect{ background:var(--warn-soft); border-color:var(--warn); }
+  .quiz-opt:disabled{ cursor:default; }
+  .quiz-feedback{ margin-top:1.2rem; padding:1rem 1.1rem; border-radius:10px; background:var(--bg-soft); border-left:3px solid var(--trace); font-size:0.9rem; color:var(--ink-soft); display:none; }
+  .quiz-feedback.show{ display:block; }
+  .quiz-nav{ display:flex; justify-content:flex-end; margin-top:1.4rem; }
+  .btn{ font-family:"Fira Code",monospace; font-size:0.82rem; letter-spacing:0.05em; text-transform:uppercase; background:var(--trace); color:#0A2419; border:none; padding:0.7rem 1.3rem; border-radius:9px; cursor:pointer; font-weight:600; }
+  .btn:disabled{ opacity:0.35; cursor:default; }
+  .btn.ghost{ background:transparent; border:1px solid var(--line); color:var(--ink); }
+  .quiz-result{ text-align:center; }
+  .quiz-result .score-big{ font-family:"Fira Code",monospace; font-size:3.2rem; color:var(--trace-strong); font-weight:600; }
+  .quiz-result p{ margin:0.8rem auto 0; max-width:52ch; color:var(--ink-soft); }
+
+  /* ============ DISCUSSION ============ */
+  .disc-grid{ display:flex; flex-direction:column; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:14px; overflow:hidden; margin-top:2.2rem; }
+  .disc-item{ background:var(--surface); padding:1.4rem 1.6rem; display:grid; grid-template-columns:2.4rem 1fr; gap:1rem; }
+  .disc-item .dn{ font-family:"Rajdhani",sans-serif; font-size:2rem; color:var(--line-strong); }
+  .disc-item p{ margin:0; font-size:1rem; }
+  .disc-item .dtag{ font-family:"Fira Code",monospace; font-size:0.66rem; color:var(--trace); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.35rem; display:block; }
+
+  .lookahead{ background:var(--bg-soft); border:1px solid var(--line); border-radius:14px; padding:1.4rem 1.6rem; margin-top:2.2rem; display:flex; gap:1.2rem; align-items:baseline; flex-wrap:wrap; }
+  .lookahead .lw{ font-family:"Fira Code",monospace; color:var(--trace); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.06em; }
+
+  footer{ padding:3rem 0 4rem; color:var(--ink-faint); font-size:0.85rem; border-top:1px solid var(--line); }
+
+  #instr-toggle{ position:fixed; left:1.2rem; bottom:1.2rem; z-index:180; background:var(--trace); color:#0A2419; font-family:"Fira Code",monospace; font-size:0.72rem; letter-spacing:0.06em; text-transform:uppercase; border:none; padding:0.65rem 1rem; border-radius:30px; cursor:pointer; box-shadow:var(--shadow); display:flex; align-items:center; gap:0.5rem; }
+  #instr-panel{ position:fixed; inset:0; z-index:300; display:none; background:rgba(0,0,0,0.6); backdrop-filter:blur(2px); align-items:center; justify-content:center; padding:1.5rem; }
+  #instr-panel.open{ display:flex; }
+  .instr-card{ background:var(--surface); color:var(--ink); border-radius:18px; max-width:740px; width:100%; max-height:85vh; overflow-y:auto; padding:clamp(1.5rem,4vw,2.5rem); box-shadow:var(--shadow); border:1px solid var(--line); }
+  .instr-card h3{ font-size:1.6rem; text-transform:none; }
+  .instr-close{ float:right; background:none; border:1px solid var(--line); border-radius:50%; width:2rem; height:2rem; cursor:pointer; color:var(--ink); font-size:1rem; }
+  .run-table{ width:100%; border-collapse:collapse; margin-top:1.4rem; font-size:0.9rem; }
+  .run-table th{ text-align:left; font-family:"Fira Code",monospace; font-size:0.66rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-faint); border-bottom:1px solid var(--line); padding:0.5rem 0.6rem 0.5rem 0; }
+  .run-table td{ padding:0.65rem 0.6rem 0.65rem 0; border-bottom:1px solid var(--line); vertical-align:top; }
+  .run-table td.tt{ font-family:"Fira Code",monospace; color:var(--trace); white-space:nowrap; }
+</style>
+
+<nav id="topbar-wrap" style="position:fixed; top:0; left:0; right:0; height:3px; z-index:200;">
+  <div id="topbar-fill" style="height:100%; width:0%; background:linear-gradient(90deg, var(--trace), var(--signal)); transition:width 0.08s linear;"></div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<section id="hero">
+  <div class="wrap">
+    <div class="eyebrow">Mine Ventilation · Week 5</div>
+    <h1 class="hero-title">You can't fix one airway <span class="hl">without every other airway feeling it.</span></h1>
+    <p class="hero-sub">A real mine isn't one fan and one airway — it's dozens to hundreds of them, all connected, all arguing over the same air. Today we stop analyzing airways one at a time and start analyzing the whole network at once, the same way an electrical engineer analyzes a circuit.</p>
+
+    <div class="hero-meta">
+      <div><div class="k">Session</div><div class="v">90 minutes</div></div>
+      <div><div class="k">Format</div><div class="v">One equation, one live network solver</div></div>
+      <div><div class="k">You'll leave with</div><div class="v">A working intuition for why air "chooses" the easy path</div></div>
+    </div>
+
+    <div class="schematic">
+      <svg viewBox="0 0 560 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Circuit-style schematic of a small mine ventilation network: two parallel airways between a junction and the working face, feeding a single return airway to a fan at surface.">
+        <!-- nodes -->
+        <circle cx="60" cy="110" r="5" fill="var(--trace-strong)"/>
+        <circle cx="300" cy="110" r="5" fill="var(--trace-strong)"/>
+        <text x="60" y="95" font-family="Fira Code, monospace" font-size="10" fill="var(--ink-faint)" text-anchor="middle">PORTAL</text>
+        <text x="300" y="95" font-family="Fira Code, monospace" font-size="10" fill="var(--ink-faint)" text-anchor="middle">FACE</text>
+        <!-- top parallel branch (resistor zigzag) -->
+        <path d="M60,110 L100,110 L110,90 L124,110 L138,90 L152,110 L166,90 L180,110 L190,110 L300,110" fill="none" stroke="var(--signal)" stroke-width="2.5" transform="translate(0,-35)"/>
+        <text x="180" y="55" font-family="Fira Code, monospace" font-size="11" fill="var(--signal)" text-anchor="middle">R1</text>
+        <!-- bottom parallel branch -->
+        <path d="M60,110 L100,110 L110,90 L124,110 L138,90 L152,110 L166,90 L180,110 L190,110 L300,110" fill="none" stroke="var(--signal)" stroke-width="2.5" transform="translate(0,35)"/>
+        <text x="180" y="165" font-family="Fira Code, monospace" font-size="11" fill="var(--signal)" text-anchor="middle">R2</text>
+        <!-- connecting verticals -->
+        <line x1="60" y1="75" x2="60" y2="145" stroke="var(--ink-faint)" stroke-width="1.5"/>
+        <line x1="300" y1="75" x2="300" y2="145" stroke="var(--ink-faint)" stroke-width="1.5"/>
+        <!-- series return airway -->
+        <path d="M300,110 L340,110 L350,90 L364,110 L378,90 L392,110 L406,90 L420,110 L430,110" fill="none" stroke="var(--trace)" stroke-width="2.5"/>
+        <text x="365" y="130" font-family="Fira Code, monospace" font-size="11" fill="var(--trace)" text-anchor="middle">R3</text>
+        <!-- fan -->
+        <circle cx="470" cy="110" r="22" fill="none" stroke="var(--ink)" stroke-width="2"/>
+        <path d="M470,92 L478,105 L462,105 Z M470,128 L478,115 L462,115 Z" fill="var(--ink)"/>
+        <line x1="430" y1="110" x2="448" y2="110" stroke="var(--ink)" stroke-width="2"/>
+        <text x="470" y="150" font-family="Fira Code, monospace" font-size="10" fill="var(--ink-faint)" text-anchor="middle">FAN</text>
+        <!-- flow arrows -->
+        <path d="M505,110 L535,110" stroke="var(--ink)" stroke-width="2" marker-end="url(#arr)"/>
+        <defs><marker id="arr" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="var(--ink)"/></marker></defs>
+      </svg>
+      <div class="schematic-cap">TWO AIRWAYS IN PARALLEL (R1, R2), ONE IN SERIES (R3) — REDRAWN LIVE IN THE NETWORK TOOL BELOW</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CIRCUIT ANALOGY ============ -->
+<section id="analogy" class="section-pad">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">01 · The analogy — and where it breaks</span></div>
+    <h2 class="sec-title">Almost exactly an electrical circuit. Almost.</h2>
+    <p class="sec-dek">Mine ventilation networks obey the same continuity logic as a DC circuit. The one difference changes everything about how you solve them.</p>
+
+    <div class="analogy-grid">
+      <div class="analogy-card">
+        <div class="ac-eyebrow">Electrical circuit</div>
+        <h4>Ohm's Law</h4>
+        <div class="ac-formula">V = I · R</div>
+        <p>Voltage drop is <em>linear</em> in current. Double the current, double the voltage drop. Junction currents balance (Kirchhoff's current law). Networks solve with straightforward linear algebra.</p>
+      </div>
+      <div class="analogy-vs">VS</div>
+      <div class="analogy-card">
+        <div class="ac-eyebrow">Mine ventilation network</div>
+        <h4>The Square Law</h4>
+        <div class="ac-formula">P = R · Q²</div>
+        <p>Pressure drop is <em>quadratic</em> in airflow — a legacy of turbulent flow. Junction airflows balance exactly like current does. But that squared term means the system is nonlinear.</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <b>Why this matters</b>
+      A linear network (Ohm's Law) solves in one pass of algebra. A quadratic network doesn't — which is exactly why mine ventilation engineers borrowed an <em>iterative</em> method, originally built for something else entirely, to solve networks by successive correction instead of direct solution.
+    </div>
+  </div>
+</section>
+
+<!-- ============ HARDY CROSS HISTORY ============ -->
+<section id="history" class="section-pad" style="background:var(--bg-soft);">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">02 · Borrowed math</span></div>
+    <h2 class="sec-title">The method wasn't built for mines at all.</h2>
+    <p class="sec-dek">In 1930, structural engineer Hardy Cross published a method for finding forces in statically indeterminate buildings — trusses and frames with more supporting members than simple equilibrium equations could solve directly. In November 1936, he re-published the same core idea for an entirely different problem: flow distribution in networks of pipes.</p>
+    <p class="sec-dek">The trick in both cases is the same: guess a starting distribution, calculate how badly it violates the network's balance conditions, apply a correction, and repeat until the errors shrink to nothing. Mine ventilation engineers adopted this exact approach for airway networks — guess an airflow distribution, check it against the square law at every loop, correct, repeat. It's the direct ancestor of the network-solving software mines actually use today.</p>
+  </div>
+</section>
+
+<!-- ============ ATKINSON EQUATION CALCULATOR ============ -->
+<section id="atkinson" class="section-pad">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">03 · Instrument 1</span></div>
+    <h2 class="sec-title">Where a single airway's resistance actually comes from.</h2>
+    <p class="sec-dek">Every R you'll use today is built from four numbers describing one airway's geometry and surface roughness.</p>
+
+    <div class="calc-card">
+      <div class="calc-head"><h3>The Atkinson equation</h3><span class="calc-num">Single airway</span></div>
+      <div class="calc-formula">R = (k · per · L) / A³</div>
+      <div class="calc-body">
+        <div>
+          <div class="field">
+            <label>Friction factor (k) <span class="fval mono" id="a-k-val">0.012 kg/m³</span></label>
+            <input type="range" id="a-k" min="0.005" max="0.03" step="0.001" value="0.012">
+          </div>
+          <div class="field">
+            <label>Perimeter (per) <span class="fval mono" id="a-per-val">14.0 m</span></label>
+            <input type="range" id="a-per" min="5" max="25" step="0.5" value="14">
+          </div>
+          <div class="field">
+            <label>Length (L) <span class="fval mono" id="a-l-val">500 m</span></label>
+            <input type="range" id="a-l" min="50" max="2000" step="10" value="500">
+          </div>
+          <div class="field">
+            <label>Cross-sectional area (A) <span class="fval mono" id="a-a-val">12.0 m²</span></label>
+            <input type="range" id="a-a" min="4" max="30" step="0.5" value="12">
+          </div>
+        </div>
+        <div class="result-panel">
+          <div class="result-row big"><span class="rl">Airway resistance R</span><span class="rr" id="a-r">0.0486</span></div>
+          <div class="result-flag" id="a-flag">Try doubling area alone — watch what happens to R</div>
+        </div>
+      </div>
+      <p class="calc-note">Friction factor k depends on lining and roughness — smooth concrete-lined shafts sit toward the low end, rough unlined rock toward the high end; these sliders are illustrative, and real designs use site-measured or tabulated values. Notice the exponent: R depends on the <em>cube</em> of area. That single exponent is why "make the airway bigger" is usually a far more powerful lever than almost anything else available to a ventilation engineer.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ NETWORK SOLVER ============ -->
+<section id="network" class="section-pad" style="background:var(--bg-soft);">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">04 · Instrument 2</span></div>
+    <h2 class="sec-title">Solve the whole network at once.</h2>
+    <p class="sec-dek">Two development headings (R1, R2) run in parallel, then rejoin into one return airway (R3) back to the fan — the exact layout in the hero diagram. Watch how airflow splits unevenly, and how one branch changes the whole system's operating point.</p>
+
+    <div class="calc-card">
+      <div class="calc-body">
+        <div>
+          <div class="field">
+            <label>Heading 1 resistance (R1) <span class="fval mono" id="n-r1-val">0.0200</span></label>
+            <input type="range" id="n-r1" min="0.005" max="0.06" step="0.001" value="0.02">
+          </div>
+          <div class="field">
+            <label>Heading 2 resistance (R2) <span class="fval mono" id="n-r2-val">0.0300</span></label>
+            <input type="range" id="n-r2" min="0.005" max="0.06" step="0.001" value="0.03">
+          </div>
+          <div class="field">
+            <label>Return airway resistance (R3) <span class="fval mono" id="n-r3-val">0.0100</span></label>
+            <input type="range" id="n-r3" min="0.002" max="0.05" step="0.001" value="0.01">
+          </div>
+          <div class="field">
+            <label>Fan speed <span class="fval mono" id="n-speed-val">100%</span></label>
+            <input type="range" id="n-speed" min="60" max="130" step="1" value="100">
+          </div>
+
+          <div class="net-diagram" style="margin-top:1.2rem;">
+            <svg id="net-svg" viewBox="0 0 400 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Live network diagram showing computed flow split between two parallel airways"></svg>
+            <div class="net-legend">
+              <span><span class="sw" style="background:var(--signal);"></span>Line thickness ∝ airflow carried</span>
+            </div>
+          </div>
+        </div>
+        <div class="result-panel">
+          <div class="result-row"><span class="rl">Parallel combination (R1 ∥ R2)</span><span class="rr" id="n-req">0.00606</span></div>
+          <div class="result-row"><span class="rl">Total network resistance</span><span class="rr" id="n-rtotal">0.01606</span></div>
+          <div class="result-row big"><span class="rl">Total airflow Q</span><span class="rr" id="n-qtotal">246.4 m³/s</span></div>
+          <div class="result-row"><span class="rl">Operating pressure</span><span class="rr" id="n-pop">975 Pa</span></div>
+          <div class="result-row"><span class="rl">→ through Heading 1</span><span class="rr" id="n-q1">135.7 m³/s</span></div>
+          <div class="result-row"><span class="rl">→ through Heading 2</span><span class="rr" id="n-q2">110.8 m³/s</span></div>
+          <div class="result-flag" id="n-flag">Heading 1 carries more air — it's the lower-resistance path</div>
+        </div>
+      </div>
+      <p class="calc-note">Parallel resistances don't add like electrical resistors — they combine as 1/√R_eq = 1/√R1 + 1/√R2, a direct consequence of the square law. Push R2 higher (simulating a partially blocked or damaged heading) and watch Heading 1 absorb more and more of the total flow — air always takes the path that costs it least pressure, exactly like current, just with a different exponent.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ QUIZ ============ -->
+<section id="quiz" class="section-pad">
+  <div class="wrap" style="max-width:760px;">
+    <div class="kicker-row"><span class="eyebrow">05 · Checkpoint</span></div>
+    <h2 class="sec-title">Think like the whole network, not one airway.</h2>
+    <p class="sec-dek">Six scenarios pulling on today's equation and network tool.</p>
+
+    <div class="quiz-shell">
+      <div class="quiz-progress"><div class="quiz-progress-fill" id="quiz-progress-fill"></div></div>
+      <div class="quiz-body" id="quiz-body"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DISCUSSION ============ -->
+<section id="discuss" class="section-pad" style="background:var(--bg-soft);">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">06 · Debrief</span></div>
+    <h2 class="sec-title">For the last 15 minutes: talk it through.</h2>
+    <p class="sec-dek">In pairs or small groups.</p>
+
+    <div class="disc-grid">
+      <div class="disc-item">
+        <div class="dn">1</div>
+        <div><span class="dtag">Systems thinking</span><p>A single blocked or damaged airway doesn't just lose its own airflow — it changes the flow through every other connected airway. What does that imply about how a ventilation engineer should prioritize maintenance across a whole network, not just airway by airway?</p></div>
+      </div>
+      <div class="disc-item">
+        <div class="dn">2</div>
+        <div><span class="dtag">Engineering economics</span><p>Resistance scales with the cube of area — double the area, resistance drops by a factor of eight. What does that suggest about "make the airway bigger" versus "add more fan power" as two different responses to the same airflow shortfall?</p></div>
+      </div>
+      <div class="disc-item">
+        <div class="dn">3</div>
+        <div><span class="dtag">Cross-disciplinary</span><p>Hardy Cross borrowed a method invented for analyzing forces in buildings and applied it to airflow in pipes two years later. What other engineering ideas do you think could cross over between subfields the way this one did?</p></div>
+      </div>
+      <div class="disc-item">
+        <div class="dn">4</div>
+        <div><span class="dtag">Hazard</span><p>Lower-resistance paths always win more airflow. What real hazard could that create for a working face that becomes even slightly harder to ventilate than the paths around it?</p></div>
+      </div>
+      <div class="disc-item">
+        <div class="dn">5</div>
+        <div><span class="dtag">Career</span><p>Modern mines use ventilation network software instead of manual Hardy Cross iteration. Does understanding the manual method still matter if software does it for you? Defend your answer.</p></div>
+      </div>
+    </div>
+
+    <div class="lookahead">
+      <span class="lw">Still ahead</span>
+      <span>Weeks 9–10, Auxiliary &amp; Booster Ventilation, add fans <em>inside</em> this network rather than just at the portal — which means today's network math gets a new kind of node to solve around.</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    Mine Ventilation — Week 5 seminar material. Atkinson resistance formula and units as commonly published in mine ventilation references. Hardy Cross method history (1930 structural analysis, 1936 pipe network adaptation) per Hardy Cross's original publications as summarized on Wikipedia. Network resistance combination rules are derived directly from the square law P=RQ². Always verify friction factors and network topology against site-specific survey data in practice.
+  </div>
+</footer>
+
+<button id="instr-toggle" aria-haspopup="dialog" aria-controls="instr-panel">◐ Instructor view</button>
+<div id="instr-panel" role="dialog" aria-modal="true" aria-labelledby="instr-title">
+  <div class="instr-card">
+    <button class="instr-close" id="instr-close" aria-label="Close instructor view">✕</button>
+    <span class="eyebrow" style="color:var(--trace);">For the instructor</span>
+    <h3 id="instr-title">Suggested 90-minute run of show</h3>
+    <table class="run-table">
+      <tr><th>Time</th><th>Segment</th></tr>
+      <tr><td class="tt">0:00–0:08</td><td>Open on the hero schematic. Ask cold: "if I fix one airway's resistance, does that change what happens anywhere else in the mine?" Most students will say no at first.</td></tr>
+      <tr><td class="tt">0:08–0:18</td><td>Circuit analogy cards. Emphasize the one difference (linear vs. quadratic) — it's the whole reason today's method exists.</td></tr>
+      <tr><td class="tt">0:18–0:26</td><td>Hardy Cross history. The 1930→1936 borrowing is a good hook for the discussion prompt on cross-disciplinary ideas later.</td></tr>
+      <tr><td class="tt">0:26–0:38</td><td>Atkinson calculator in pairs. Have them find how much R changes from doubling k vs. doubling A — the cubic exponent should visibly surprise them.</td></tr>
+      <tr><td class="tt">0:38–1:00</td><td>Network solver. Have every pair push R2 up until Heading 2 is carrying almost no air at all — that's the "short-circuiting" hazard from discussion prompt 4, made visible.</td></tr>
+      <tr><td class="tt">1:00–1:15</td><td>Run the 6-question checkpoint as a live class poll.</td></tr>
+      <tr><td class="tt">1:15–1:27</td><td>Small-group discussion prompts.</td></tr>
+      <tr><td class="tt">1:27–1:30</td><td>Close on the "still ahead" note.</td></tr>
+    </table>
+    <p style="margin-top:1.4rem; color:var(--ink-soft); font-size:0.9rem;">Safe to project this page directly to students — this panel is only visible to whoever clicks the button.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var fill = document.getElementById('topbar-fill');
+  function onScroll(){
+    var h = document.documentElement;
+    var scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    fill.style.width = scrolled + '%';
+  }
+  document.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  /* ---------- Atkinson equation calculator ---------- */
+  var ak = document.getElementById('a-k'), aper = document.getElementById('a-per'),
+      al = document.getElementById('a-l'), aa = document.getElementById('a-a');
+  function calcAtkinson(){
+    var k = parseFloat(ak.value), per = parseFloat(aper.value), L = parseFloat(al.value), A = parseFloat(aa.value);
+    document.getElementById('a-k-val').textContent = k.toFixed(3) + ' kg/m³';
+    document.getElementById('a-per-val').textContent = per.toFixed(1) + ' m';
+    document.getElementById('a-l-val').textContent = L.toFixed(0) + ' m';
+    document.getElementById('a-a-val').textContent = A.toFixed(1) + ' m²';
+
+    var R = (k * per * L) / Math.pow(A,3);
+    document.getElementById('a-r').textContent = R.toFixed(4);
+  }
+  [ak,aper,al,aa].forEach(function(el){ el.addEventListener('input', calcAtkinson); });
+  calcAtkinson();
+
+  /* ---------- Network solver ---------- */
+  var nr1 = document.getElementById('n-r1'), nr2 = document.getElementById('n-r2'),
+      nr3 = document.getElementById('n-r3'), nspeed = document.getElementById('n-speed');
+  var P0_BASE = 3000, QMAX_BASE = 300;
+
+  function solveNetwork(){
+    var R1 = parseFloat(nr1.value), R2 = parseFloat(nr2.value), R3 = parseFloat(nr3.value);
+    var speedPct = parseFloat(nspeed.value);
+    var s = speedPct/100;
+
+    document.getElementById('n-r1-val').textContent = R1.toFixed(4);
+    document.getElementById('n-r2-val').textContent = R2.toFixed(4);
+    document.getElementById('n-r3-val').textContent = R3.toFixed(4);
+    document.getElementById('n-speed-val').textContent = speedPct.toFixed(0) + '%';
+
+    // parallel combination: 1/sqrt(Req) = 1/sqrt(R1) + 1/sqrt(R2)
+    var invSqrtSum = 1/Math.sqrt(R1) + 1/Math.sqrt(R2);
+    var Req = 1/(invSqrtSum*invSqrtSum);
+    var Rtotal = Req + R3;
+
+    var P0s = P0_BASE*s*s, Qmaxs = QMAX_BASE*s;
+    var Qtotal = Math.sqrt(P0s/(Rtotal + P0s/(Qmaxs*Qmaxs)));
+    var Pop = Rtotal*Qtotal*Qtotal;
+
+    var Q1 = Qtotal*Math.sqrt(Req/R1);
+    var Q2 = Qtotal*Math.sqrt(Req/R2);
+
+    document.getElementById('n-req').textContent = Req.toFixed(5);
+    document.getElementById('n-rtotal').textContent = Rtotal.toFixed(5);
+    document.getElementById('n-qtotal').textContent = Qtotal.toFixed(1) + ' m³/s';
+    document.getElementById('n-pop').textContent = Pop.toFixed(0) + ' Pa';
+    document.getElementById('n-q1').textContent = Q1.toFixed(1) + ' m³/s';
+    document.getElementById('n-q2').textContent = Q2.toFixed(1) + ' m³/s';
+
+    var flag = document.getElementById('n-flag');
+    var ratio = Q1/Q2;
+    if(ratio > 1.05){
+      flag.textContent = 'Heading 1 carries more air (' + (Q1/Qtotal*100).toFixed(0) + '% of total) — it\'s the lower-resistance path';
+    } else if(ratio < 0.95){
+      flag.textContent = 'Heading 2 carries more air (' + (Q2/Qtotal*100).toFixed(0) + '% of total) — it\'s the lower-resistance path';
+    } else {
+      flag.textContent = 'Flow splits almost evenly — both headings have similar resistance';
+    }
+
+    drawNetwork(Q1, Q2, Math.max(Q1,Q2));
+  }
+
+  function drawNetwork(Q1, Q2, Qmax){
+    var svg = document.getElementById('net-svg');
+    while(svg.firstChild){ svg.removeChild(svg.firstChild); }
+    var svgns = "http://www.w3.org/2000/svg";
+    function el(tag, attrs){ var e = document.createElementNS(svgns, tag); for(var k in attrs){ e.setAttribute(k, attrs[k]); } return e; }
+
+    var w1 = 1.5 + (Q1/Qmax)*5.5;
+    var w2 = 1.5 + (Q2/Qmax)*5.5;
+
+    svg.appendChild(el('circle',{cx:40,cy:95,r:5,fill:'var(--trace-strong)'}));
+    svg.appendChild(el('circle',{cx:220,cy:95,r:5,fill:'var(--trace-strong)'}));
+    var t1 = el('text',{x:40,y:80,'font-family':'Fira Code, monospace','font-size':9,fill:'var(--ink-faint)','text-anchor':'middle'}); t1.textContent='A'; svg.appendChild(t1);
+    var t2 = el('text',{x:220,y:80,'font-family':'Fira Code, monospace','font-size':9,fill:'var(--ink-faint)','text-anchor':'middle'}); t2.textContent='B'; svg.appendChild(t2);
+
+    // top branch R1
+    svg.appendChild(el('path',{d:'M40,95 L220,95', fill:'none', stroke:'var(--signal)', 'stroke-width':w1, transform:'translate(0,-30)'}));
+    var l1 = el('text',{x:130,y:50,'font-family':'Fira Code, monospace','font-size':10,fill:'var(--signal)','text-anchor':'middle'}); l1.textContent='R1 · '+Q1.toFixed(0)+' m³/s'; svg.appendChild(l1);
+
+    // bottom branch R2
+    svg.appendChild(el('path',{d:'M40,95 L220,95', fill:'none', stroke:'var(--signal)', 'stroke-width':w2, transform:'translate(0,30)'}));
+    var l2 = el('text',{x:130,y:145,'font-family':'Fira Code, monospace','font-size':10,fill:'var(--signal)','text-anchor':'middle'}); l2.textContent='R2 · '+Q2.toFixed(0)+' m³/s'; svg.appendChild(l2);
+
+    svg.appendChild(el('line',{x1:40,y1:65,x2:40,y2:125,stroke:'var(--ink-faint)','stroke-width':1.5}));
+    svg.appendChild(el('line',{x1:220,y1:65,x2:220,y2:125,stroke:'var(--ink-faint)','stroke-width':1.5}));
+
+    // series R3
+    var w3 = 1.5 + ((Q1+Q2)/(Qmax*2))*5.5;
+    svg.appendChild(el('path',{d:'M220,95 L320,95', fill:'none', stroke:'var(--trace)', 'stroke-width':w3}));
+    var l3 = el('text',{x:270,y:113,'font-family':'Fira Code, monospace','font-size':10,fill:'var(--trace)','text-anchor':'middle'}); l3.textContent='R3'; svg.appendChild(l3);
+
+    // fan
+    svg.appendChild(el('circle',{cx:355,cy:95,r:18,fill:'none',stroke:'var(--ink)','stroke-width':2}));
+    svg.appendChild(el('path',{d:'M355,80 L361,91 L349,91 Z M355,110 L361,99 L349,99 Z',fill:'var(--ink)'}));
+    svg.appendChild(el('line',{x1:320,y1:95,x2:337,y2:95,stroke:'var(--ink)','stroke-width':2}));
+  }
+
+  [nr1,nr2,nr3,nspeed].forEach(function(el){ el.addEventListener('input', solveNetwork); });
+  window.addEventListener('resize', function(){ /* redraw uses last computed values via solveNetwork */ });
+  solveNetwork();
+
+  /* ---------- QUIZ ---------- */
+  var QUESTIONS = [
+    {
+      scenario: "At every junction in a mine ventilation network, the air flowing in must equal the air flowing out — nothing accumulates.",
+      q: "What electrical circuit law does this directly mirror?",
+      options: [
+        "Ohm's Law",
+        "Kirchhoff's current law (conservation of flow at a junction)",
+        "Coulomb's Law",
+        "Newton's third law"
+      ],
+      correct: 1,
+      feedback: "Continuity at a junction — flow in equals flow out — is exactly Kirchhoff's current law applied to air instead of electrons. It's the part of circuit theory that carries over unchanged."
+    },
+    {
+      scenario: "An electrical circuit obeys V=IR (linear). A ventilation network obeys P=RQ² (quadratic).",
+      q: "Why does that difference specifically require an iterative method like Hardy Cross, instead of one-pass linear algebra?",
+      options: [
+        "It doesn't — linear algebra works fine for both.",
+        "The squared term makes the system of equations nonlinear, so it can't be solved directly the way linear circuit equations can — successive correction converges on the answer instead.",
+        "Iterative methods are only needed when there are more than two airways.",
+        "The square law only applies to auxiliary fans, not networks."
+      ],
+      correct: 1,
+      feedback: "Linear equations solve directly. The square law makes the network's governing equations nonlinear — which is exactly the class of problem Hardy Cross's iterative correction approach was built to handle, whether the unknowns are structural forces, pipe flows, or mine airflows."
+    },
+    {
+      scenario: "Two airways run in parallel between the same two junctions, with resistances R1 and R2.",
+      q: "How do they combine into an equivalent resistance?",
+      options: [
+        "Req = R1 + R2, same as electrical resistors in parallel.",
+        "1/Req = 1/R1 + 1/R2, same formula as electrical resistors in parallel.",
+        "1/√Req = 1/√R1 + 1/√R2 — a square-root version of the electrical rule, because of the square law.",
+        "Parallel airways cannot be combined into a single equivalent resistance."
+      ],
+      correct: 2,
+      feedback: "Because Q=√(P/R) instead of Q=P/R, the parallel combination rule picks up a square root that the electrical formula doesn't have. Same conservation logic, different exponent, different formula."
+    },
+    {
+      scenario: "In the network tool, you increase R2 (simulating a partially blocked heading) while leaving R1 unchanged.",
+      q: "What happens to the airflow distribution?",
+      options: [
+        "Both headings lose an equal amount of airflow.",
+        "Heading 1 (the now-relatively-easier path) carries a larger share of the total airflow, while Heading 2 carries less.",
+        "Total airflow through the network is completely unaffected by resistance changes in either heading.",
+        "Heading 2 automatically carries more air to compensate."
+      ],
+      correct: 1,
+      feedback: "Air reroutes toward the lower-resistance path, the same way current does — which means a partially blocked heading can end up even more starved of air than the blockage alone would suggest, as flow increasingly favors the easier route."
+    },
+    {
+      scenario: "Using the Atkinson equation R = (k·per·L)/A³, you double an airway's cross-sectional area and change nothing else.",
+      q: "What happens to its resistance?",
+      options: [
+        "It halves.",
+        "It stays the same — area doesn't affect resistance.",
+        "It drops to one-eighth of its original value, because resistance depends on the cube of area.",
+        "It doubles."
+      ],
+      correct: 2,
+      feedback: "R is inversely proportional to A³. Doubling A means dividing R by 2³=8 — a dramatically larger effect than the same percentage change in friction factor or length would produce."
+    },
+    {
+      scenario: "The Hardy Cross method used to solve ventilation networks today was originally developed for a completely different engineering problem.",
+      q: "What was it originally built to solve?",
+      options: [
+        "Electrical power grid load balancing.",
+        "Forces in statically indeterminate structures (trusses and frames), later adapted to pipe flow networks.",
+        "Weather prediction models.",
+        "It was designed for mine ventilation from the start."
+      ],
+      correct: 1,
+      feedback: "Hardy Cross published the method for structural analysis in 1930, then adapted the same iterative-correction idea to pipe flow networks in 1936. Mine ventilation engineering later borrowed it again for airway networks — the same idea, its third application."
+    }
+  ];
+
+  var qState = { i:0, score:0, answered:false };
+  var quizBody = document.getElementById('quiz-body');
+  var quizFill = document.getElementById('quiz-progress-fill');
+
+  function renderQuiz(){
+    if(qState.i >= QUESTIONS.length){ renderResult(); return; }
+    var item = QUESTIONS[qState.i];
+    qState.answered = false;
+    quizFill.style.width = (qState.i / QUESTIONS.length * 100) + '%';
+
+    var html = '';
+    html += '<div class="quiz-q-num">Question ' + (qState.i+1) + ' of ' + QUESTIONS.length + '</div>';
+    html += '<div class="quiz-scenario">' + item.scenario + '</div>';
+    html += '<div class="quiz-question">' + item.q + '</div>';
+    html += '<div class="quiz-options">';
+    item.options.forEach(function(opt, idx){
+      var letter = String.fromCharCode(65+idx);
+      html += '<button class="quiz-opt" data-idx="'+idx+'"><span class="qletter">'+letter+'</span><span>'+opt+'</span></button>';
+    });
+    html += '</div>';
+    html += '<div class="quiz-feedback" id="quiz-feedback"></div>';
+    html += '<div class="quiz-nav"><button class="btn" id="quiz-next" disabled>Next →</button></div>';
+    quizBody.innerHTML = html;
+
+    var opts = quizBody.querySelectorAll('.quiz-opt');
+    opts.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(qState.answered) return;
+        qState.answered = true;
+        var idx = parseInt(btn.getAttribute('data-idx'),10);
+        opts.forEach(function(o){ o.disabled = true; });
+        if(idx === item.correct){
+          btn.classList.add('correct');
+          qState.score++;
+        } else {
+          btn.classList.add('incorrect');
+          opts[item.correct].classList.add('correct');
+        }
+        var fb = document.getElementById('quiz-feedback');
+        fb.textContent = item.feedback;
+        fb.classList.add('show');
+        document.getElementById('quiz-next').disabled = false;
+      });
+    });
+    document.getElementById('quiz-next').addEventListener('click', function(){
+      qState.i++;
+      renderQuiz();
+    });
+  }
+
+  function renderResult(){
+    quizFill.style.width = '100%';
+    var msg;
+    if(qState.score === QUESTIONS.length) msg = "Perfect run. You're already thinking in networks, not single airways.";
+    else if(qState.score >= QUESTIONS.length - 2) msg = "Solid. Go push R2 to its maximum in the network tool if you haven't — watching Heading 2 nearly starve of air makes the missed questions click.";
+    else msg = "This is exactly why the tools come before the quiz. Scroll back up, try doubling area in the Atkinson calculator, then push the network tool to its extremes.";
+
+    quizBody.innerHTML =
+      '<div class="quiz-result">' +
+        '<div class="quiz-q-num">Checkpoint complete</div>' +
+        '<div class="score-big">' + qState.score + ' / ' + QUESTIONS.length + '</div>' +
+        '<p>' + msg + '</p>' +
+        '<div class="quiz-nav" style="justify-content:center; margin-top:1.6rem;"><button class="btn ghost" id="quiz-retry">Retry checkpoint</button></div>' +
+      '</div>';
+    document.getElementById('quiz-retry').addEventListener('click', function(){
+      qState = {i:0, score:0, answered:false};
+      renderQuiz();
+    });
+  }
+  renderQuiz();
+
+  /* ---------- instructor panel ---------- */
+  var instrToggle = document.getElementById('instr-toggle');
+  var instrPanel = document.getElementById('instr-panel');
+  var instrClose = document.getElementById('instr-close');
+  instrToggle.addEventListener('click', function(){ instrPanel.classList.add('open'); });
+  instrClose.addEventListener('click', function(){ instrPanel.classList.remove('open'); });
+  instrPanel.addEventListener('click', function(e){ if(e.target === instrPanel) instrPanel.classList.remove('open'); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') instrPanel.classList.remove('open'); });
+
+})();
+</script>

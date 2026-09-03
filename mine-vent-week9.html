@@ -1,0 +1,825 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=Schibsted+Grotesk:wght@400;500;600;700;800&family=PT+Mono&display=swap" rel="stylesheet">
+<title>The Redline Drawing</title>
+
+<style>
+  /* Deliberate single-theme "redlined engineering drawing" design — a warm
+     vellum tracing-paper surface with graphite linework and red-pencil
+     "redline" annotations, the way a design gets marked up for revision.
+     The physical-paper metaphor only works as a light surface; a dark-mode
+     variant would break it. */
+  :root{
+    --paper:#EFE7D3;
+    --paper-raised:#F7F1E2;
+    --ink:#2B2E33;
+    --ink-soft:#5C6169;
+    --ink-faint:#8B9097;
+    --line:rgba(43,46,51,0.16);
+    --line-strong:rgba(43,46,51,0.32);
+    --shadow: 0 1px 2px rgba(43,46,51,0.08), 0 14px 30px -18px rgba(43,46,51,0.35);
+
+    --redline:#B23A2E;
+    --redline-soft:#F6DEDA;
+    --blueline:#2F5D8A;
+    --blueline-soft:#DCE6EE;
+    --good:#3F7D4E;
+    --good-soft:#DFEBE1;
+    --warn:#B9791F;
+    --warn-soft:#F3E4CB;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto;} *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;} }
+
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:"Schibsted Grotesk", ui-sans-serif, system-ui, sans-serif;
+    font-size:16px; line-height:1.62; -webkit-font-smoothing:antialiased;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(43,46,51,0.035) 0px, rgba(43,46,51,0.035) 1px, transparent 1px, transparent 28px),
+      repeating-linear-gradient(90deg, rgba(43,46,51,0.035) 0px, rgba(43,46,51,0.035) 1px, transparent 1px, transparent 28px);
+  }
+  h1,h2,h3,h4{
+    font-family:"Fjalla One", "Arial Narrow", sans-serif;
+    font-weight:400; letter-spacing:0.01em;
+    text-wrap:balance; margin:0; line-height:1.05;
+  }
+  .mono{ font-family:"PT Mono", ui-monospace, monospace; }
+  p{ margin:0 0 1em; max-width:66ch; }
+  p:last-child{ margin-bottom:0; }
+  a{ color:inherit; }
+  ::selection{ background:var(--redline); color:var(--paper-raised); }
+  button{ font-family:inherit; }
+  a:focus-visible, button:focus-visible, input:focus-visible{ outline:2px solid var(--redline); outline-offset:3px; }
+
+  .eyebrow{
+    font-family:"PT Mono", monospace; font-size:0.7rem;
+    letter-spacing:0.1em; text-transform:uppercase; font-weight:500;
+    display:inline-flex; align-items:center; gap:0.55em; color:var(--ink-faint);
+  }
+  .wrap{ max-width:1100px; margin:0 auto; padding:0 clamp(1.25rem,4vw,3rem); }
+  .section-pad{ padding:clamp(3.2rem,7.5vw,5.6rem) 0; }
+  img,svg{ max-width:100%; }
+  .sec-title{ font-size:clamp(1.9rem,4.2vw,2.9rem); }
+  .sec-dek{ color:var(--ink-soft); max-width:64ch; margin-top:1rem; font-size:1.05rem; font-family:"Schibsted Grotesk",sans-serif; }
+  .kicker-row{ margin-bottom:1rem; }
+  section + section{ border-top:1px solid var(--line); }
+
+  /* ============ HERO ============ */
+  #hero{ padding:clamp(3.4rem,8vw,5.6rem) 0 clamp(2.2rem,5vw,3.4rem); }
+  h1.hero-title{ font-size:clamp(2.2rem,5.6vw,4rem); max-width:22ch; }
+  h1.hero-title .hl{ color:var(--redline); }
+  .hero-sub{ font-size:clamp(1.02rem,1.6vw,1.18rem); color:var(--ink-soft); max-width:60ch; margin-top:1.3rem; }
+  .hero-meta{ margin-top:2.2rem; display:flex; flex-wrap:wrap; gap:2.2rem; }
+  .hero-meta .k{ font-family:"PT Mono",monospace; font-size:0.68rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-faint); }
+  .hero-meta .v{ font-size:1.02rem; margin-top:0.25rem; font-weight:600; }
+
+  .drawing{ background:var(--paper-raised); border:1px solid var(--line-strong); border-radius:4px; padding:1.3rem; margin-top:2.4rem; box-shadow:var(--shadow); }
+  .drawing svg{ display:block; width:100%; height:auto; }
+  .drawing-cap{ font-family:"PT Mono",monospace; font-size:0.72rem; color:var(--ink-soft); text-align:center; margin-top:0.7rem; letter-spacing:0.03em; }
+
+  /* ============ CONCEPT ============ */
+  .principle-box{ background:var(--paper-raised); border:1px solid var(--line-strong); border-left:5px solid var(--redline); border-radius:2px; padding:1.5rem 1.7rem; margin-top:2.2rem; }
+  .principle-box .pb-label{ font-family:"PT Mono",monospace; font-size:0.66rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--redline); font-weight:700; }
+  .principle-box blockquote{ margin:0.7rem 0 0; font-size:1.1rem; font-style:italic; color:var(--ink); }
+  .principle-box cite{ display:block; margin-top:0.7rem; font-size:0.82rem; color:var(--ink-faint); font-style:normal; }
+
+  .criteria-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-top:2.2rem; }
+  @media (max-width:900px){ .criteria-grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:560px){ .criteria-grid{grid-template-columns:1fr;} }
+  .crit-card{ background:var(--paper-raised); border:1px solid var(--line-strong); border-radius:4px; padding:1.1rem 1.1rem; }
+  .crit-card .cn{ font-family:"PT Mono",monospace; font-size:0.62rem; color:var(--ink-faint); text-transform:uppercase; letter-spacing:0.06em; }
+  .crit-card h5{ font-family:"Fjalla One",sans-serif; font-size:1.15rem; margin-top:0.3rem; font-weight:400; }
+  .crit-card p{ font-size:0.85rem; color:var(--ink-soft); margin-top:0.5rem; }
+
+  /* ============ CALCULATOR (shared style) ============ */
+  .calc-card{ background:var(--paper-raised); border:1px solid var(--line-strong); border-radius:6px; padding:1.9rem clamp(1.3rem,3vw,2.3rem); box-shadow:var(--shadow); margin-top:2.4rem; }
+  .calc-head{ display:flex; align-items:baseline; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+  .calc-head h3{ font-size:1.6rem; }
+  .calc-num{ font-family:"PT Mono",monospace; font-size:0.7rem; color:var(--ink-faint); letter-spacing:0.06em; text-transform:uppercase; }
+  .calc-formula{ font-family:"PT Mono",monospace; font-size:0.85rem; background:var(--paper); border:1px solid var(--line); padding:0.6rem 0.9rem; border-radius:3px; margin-top:0.7rem; display:inline-block; }
+  .calc-body{ display:grid; grid-template-columns:1.15fr 0.85fr; gap:2rem; margin-top:1.4rem; align-items:start; }
+  @media (max-width:820px){ .calc-body{grid-template-columns:1fr;} }
+  .field{ margin-bottom:1.1rem; }
+  .field:last-child{ margin-bottom:0; }
+  .field label{ display:flex; justify-content:space-between; font-size:0.83rem; color:var(--ink-soft); margin-bottom:0.5rem; font-family:"PT Mono",monospace; }
+  .field label .fval{ color:var(--redline); font-weight:700; }
+  input[type=range]{ width:100%; accent-color:var(--redline); height:4px; cursor:pointer; }
+  .field-group{ background:var(--paper); border:1px solid var(--line); border-radius:4px; padding:0.9rem 1rem; margin-bottom:0.9rem; }
+  .field-group .fg-title{ font-family:"PT Mono",monospace; font-size:0.66rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--blueline); margin-bottom:0.7rem; display:flex; justify-content:space-between; }
+  .field-group .fg-title .fg-result{ color:var(--ink); font-weight:700; }
+
+  .result-panel{ background:var(--paper); border:1px solid var(--line); border-radius:4px; padding:1.2rem 1.3rem; display:flex; flex-direction:column; gap:0.7rem; }
+  .result-row{ display:flex; justify-content:space-between; align-items:baseline; gap:1rem; }
+  .result-row .rl{ font-size:0.8rem; color:var(--ink-soft); }
+  .result-row .rr{ font-family:"PT Mono",monospace; font-weight:600; font-size:1.05rem; font-variant-numeric:tabular-nums; text-align:right; }
+  .result-row.big .rr{ font-size:1.6rem; color:var(--redline); }
+  .result-row.governing{ background:var(--redline-soft); margin:0 -0.4rem; padding:0.5rem 0.4rem; border-radius:3px; }
+  .result-flag{ margin-top:0.1rem; padding:0.6rem 0.75rem; border-radius:4px; font-size:0.8rem; font-family:"PT Mono",monospace; }
+  .result-flag.ok{ background:var(--good-soft); color:var(--good); }
+  .result-flag.warn{ background:var(--warn-soft); color:var(--warn); }
+  .calc-note{ font-size:0.8rem; color:var(--ink-faint); margin-top:1rem; border-top:1px dashed var(--line); padding-top:0.9rem; }
+
+  .bar-wrap{ background:var(--paper); border:1px solid var(--line); border-radius:4px; padding:1rem; }
+  .bar-wrap svg{ display:block; width:100%; height:auto; }
+
+  /* ============ STAT CARDS ============ */
+  .stat-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1.2rem; margin-top:2.2rem; }
+  @media (max-width:760px){ .stat-grid{grid-template-columns:1fr;} }
+  .stat-card{ background:var(--paper-raised); border:1px solid var(--line-strong); border-radius:4px; padding:1.4rem 1.5rem; }
+  .stat-card .sv{ font-family:"Fjalla One",sans-serif; font-size:2.2rem; color:var(--blueline); }
+  .stat-card .sl{ font-size:0.85rem; color:var(--ink-soft); margin-top:0.4rem; }
+  .stat-card .ss{ font-family:"PT Mono",monospace; font-size:0.66rem; color:var(--ink-faint); margin-top:0.6rem; display:block; }
+
+  /* ============ CASE FILES ============ */
+  .case-list{ margin-top:2.2rem; display:flex; flex-direction:column; gap:1rem; }
+  .case{ background:var(--paper-raised); border:1px solid var(--line-strong); border-radius:4px; overflow:hidden; }
+  .case-head{ width:100%; display:flex; align-items:center; gap:1.1rem; padding:1.2rem 1.4rem; background:none; border:none; cursor:pointer; text-align:left; color:var(--ink); }
+  .case-head .ch-toll{ font-family:"Fjalla One",sans-serif; font-size:1.8rem; color:var(--blueline); min-width:5ch; line-height:1; }
+  .case-head .ch-body{ flex:1; }
+  .case-head .ch-name{ font-family:"Fjalla One",sans-serif; font-size:1.2rem; font-weight:400; }
+  .case-head .ch-meta{ font-family:"PT Mono",monospace; font-size:0.68rem; color:var(--ink-faint); margin-top:0.2rem; letter-spacing:0.03em; }
+  .case-head .ch-chevron{ font-size:1.3rem; color:var(--ink-faint); transition:transform 0.2s; flex-shrink:0; }
+  .case.open .ch-chevron{ transform:rotate(180deg); }
+  .case-panel{ max-height:0; overflow:hidden; transition:max-height 0.28s ease; }
+  .case.open .case-panel{ max-height:700px; }
+  .case-panel-inner{ padding:0 1.4rem 1.5rem; border-top:1px solid var(--line); }
+  .case-panel-inner p{ font-size:0.94rem; color:var(--ink-soft); margin-top:1rem; }
+  .case-panel-inner .cp-lesson{ margin-top:1rem; padding:0.85rem 1rem; background:var(--blueline-soft); color:var(--blueline); border-radius:4px; font-size:0.86rem; }
+
+  /* ============ QUIZ ============ */
+  .quiz-shell{ background:var(--paper-raised); border:1px solid var(--line-strong); border-radius:6px; margin-top:2.4rem; overflow:hidden; box-shadow:var(--shadow); }
+  .quiz-progress{ height:4px; background:var(--line); }
+  .quiz-progress-fill{ height:100%; width:0%; background:var(--redline); transition:width 0.3s; }
+  .quiz-body{ padding:clamp(1.4rem,3.5vw,2.4rem); }
+  .quiz-q-num{ font-family:"PT Mono",monospace; font-size:0.7rem; color:var(--redline); letter-spacing:0.08em; text-transform:uppercase; }
+  .quiz-scenario{ color:var(--ink-soft); font-size:0.92rem; margin-top:0.7rem; font-style:italic; }
+  .quiz-question{ font-family:"Fjalla One",sans-serif; font-weight:400; font-size:clamp(1.25rem,2.4vw,1.55rem); margin-top:0.6rem; line-height:1.2; }
+  .quiz-options{ display:flex; flex-direction:column; gap:0.7rem; margin-top:1.4rem; }
+  .quiz-opt{ text-align:left; background:var(--paper); border:1px solid var(--line-strong); color:var(--ink); padding:0.85rem 1rem; border-radius:4px; cursor:pointer; font-size:0.95rem; display:flex; gap:0.7rem; transition:background 0.15s, border-color 0.15s; }
+  .quiz-opt:hover:not(:disabled){ border-color:var(--redline); }
+  .quiz-opt .qletter{ font-family:"PT Mono",monospace; color:var(--redline); flex-shrink:0; }
+  .quiz-opt.correct{ background:var(--good-soft); border-color:var(--good); }
+  .quiz-opt.incorrect{ background:var(--redline-soft); border-color:var(--redline); }
+  .quiz-opt:disabled{ cursor:default; }
+  .quiz-feedback{ margin-top:1.2rem; padding:1rem 1.1rem; border-radius:4px; background:var(--paper); border-left:3px solid var(--blueline); font-size:0.9rem; color:var(--ink-soft); display:none; }
+  .quiz-feedback.show{ display:block; }
+  .quiz-nav{ display:flex; justify-content:flex-end; margin-top:1.4rem; }
+  .btn{ font-family:"PT Mono",monospace; font-size:0.8rem; letter-spacing:0.04em; text-transform:uppercase; background:var(--redline); color:var(--paper-raised); border:none; padding:0.7rem 1.3rem; border-radius:3px; cursor:pointer; font-weight:700; }
+  .btn:disabled{ opacity:0.35; cursor:default; }
+  .btn.ghost{ background:transparent; border:1px solid var(--line-strong); color:var(--ink); }
+  .quiz-result{ text-align:center; }
+  .quiz-result .score-big{ font-family:"Fjalla One",sans-serif; font-size:3.4rem; color:var(--redline); }
+  .quiz-result p{ margin:0.8rem auto 0; max-width:52ch; color:var(--ink-soft); }
+
+  /* ============ DISCUSSION ============ */
+  .disc-grid{ display:flex; flex-direction:column; gap:1px; background:var(--line-strong); border:1px solid var(--line-strong); border-radius:4px; overflow:hidden; margin-top:2.2rem; }
+  .disc-item{ background:var(--paper-raised); padding:1.4rem 1.6rem; display:grid; grid-template-columns:2.4rem 1fr; gap:1rem; }
+  .disc-item .dn{ font-family:"Fjalla One",sans-serif; font-size:1.9rem; color:var(--line-strong); }
+  .disc-item p{ margin:0; font-size:1rem; }
+  .disc-item .dtag{ font-family:"PT Mono",monospace; font-size:0.64rem; color:var(--redline); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.35rem; display:block; }
+
+  .lookahead{ background:var(--blueline-soft); border:1px solid var(--blueline); border-radius:4px; padding:1.4rem 1.6rem; margin-top:2.2rem; display:flex; gap:1.2rem; align-items:baseline; flex-wrap:wrap; }
+  .lookahead .lw{ font-family:"PT Mono",monospace; color:var(--blueline); font-size:0.78rem; text-transform:uppercase; letter-spacing:0.05em; }
+
+  footer{ padding:3rem 0 4rem; color:var(--ink-faint); font-size:0.85rem; border-top:1px solid var(--line); }
+
+  #instr-toggle{ position:fixed; left:1.2rem; bottom:1.2rem; z-index:180; background:var(--redline); color:var(--paper-raised); font-family:"PT Mono",monospace; font-size:0.72rem; letter-spacing:0.05em; text-transform:uppercase; border:none; padding:0.65rem 1rem; border-radius:30px; cursor:pointer; box-shadow:var(--shadow); display:flex; align-items:center; gap:0.5rem; font-weight:700; }
+  #instr-panel{ position:fixed; inset:0; z-index:300; display:none; background:rgba(43,46,51,0.5); backdrop-filter:blur(2px); align-items:center; justify-content:center; padding:1.5rem; }
+  #instr-panel.open{ display:flex; }
+  .instr-card{ background:var(--paper-raised); color:var(--ink); border-radius:8px; max-width:740px; width:100%; max-height:85vh; overflow-y:auto; padding:clamp(1.5rem,4vw,2.5rem); box-shadow:var(--shadow); border:1px solid var(--line-strong); }
+  .instr-card h3{ font-size:1.6rem; }
+  .instr-close{ float:right; background:none; border:1px solid var(--line-strong); border-radius:50%; width:2rem; height:2rem; cursor:pointer; color:var(--ink); font-size:1rem; }
+  .run-table{ width:100%; border-collapse:collapse; margin-top:1.4rem; font-size:0.9rem; }
+  .run-table th{ text-align:left; font-family:"PT Mono",monospace; font-size:0.64rem; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-faint); border-bottom:1px solid var(--line-strong); padding:0.5rem 0.6rem 0.5rem 0; }
+  .run-table td{ padding:0.65rem 0.6rem 0.65rem 0; border-bottom:1px solid var(--line); vertical-align:top; }
+  .run-table td.tt{ font-family:"PT Mono",monospace; color:var(--redline); white-space:nowrap; }
+</style>
+
+<nav id="topbar-wrap" style="position:fixed; top:0; left:0; right:0; height:3px; z-index:200; background:var(--line);">
+  <div id="topbar-fill" style="height:100%; width:0%; background:var(--redline); transition:width 0.08s linear;"></div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<section id="hero">
+  <div class="wrap">
+    <div class="eyebrow">Mine Ventilation · Week 9</div>
+    <h1 class="hero-title">Every calculator this semester was really one question, asked <span class="hl">six different ways.</span></h1>
+    <p class="hero-sub">How much air does this actually need? Diesel exhaust, methane, dust, heat, minimum velocity — each has its own formula, and you've now used all of them. Planning a mine's ventilation system means running every one of those numbers and building around whichever comes back largest. Not the sum. The largest.</p>
+
+    <div class="hero-meta">
+      <div><div class="k">Session</div><div class="v">90 minutes</div></div>
+      <div><div class="k">Format</div><div class="v">Two calculators, one redlined drawing</div></div>
+      <div><div class="k">You'll leave with</div><div class="v">Why "add them all up" is the wrong way to size a mine</div></div>
+    </div>
+
+    <div class="drawing">
+      <svg viewBox="0 0 620 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Engineering drawing of a mine cross-section with red pencil redline annotations showing four separate airflow requirements — diesel, gas, minimum velocity, and heat — pointing to a single circled governing value.">
+        <!-- shaft/heading outline (blueprint blue, "original drawing") -->
+        <rect x="40" y="40" width="30" height="180" fill="none" stroke="#2F5D8A" stroke-width="1.5"/>
+        <rect x="70" y="120" width="420" height="40" fill="none" stroke="#2F5D8A" stroke-width="1.5"/>
+        <rect x="490" y="40" width="30" height="180" fill="none" stroke="#2F5D8A" stroke-width="1.5"/>
+        <text x="55" y="230" font-family="PT Mono, monospace" font-size="9" fill="#2F5D8A" text-anchor="middle">INTAKE</text>
+        <text x="505" y="230" font-family="PT Mono, monospace" font-size="9" fill="#2F5D8A" text-anchor="middle">RETURN</text>
+
+        <!-- redline callouts, hand-marked-up style -->
+        <line x1="130" y1="118" x2="130" y2="60" stroke="#B23A2E" stroke-width="1.2" stroke-dasharray="2,2"/>
+        <text x="132" y="55" font-family="PT Mono, monospace" font-size="10" fill="#B23A2E">DIESEL: 48.0 m³/s</text>
+
+        <line x1="230" y1="118" x2="230" y2="35" stroke="#B23A2E" stroke-width="1.2" stroke-dasharray="2,2"/>
+        <text x="232" y="30" font-family="PT Mono, monospace" font-size="10" fill="#B23A2E">GAS: 5.0 m³/s</text>
+
+        <line x1="330" y1="162" x2="330" y2="200" stroke="#B23A2E" stroke-width="1.2" stroke-dasharray="2,2"/>
+        <text x="332" y="215" font-family="PT Mono, monospace" font-size="10" fill="#B23A2E">VELOCITY: 10.0 m³/s</text>
+
+        <line x1="420" y1="118" x2="420" y2="60" stroke="#B23A2E" stroke-width="1.2" stroke-dasharray="2,2"/>
+        <text x="415" y="55" font-family="PT Mono, monospace" font-size="10" fill="#B23A2E" text-anchor="end">HEAT: 41.5 m³/s</text>
+
+        <!-- circled governing value -->
+        <circle cx="130" cy="118" r="14" fill="none" stroke="#B23A2E" stroke-width="2"/>
+        <text x="130" y="250" font-family="PT Mono, monospace" font-size="11" fill="#B23A2E" text-anchor="middle" font-weight="bold">GOVERNS → DESIGN AIRFLOW</text>
+      </svg>
+      <div class="drawing-cap">FOUR CRITERIA, ONE MINE — THE LARGEST NUMBER WINS THE DESIGN, SEE CALCULATOR BELOW</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ THE GOVERNING CRITERION PRINCIPLE ============ -->
+<section id="principle" class="section-pad">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">01 · The one rule underneath everything</span></div>
+    <h2 class="sec-title">You don't add the requirements. You take the biggest one.</h2>
+    <p class="sec-dek">It's tempting to think a mine needs "diesel air plus gas air plus dust air plus heat air." It doesn't — because the same cubic metre of air dilutes diesel fumes, carries away methane, clears dust, and removes heat all at once. Provide enough for the hungriest single criterion, and the others come along for free.</p>
+
+    <div class="principle-box">
+      <div class="pb-label">Source text</div>
+      <blockquote>"The minimum dilution air flow rate is determined by the contaminant requiring the greatest dilution quantity, with due cognizance of the possible additive effects of mixtures and synergism..."</blockquote>
+      <cite>— International Labour Organization, Encyclopaedia of Occupational Health and Safety, "Ventilation and Cooling in Underground Mines"</cite>
+    </div>
+
+    <div class="criteria-grid">
+      <div class="crit-card">
+        <div class="cn">Criterion 1</div>
+        <h5>Diesel equipment</h5>
+        <p>Airflow to dilute diesel exhaust gases and particulate to safe concentrations, scaled to installed engine power.</p>
+      </div>
+      <div class="crit-card">
+        <div class="cn">Criterion 2</div>
+        <h5>Gas dilution</h5>
+        <p>Airflow to dilute methane or other gas make below a statutory limit — the same formula from Week 1.</p>
+      </div>
+      <div class="crit-card">
+        <div class="cn">Criterion 3</div>
+        <h5>Minimum velocity</h5>
+        <p>A floor on air speed through any heading, regardless of what's being diluted — simple area times velocity.</p>
+      </div>
+      <div class="crit-card">
+        <div class="cn">Criterion 4</div>
+        <h5>Heat removal</h5>
+        <p>Airflow to carry away heat load fast enough to hold a target temperature rise — the same physics as Week 8.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CALCULATOR 1: GOVERNING CRITERION (flagship) ============ -->
+<section id="governing" class="section-pad" style="background:var(--paper-raised);">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">02 · Instrument 1 — the flagship</span></div>
+    <h2 class="sec-title">Run all four. See which one actually governs.</h2>
+    <p class="sec-dek">Every input below reuses a formula from an earlier week. What's new is the decision rule at the end.</p>
+
+    <div class="calc-card">
+      <div class="calc-body">
+        <div>
+          <div class="field-group">
+            <div class="fg-title">Diesel equipment <span class="fg-result" id="g-q1-label">48.0 m³/s</span></div>
+            <div class="field">
+              <label>Installed diesel fleet power <span class="fval mono" id="g-kw-val">800 kW</span></label>
+              <input type="range" id="g-kw" min="0" max="2000" step="10" value="800">
+            </div>
+          </div>
+          <div class="field-group">
+            <div class="fg-title">Gas dilution <span class="fg-result" id="g-q2-label">5.0 m³/s</span></div>
+            <div class="field">
+              <label>Gas make <span class="fval mono" id="g-gas-val">0.050 m³/s</span></label>
+              <input type="range" id="g-gas" min="0" max="0.2" step="0.005" value="0.05">
+            </div>
+            <div class="field">
+              <label>Statutory limit <span class="fval mono" id="g-limit-val">1.0%</span></label>
+              <input type="range" id="g-limit" min="0.5" max="2" step="0.1" value="1.0">
+            </div>
+          </div>
+          <div class="field-group">
+            <div class="fg-title">Minimum velocity <span class="fg-result" id="g-q3-label">10.0 m³/s</span></div>
+            <div class="field">
+              <label>Heading cross-section <span class="fval mono" id="g-area-val">20 m²</span></label>
+              <input type="range" id="g-area" min="8" max="30" step="1" value="20">
+            </div>
+            <div class="field">
+              <label>Minimum velocity required <span class="fval mono" id="g-vel-val">0.50 m/s</span></label>
+              <input type="range" id="g-vel" min="0.25" max="1.0" step="0.05" value="0.5">
+            </div>
+          </div>
+          <div class="field-group">
+            <div class="fg-title">Heat removal <span class="fg-result" id="g-q4-label">41.5 m³/s</span></div>
+            <div class="field">
+              <label>Zone heat load <span class="fval mono" id="g-heat-val">250 kW</span></label>
+              <input type="range" id="g-heat" min="50" max="1500" step="10" value="250">
+            </div>
+            <div class="field">
+              <label>Allowable temperature rise <span class="fval mono" id="g-dt-val">5.0°C</span></label>
+              <input type="range" id="g-dt" min="2" max="8" step="0.5" value="5">
+            </div>
+          </div>
+        </div>
+        <div class="result-panel">
+          <div class="result-row"><span class="rl">Diesel</span><span class="rr" id="g-r1">48.0 m³/s</span></div>
+          <div class="result-row"><span class="rl">Gas dilution</span><span class="rr" id="g-r2">5.0 m³/s</span></div>
+          <div class="result-row"><span class="rl">Minimum velocity</span><span class="rr" id="g-r3">10.0 m³/s</span></div>
+          <div class="result-row"><span class="rl">Heat removal</span><span class="rr" id="g-r4">41.5 m³/s</span></div>
+          <div class="result-row big governing"><span class="rl">Governing criterion</span><span class="rr" id="g-name">Diesel</span></div>
+          <div class="result-row big"><span class="rl">Design airflow required</span><span class="rr" id="g-total">48.0 m³/s</span></div>
+          <div class="bar-wrap">
+            <svg id="g-svg" viewBox="0 0 400 130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Bar chart comparing the four airflow requirements, with the largest highlighted as governing"></svg>
+          </div>
+        </div>
+      </div>
+      <p class="calc-note">Design airflow = the maximum of the four criteria, not their sum — the same cubic metre of air does all four jobs at once. Watch how close diesel and heat run at the defaults: nudge the heat load up slightly and the governing criterion flips entirely, which is exactly the kind of sensitivity a real planning study has to check before committing to a fan and shaft size.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COST OF VENTILATION ============ -->
+<section id="cost" class="section-pad">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">03 · The number that never goes away</span></div>
+    <h2 class="sec-title">Ventilation is usually a mine's single biggest electricity bill.</h2>
+    <p class="sec-dek">Once the system is sized and built, it runs continuously for the life of the mine — and that adds up to a startling share of total operating cost.</p>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="sv">25%</div>
+        <div class="sl">of total energy cost on a deep, hot mine</div>
+        <span class="ss">SAIMM Journal, du Plessis et al. (2014)</span>
+      </div>
+      <div class="stat-card">
+        <div class="sv">~33%</div>
+        <div class="sl">of a typical underground mine's entire electricity cost</div>
+        <span class="ss">Hard Rock Miner's Handbook</span>
+      </div>
+      <div class="stat-card">
+        <div class="sv">up to 50%</div>
+        <div class="sl">of total electricity use, cited in some underground operations</div>
+        <span class="ss">Mining Technology journal (2020)</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CASE FILES ============ -->
+<section id="cases" class="section-pad" style="background:var(--paper-raised);">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">04 · Planning done well</span></div>
+    <h2 class="sec-title">Two mines that planned for what came next.</h2>
+
+    <div class="case-list" id="case-list">
+      <div class="case open" data-case="0">
+        <button class="case-head">
+          <div class="ch-toll">$2M/yr</div>
+          <div class="ch-body">
+            <div class="ch-name">Kidd Mine, Timmins, Ontario — ventilation on demand</div>
+            <div class="ch-meta">RUNNING THE FAN ONLY WHERE AND WHEN SOMEONE IS ACTUALLY THERE</div>
+          </div>
+          <div class="ch-chevron">⌄</div>
+        </button>
+        <div class="case-panel"><div class="case-panel-inner">
+          <p>One of the world's deepest base-metal mines (workings run to roughly 3,000 m) installed a ventilation-on-demand system: RFID cap-lamp tags and occupancy sensors feed a central controller that adjusts fan speed and louvre position in real time, based on where people and equipment actually are — instead of running every fan at full capacity, everywhere, all the time. The result, independently published by Ontario's electricity system operator: roughly $2 million per year in energy savings, paying back the investment in about two years. One targeted fan upgrade alone — replacing two 200-horsepower fans with twelve much smaller 3-horsepower units — cut electricity use on that system by 98%.</p>
+          <div class="cp-lesson">The lesson: a well-planned ventilation system isn't just sized correctly once — it's built so it can be run efficiently for the rest of the mine's life, not just powerful enough to survive its worst day.</div>
+        </div></div>
+      </div>
+
+      <div class="case" data-case="1">
+        <button class="case-head">
+          <div class="ch-toll">1,200 m³/s</div>
+          <div class="ch-body">
+            <div class="ch-name">Palabora Copper Mine, South Africa — planning the next 450 metres</div>
+            <div class="ch-meta">A NEW SHAFT, SUNK BEFORE THE OLD ONE RAN OUT</div>
+          </div>
+          <div class="ch-chevron">⌄</div>
+        </button>
+        <div class="case-panel"><div class="case-panel-inner">
+          <p>As Palabora's underground block cave ("Lift I") approached depletion, the mine didn't wait for it to run out before planning what came next. "Lift II" is being developed 450 metres deeper, targeting production out to roughly 2040 — and a dedicated new ventilation shaft was sunk to 1,200 m depth specifically to serve it, holed through in early 2024. A new quadrafurcated fan station with four 3-megawatt fans, each moving about 400 m³/s, adds 1,200 m³/s of fresh ventilating air for the deeper phase alone.</p>
+          <p>South Africa's South Deep mine shows the same staged logic even further along: as it deepened toward 3,000 m, it added a twin-shaft ventilation system delivering 1,200 m³/s of cooled air, backed by a surface ice plant and an underground refrigeration plant — the same refrigeration engineering from Week 8, planned in from the start of the deepening phase rather than bolted on afterward.</p>
+          <div class="cp-lesson">The lesson: ventilation capacity has to be planned in phases tied to the mine's own depth roadmap — sizing only for today's workings guarantees a much more expensive retrofit later.</div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CALCULATOR 2: VOD ECONOMICS ============ -->
+<section id="vod" class="section-pad">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">05 · Instrument 2</span></div>
+    <h2 class="sec-title">Sizing it right is only half the plan. Running it smart is the other half.</h2>
+    <p class="sec-dek">A ventilation-on-demand retrofit costs money up front and saves money every year after. The defaults below reproduce Kidd Mine's real, published numbers — then let you test other mines' economics.</p>
+
+    <div class="calc-card">
+      <div class="calc-body">
+        <div>
+          <div class="field">
+            <label>Current annual ventilation electricity cost <span class="fval mono" id="v-cost-val">$8.0M</span></label>
+            <input type="range" id="v-cost" min="1" max="15" step="0.5" value="8">
+          </div>
+          <div class="field">
+            <label>Assumed VOD savings <span class="fval mono" id="v-pct-val">25%</span></label>
+            <input type="range" id="v-pct" min="10" max="40" step="1" value="25">
+          </div>
+          <div class="field">
+            <label>VOD system capital cost <span class="fval mono" id="v-cap-val">$4.0M</span></label>
+            <input type="range" id="v-cap" min="0.5" max="8" step="0.5" value="4">
+          </div>
+        </div>
+        <div class="result-panel">
+          <div class="result-row big"><span class="rl">Annual savings</span><span class="rr" id="v-savings">$2.00M</span></div>
+          <div class="result-row big"><span class="rl">Payback period</span><span class="rr" id="v-payback">2.0 years</span></div>
+          <div class="result-flag ok" id="v-flag">Matches Kidd Mine's real, published ~2-year payback</div>
+        </div>
+      </div>
+      <p class="calc-note">Kidd Mine's real figures: roughly $2M/year in savings from occupancy-based ventilation-on-demand control, about a 2-year payback. Documented VOD savings elsewhere in the literature range from about 10% to 40% of ventilation electricity cost, depending on how much of the system is retrofitted and how variable the mine's actual occupancy is.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ QUIZ ============ -->
+<section id="quiz" class="section-pad" style="background:var(--paper-raised);">
+  <div class="wrap" style="max-width:760px;">
+    <div class="kicker-row"><span class="eyebrow">06 · Checkpoint</span></div>
+    <h2 class="sec-title">Six scenarios, the whole semester at once.</h2>
+    <p class="sec-dek">Pulling on today's calculators and case files — and everything before them.</p>
+
+    <div class="quiz-shell">
+      <div class="quiz-progress"><div class="quiz-progress-fill" id="quiz-progress-fill"></div></div>
+      <div class="quiz-body" id="quiz-body"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DISCUSSION ============ -->
+<section id="discuss" class="section-pad">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">07 · Debrief</span></div>
+    <h2 class="sec-title">For the last 15 minutes: talk it through.</h2>
+    <p class="sec-dek">In pairs or small groups.</p>
+
+    <div class="disc-grid">
+      <div class="disc-item">
+        <div class="dn">1</div>
+        <div><span class="dtag">Design logic</span><p>"Take the largest requirement, not the sum" only works because the same air serves every purpose at once. Can you think of a situation in mine ventilation where that assumption might not hold — where two criteria could actually compete for the same air rather than share it?</p></div>
+      </div>
+      <div class="disc-item">
+        <div class="dn">2</div>
+        <div><span class="dtag">Sensitivity</span><p>At today's calculator defaults, diesel and heat were separated by less than 15% of the governing value. If you were the engineer, would you design to today's governing criterion, or build in margin against whichever one is running second? What would decide that for you?</p></div>
+      </div>
+      <div class="disc-item">
+        <div class="dn">3</div>
+        <div><span class="dtag">Economics</span><p>Ventilation can be a quarter to half of a mine's entire electricity bill, yet it's often planned mainly around worst-case safety scenarios. How should a ventilation engineer balance "big enough for the worst day" against "efficient enough for every ordinary day"?</p></div>
+      </div>
+      <div class="disc-item">
+        <div class="dn">4</div>
+        <div><span class="dtag">Staged planning</span><p>Palabora sank a new shaft before Lift I ran out, rather than after. What organizational or financial pressures do you think make it hard for a mine to commit that kind of capital early, even when the engineering case is clear?</p></div>
+      </div>
+      <div class="disc-item">
+        <div class="dn">5</div>
+        <div><span class="dtag">Synthesis</span><p>Looking back across the whole semester — gases, psychrometrics, fans, networks, dust, heat — which single topic do you think most changes how you'd approach planning a brand-new mine's ventilation system from scratch, and why?</p></div>
+      </div>
+    </div>
+
+    <div class="lookahead">
+      <span class="lw">Still ahead</span>
+      <span>Weeks 14–15, Emergency Planning, Escape &amp; Mine Rescue, close the course by asking what a ventilation plan owes the people underground when everything above has already failed.</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    Mine Ventilation — Week 9 seminar material. Governing-criterion design principle per the ILO Encyclopaedia of Occupational Health and Safety, "Ventilation and Cooling in Underground Mines," and Stinnette &amp; De Souza, "Airflow Requirements for Modern Diesel and Electric Equipment." Diesel airflow rate (0.06 m³/s per kW) per Ontario Regulation 854, Rule 2. Ventilation electricity-cost share per du Plessis, Marx &amp; Nell, Journal of the SAIMM 114(12), 2014; de Vilhena Costa &amp; da Silva, Mining Technology 129(1), 2020; and the Hard Rock Miner's Handbook. Kidd Mine ventilation-on-demand case per the Independent Electricity System Operator of Ontario. Palabora and South Deep figures per Mining Weekly (2023) and Engineering &amp; Mining Journal. Always verify current regulatory airflow requirements and site-specific costs against your jurisdiction and operation.
+  </div>
+</footer>
+
+<button id="instr-toggle" aria-haspopup="dialog" aria-controls="instr-panel">◐ Instructor view</button>
+<div id="instr-panel" role="dialog" aria-modal="true" aria-labelledby="instr-title">
+  <div class="instr-card">
+    <button class="instr-close" id="instr-close" aria-label="Close instructor view">✕</button>
+    <span class="eyebrow" style="color:var(--redline);">For the instructor</span>
+    <h3 id="instr-title">Suggested 90-minute run of show</h3>
+    <table class="run-table">
+      <tr><th>Time</th><th>Segment</th></tr>
+      <tr><td class="tt">0:00–0:08</td><td>Open on the hero redline drawing. Ask cold: "if a heading needs 48 m³/s for diesel and 5 m³/s for gas, how much air do you actually provide?" — let "53" surface before revealing why that's wrong.</td></tr>
+      <tr><td class="tt">0:08–0:16</td><td>Governing-criterion principle box + four criteria cards. Have students name which formula each criterion reuses from earlier in the semester.</td></tr>
+      <tr><td class="tt">0:16–0:38</td><td>Governing-criterion calculator in pairs. Have every pair find a slider adjustment that flips which criterion governs — this is the core "aha" of the whole session.</td></tr>
+      <tr><td class="tt">0:38–0:46</td><td>Cost-of-ventilation stat cards. Let the 25–50% range land before moving on.</td></tr>
+      <tr><td class="tt">0:46–0:58</td><td>Case files — Kidd Mine and Palabora, one group each, report back.</td></tr>
+      <tr><td class="tt">0:58–1:10</td><td>VOD economics calculator. Have pairs find the capital cost above which a 10% savings assumption no longer pays back within 5 years.</td></tr>
+      <tr><td class="tt">1:10–1:20</td><td>Run the 6-question checkpoint as a live class poll.</td></tr>
+      <tr><td class="tt">1:20–1:27</td><td>Small-group discussion prompts — prompt 5 works well as a full-class share-out given it spans the whole semester.</td></tr>
+      <tr><td class="tt">1:27–1:30</td><td>Close on the "still ahead" note.</td></tr>
+    </table>
+    <p style="margin-top:1.4rem; color:var(--ink-soft); font-size:0.9rem;">Safe to project this page directly to students — this panel is only visible to whoever clicks the button.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var fill = document.getElementById('topbar-fill');
+  function onScroll(){
+    var h = document.documentElement;
+    var scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    fill.style.width = scrolled + '%';
+  }
+  document.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  var svgns = "http://www.w3.org/2000/svg";
+  function el(tag, attrs){ var e = document.createElementNS(svgns, tag); for(var k in attrs){ e.setAttribute(k, attrs[k]); } return e; }
+
+  /* ---------- case files accordion ---------- */
+  var cases = document.querySelectorAll('.case');
+  cases.forEach(function(c){
+    var head = c.querySelector('.case-head');
+    head.addEventListener('click', function(){
+      c.classList.toggle('open');
+    });
+  });
+
+  /* ---------- Calculator 1: governing criterion ---------- */
+  var gKw = document.getElementById('g-kw'), gGas = document.getElementById('g-gas'), gLimit = document.getElementById('g-limit'),
+      gArea = document.getElementById('g-area'), gVel = document.getElementById('g-vel'),
+      gHeat = document.getElementById('g-heat'), gDt = document.getElementById('g-dt');
+
+  var AIR_RHO = 1.2, AIR_CP = 1.005;
+
+  function calcGoverning(){
+    var kw = parseFloat(gKw.value);
+    var gas = parseFloat(gGas.value);
+    var limit = parseFloat(gLimit.value);
+    var area = parseFloat(gArea.value);
+    var vel = parseFloat(gVel.value);
+    var heat = parseFloat(gHeat.value);
+    var dt = parseFloat(gDt.value);
+
+    document.getElementById('g-kw-val').textContent = kw.toFixed(0) + ' kW';
+    document.getElementById('g-gas-val').textContent = gas.toFixed(3) + ' m³/s';
+    document.getElementById('g-limit-val').textContent = limit.toFixed(1) + '%';
+    document.getElementById('g-area-val').textContent = area.toFixed(0) + ' m²';
+    document.getElementById('g-vel-val').textContent = vel.toFixed(2) + ' m/s';
+    document.getElementById('g-heat-val').textContent = heat.toFixed(0) + ' kW';
+    document.getElementById('g-dt-val').textContent = dt.toFixed(1) + '°C';
+
+    var Q1 = kw * 0.06;
+    var Q2 = gas * (100/limit - 1);
+    var Q3 = area * vel;
+    var Q4 = heat / (AIR_RHO * AIR_CP * dt);
+
+    var results = [
+      {name:'Diesel', val:Q1, labelId:'g-q1-label', rowId:'g-r1'},
+      {name:'Gas dilution', val:Q2, labelId:'g-q2-label', rowId:'g-r2'},
+      {name:'Minimum velocity', val:Q3, labelId:'g-q3-label', rowId:'g-r3'},
+      {name:'Heat removal', val:Q4, labelId:'g-q4-label', rowId:'g-r4'}
+    ];
+
+    results.forEach(function(r){
+      var text = r.val.toFixed(1) + ' m³/s';
+      document.getElementById(r.labelId).textContent = text;
+      document.getElementById(r.rowId).textContent = text;
+    });
+
+    var governing = results.slice().sort(function(a,b){ return b.val - a.val; })[0];
+    document.getElementById('g-name').textContent = governing.name;
+    document.getElementById('g-total').textContent = governing.val.toFixed(1) + ' m³/s';
+
+    drawBars(results, governing.name);
+  }
+
+  function drawBars(results, governingName){
+    var svg = document.getElementById('g-svg');
+    while(svg.firstChild){ svg.removeChild(svg.firstChild); }
+    var maxVal = Math.max.apply(null, results.map(function(r){ return r.val; })) || 1;
+    var x0 = 130, x1 = 335;
+    var rowH = 26, top = 14;
+
+    results.forEach(function(r, i){
+      var y = top + i*rowH;
+      var isGov = r.name === governingName;
+      var color = isGov ? 'var(--redline)' : 'var(--blueline)';
+      var w = Math.max(2, (r.val/maxVal)*(x1-x0));
+
+      var lbl = el('text',{x:x0-8,y:y+4,'font-family':'PT Mono, monospace','font-size':10,fill:'var(--ink-soft)','text-anchor':'end'}); lbl.textContent=r.name; svg.appendChild(lbl);
+      svg.appendChild(el('rect',{x:x0,y:y-7,width:x1-x0,height:14,fill:'none',stroke:'var(--line)','stroke-width':1}));
+      svg.appendChild(el('rect',{x:x0,y:y-7,width:w,height:14,fill:color}));
+
+      var vt = el('text',{x:x0+w+8,y:y+4,'font-family':'PT Mono, monospace','font-size':10,fill:color,'text-anchor':'start'}); vt.textContent=r.val.toFixed(1); svg.appendChild(vt);
+    });
+  }
+
+  [gKw,gGas,gLimit,gArea,gVel,gHeat,gDt].forEach(function(el){ el.addEventListener('input', calcGoverning); });
+  calcGoverning();
+
+  /* ---------- Calculator 2: VOD economics ---------- */
+  var vCost = document.getElementById('v-cost'), vPct = document.getElementById('v-pct'), vCap = document.getElementById('v-cap');
+
+  function calcVOD(){
+    var cost = parseFloat(vCost.value);
+    var pct = parseFloat(vPct.value);
+    var cap = parseFloat(vCap.value);
+
+    document.getElementById('v-cost-val').textContent = '$' + cost.toFixed(1) + 'M';
+    document.getElementById('v-pct-val').textContent = pct.toFixed(0) + '%';
+    document.getElementById('v-cap-val').textContent = '$' + cap.toFixed(1) + 'M';
+
+    var savings = cost * pct/100;
+    var payback = savings > 0 ? cap/savings : Infinity;
+
+    document.getElementById('v-savings').textContent = '$' + savings.toFixed(2) + 'M';
+    document.getElementById('v-payback').textContent = isFinite(payback) ? payback.toFixed(1) + ' years' : 'never';
+
+    var flag = document.getElementById('v-flag');
+    if(payback <= 3){
+      flag.className = 'result-flag ok';
+      flag.textContent = payback.toFixed(1) === '2.0' ? 'Matches Kidd Mine\'s real, published ~2-year payback' : 'Strong case — payback within 3 years';
+    } else if(payback <= 6){
+      flag.className = 'result-flag warn';
+      flag.textContent = 'Marginal case — payback between 3 and 6 years';
+    } else {
+      flag.className = 'result-flag warn';
+      flag.textContent = 'Weak case at these assumptions — payback exceeds 6 years';
+    }
+  }
+
+  [vCost,vPct,vCap].forEach(function(el){ el.addEventListener('input', calcVOD); });
+  calcVOD();
+
+  /* ---------- QUIZ ---------- */
+  var QUESTIONS = [
+    {
+      scenario: "A development heading needs 48 m³/s to dilute diesel exhaust and 5 m³/s to dilute its methane make.",
+      q: "How much air should the ventilation plan actually provide for this heading?",
+      options: [
+        "53 m³/s — the two requirements added together.",
+        "48 m³/s — the larger of the two, since that same air also dilutes the methane well below its own requirement.",
+        "26.5 m³/s — the average of the two requirements.",
+        "5 m³/s — gas dilution always takes priority over diesel dilution."
+      ],
+      correct: 1,
+      feedback: "The governing-criterion principle: provide for whichever single requirement is largest, because the same air satisfies every criterion simultaneously. 48 m³/s of air dilutes the methane far below its 5 m³/s requirement for free."
+    },
+    {
+      scenario: "Using the governing-criterion calculator, you increase the zone heat load slightly while leaving every other slider unchanged.",
+      q: "What's the most likely outcome, based on today's default values?",
+      options: [
+        "Nothing changes — heat load doesn't affect the governing criterion.",
+        "The governing criterion could flip from diesel to heat removal, since the two started close together at the defaults.",
+        "The gas dilution requirement would increase instead.",
+        "The minimum velocity requirement would automatically increase to compensate."
+      ],
+      correct: 1,
+      feedback: "At the defaults, diesel (48.0 m³/s) and heat removal (41.5 m³/s) were separated by less than 7 m³/s — close enough that a modest increase in heat load pushes heat removal into the governing position."
+    },
+    {
+      scenario: "A mining company is deciding how large a ventilation system to build for a mine that will keep getting deeper over its 25-year life.",
+      q: "What does the Palabora and South Deep case files suggest about the right approach?",
+      options: [
+        "Build the maximum possible capacity on day one, regardless of near-term need.",
+        "Plan ventilation capacity in stages tied to the mine's depth roadmap, adding shafts and fan capacity as deeper phases are committed to.",
+        "Ventilation capacity doesn't need to change as a mine deepens.",
+        "Wait until the existing system fails before planning the next phase."
+      ],
+      correct: 1,
+      feedback: "Both mines added major new ventilation capacity (a new shaft, new fan stations) timed to a specific deeper mining phase — planned ahead of need, not built all at once or reactively after a shortfall."
+    },
+    {
+      scenario: "A mine spends roughly $8 million a year on ventilation electricity. A ventilation-on-demand system costing $4 million is expected to cut that by 25%.",
+      q: "What's the payback period, and how does it compare to Kidd Mine's real case?",
+      options: [
+        "8 years — far worse than Kidd Mine's real result.",
+        "2 years — matching Kidd Mine's actual published payback almost exactly.",
+        "0.5 years — much faster than any real VOD system has achieved.",
+        "Payback cannot be calculated from this information."
+      ],
+      correct: 1,
+      feedback: "Annual savings = $8M × 25% = $2M. Payback = $4M ÷ $2M = 2 years — matching Kidd Mine's real, independently published figures almost exactly."
+    },
+    {
+      scenario: "Ventilation commonly accounts for 25% to 50% of a mine's total electricity use, and that cost continues for the entire life of the mine.",
+      q: "What does this suggest about how ventilation should be planned, beyond simply meeting the governing criterion?",
+      options: [
+        "Cost doesn't matter once safety criteria are satisfied — bigger is always better.",
+        "The system should be sized to the governing criterion, but also designed so it can be run efficiently day-to-day, since it will keep costing money long after it's built correctly once.",
+        "Mines should minimize ventilation cost by ignoring the governing criterion when it's expensive to meet.",
+        "Electricity cost is irrelevant to ventilation engineering, which is purely a safety discipline."
+      ],
+      correct: 1,
+      feedback: "A ventilation system has to satisfy the governing criterion for safety, but given how much of a mine's ongoing electricity cost it represents, planning also has to consider how efficiently that capacity can be operated day to day — which is exactly what ventilation-on-demand addresses."
+    },
+    {
+      scenario: "You're reviewing a ventilation plan that sizes a heading's airflow using diesel equipment power, methane make, and minimum velocity — but leaves out heat.",
+      q: "Based on today's material, what's the risk in that omission?",
+      options: [
+        "None — heat is never a significant factor in mine ventilation design.",
+        "If heat removal would actually be the largest of the four requirements at that heading's depth or heat load, the plan could under-provide airflow without anyone noticing, since it was never calculated.",
+        "Heat only matters in surface facilities, not underground headings.",
+        "Omitting heat always makes a ventilation plan more conservative, never less."
+      ],
+      correct: 1,
+      feedback: "The governing-criterion method only works if every relevant criterion is actually calculated and compared. Leaving one out — especially heat, which becomes dominant at depth, as Week 8 showed — risks silently under-sizing the system."
+    }
+  ];
+
+  var qState = { i:0, score:0, answered:false };
+  var quizBody = document.getElementById('quiz-body');
+  var quizFill = document.getElementById('quiz-progress-fill');
+
+  function renderQuiz(){
+    if(qState.i >= QUESTIONS.length){ renderResult(); return; }
+    var item = QUESTIONS[qState.i];
+    qState.answered = false;
+    quizFill.style.width = (qState.i / QUESTIONS.length * 100) + '%';
+
+    var html = '';
+    html += '<div class="quiz-q-num">Question ' + (qState.i+1) + ' of ' + QUESTIONS.length + '</div>';
+    html += '<div class="quiz-scenario">' + item.scenario + '</div>';
+    html += '<div class="quiz-question">' + item.q + '</div>';
+    html += '<div class="quiz-options">';
+    item.options.forEach(function(opt, idx){
+      var letter = String.fromCharCode(65+idx);
+      html += '<button class="quiz-opt" data-idx="'+idx+'"><span class="qletter">'+letter+'</span><span>'+opt+'</span></button>';
+    });
+    html += '</div>';
+    html += '<div class="quiz-feedback" id="quiz-feedback"></div>';
+    html += '<div class="quiz-nav"><button class="btn" id="quiz-next" disabled>Next →</button></div>';
+    quizBody.innerHTML = html;
+
+    var opts = quizBody.querySelectorAll('.quiz-opt');
+    opts.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(qState.answered) return;
+        qState.answered = true;
+        var idx = parseInt(btn.getAttribute('data-idx'),10);
+        opts.forEach(function(o){ o.disabled = true; });
+        if(idx === item.correct){
+          btn.classList.add('correct');
+          qState.score++;
+        } else {
+          btn.classList.add('incorrect');
+          opts[item.correct].classList.add('correct');
+        }
+        var fb = document.getElementById('quiz-feedback');
+        fb.textContent = item.feedback;
+        fb.classList.add('show');
+        document.getElementById('quiz-next').disabled = false;
+      });
+    });
+    document.getElementById('quiz-next').addEventListener('click', function(){
+      qState.i++;
+      renderQuiz();
+    });
+  }
+
+  function renderResult(){
+    quizFill.style.width = '100%';
+    var msg;
+    if(qState.score === QUESTIONS.length) msg = "Perfect run. You could scope a real ventilation planning study and defend the governing criterion to a mine manager today.";
+    else if(qState.score >= QUESTIONS.length - 2) msg = "Solid. Go back and find the exact slider position where the governing criterion flips if you haven't — that's the core intuition this session is built around.";
+    else msg = "This is exactly why the tools come before the quiz. Scroll back up, run all four criteria in the governing calculator, then push the VOD calculator's capital cost slider.";
+
+    quizBody.innerHTML =
+      '<div class="quiz-result">' +
+        '<div class="quiz-q-num">Checkpoint complete</div>' +
+        '<div class="score-big">' + qState.score + ' / ' + QUESTIONS.length + '</div>' +
+        '<p>' + msg + '</p>' +
+        '<div class="quiz-nav" style="justify-content:center; margin-top:1.6rem;"><button class="btn ghost" id="quiz-retry">Retry checkpoint</button></div>' +
+      '</div>';
+    document.getElementById('quiz-retry').addEventListener('click', function(){
+      qState = {i:0, score:0, answered:false};
+      renderQuiz();
+    });
+  }
+  renderQuiz();
+
+  /* ---------- instructor panel ---------- */
+  var instrToggle = document.getElementById('instr-toggle');
+  var instrPanel = document.getElementById('instr-panel');
+  var instrClose = document.getElementById('instr-close');
+  instrToggle.addEventListener('click', function(){ instrPanel.classList.add('open'); });
+  instrClose.addEventListener('click', function(){ instrPanel.classList.remove('open'); });
+  instrPanel.addEventListener('click', function(e){ if(e.target === instrPanel) instrPanel.classList.remove('open'); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') instrPanel.classList.remove('open'); });
+
+})();
+</script>

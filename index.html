@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C.MIB318 — Mine Ventilation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700;800&family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F5F1E6;
+    --paper-raised:#FBF8F1;
+    --ink:#2A2420;
+    --ink-soft:#6E6355;
+    --rule:#DDD3BE;
+    --green:#1F5C46;
+    --green-ink:#F2F7F4;
+    --terracotta:#B5502D;
+    --terracotta-ink:#FBF0EA;
+    --shadow: 2px 3px 0 rgba(42,36,32,0.06);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#1C1A16;
+      --paper-raised:#252220;
+      --ink:#ECE5D6;
+      --ink-soft:#A89C87;
+      --rule:#3B362C;
+      --green:#5FB58C;
+      --green-ink:#12241C;
+      --terracotta:#E08B5E;
+      --terracotta-ink:#2B1D14;
+      --shadow: 2px 3px 0 rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#1C1A16;
+    --paper-raised:#252220;
+    --ink:#ECE5D6;
+    --ink-soft:#A89C87;
+    --rule:#3B362C;
+    --green:#5FB58C;
+    --green-ink:#12241C;
+    --terracotta:#E08B5E;
+    --terracotta-ink:#2B1D14;
+    --shadow: 2px 3px 0 rgba(0,0,0,0.35);
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter', system-ui, sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Zilla Slab', Georgia, serif;
+    font-weight:700;
+    margin:0;
+    text-wrap:balance;
+  }
+  a{color:inherit;}
+  .mono{font-family:'Space Mono', 'Courier New', monospace;}
+  .wrap{max-width:1140px;margin:0 auto;padding:0 2rem;}
+
+  /* ---------- topbar ---------- */
+  .topbar{
+    border-bottom:1px solid var(--rule);
+    background:var(--paper);
+    position:sticky;top:0;z-index:20;
+  }
+  .topbar-inner{
+    max-width:1140px;margin:0 auto;padding:0 2rem;
+    height:52px;display:flex;align-items:center;justify-content:space-between;
+    font-family:'Space Mono',monospace;font-size:0.72rem;letter-spacing:0.06em;
+    text-transform:uppercase;color:var(--ink-soft);
+  }
+  .topbar-inner strong{color:var(--green);}
+
+  /* ---------- hero / masthead ---------- */
+  .masthead{padding:3.2rem 0 2.4rem;border-bottom:1px solid var(--rule);}
+  .stamp{
+    display:inline-flex;align-items:center;gap:0.5rem;
+    font-family:'Space Mono',monospace;font-size:0.78rem;letter-spacing:0.08em;
+    text-transform:uppercase;color:var(--green);
+    border:1.5px solid var(--green);border-radius:3px;
+    padding:0.28rem 0.7rem;margin-bottom:1.3rem;
+  }
+  .masthead h1{font-size:clamp(2.4rem,5vw,3.6rem);line-height:1.05;letter-spacing:-0.01em;}
+  .masthead .dept{color:var(--terracotta);}
+  .masthead-lede{
+    max-width:640px;margin-top:1.1rem;font-size:1.08rem;color:var(--ink-soft);
+  }
+  .meta-row{
+    display:flex;flex-wrap:wrap;gap:2.4rem;margin-top:2rem;
+  }
+  .meta-item{min-width:140px;}
+  .meta-item .k{
+    font-family:'Space Mono',monospace;font-size:0.68rem;letter-spacing:0.08em;
+    text-transform:uppercase;color:var(--ink-soft);margin-bottom:0.3rem;
+  }
+  .meta-item .v{font-size:1.02rem;font-weight:600;}
+
+  /* ---------- ledger strip (semester map) ---------- */
+  .ledger{
+    padding:1.4rem 0;border-bottom:1px solid var(--rule);
+    overflow-x:auto;
+  }
+  .ledger-track{
+    display:flex;align-items:center;gap:0;min-width:max-content;
+  }
+  .ledger-node{
+    display:flex;flex-direction:column;align-items:center;gap:0.4rem;
+    padding:0 0.9rem;position:relative;text-decoration:none;color:var(--ink);
+    flex-shrink:0;
+  }
+  .ledger-node .dot{
+    width:11px;height:11px;border-radius:50%;
+    background:var(--paper-raised);border:2px solid var(--green);
+  }
+  .ledger-node.special .dot{
+    border-radius:2px;transform:rotate(45deg);border-color:var(--terracotta);
+  }
+  .ledger-node .lbl{
+    font-family:'Space Mono',monospace;font-size:0.68rem;color:var(--ink-soft);
+    white-space:nowrap;
+  }
+  .ledger-line{height:2px;background:var(--rule);flex:1 0 28px;min-width:28px;}
+
+  /* ---------- section headers ---------- */
+  .section-pad{padding:3rem 0;}
+  .section-head{
+    display:flex;align-items:baseline;justify-content:space-between;gap:1rem;
+    flex-wrap:wrap;margin-bottom:1.6rem;
+  }
+  .section-head h2{font-size:1.7rem;}
+  .section-count{
+    font-family:'Space Mono',monospace;font-size:0.78rem;color:var(--ink-soft);
+  }
+
+  /* ---------- search ---------- */
+  .search-wrap{margin-bottom:1.8rem;}
+  .search-box{
+    display:flex;align-items:center;gap:0.6rem;
+    border:1.5px solid var(--rule);border-radius:4px;
+    padding:0.65rem 0.9rem;background:var(--paper-raised);
+    max-width:420px;
+  }
+  .search-box svg{flex-shrink:0;opacity:0.55;}
+  .search-box input{
+    border:none;background:transparent;outline:none;color:var(--ink);
+    font-family:'Inter',sans-serif;font-size:0.95rem;width:100%;
+  }
+  .search-box input::placeholder{color:var(--ink-soft);}
+  .no-results{
+    display:none;padding:2rem 0;color:var(--ink-soft);font-style:italic;
+  }
+
+  /* ---------- card grid ---------- */
+  .card-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:1.3rem;
+  }
+  @media(max-width:920px){.card-grid{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:640px){.card-grid{grid-template-columns:1fr;}}
+
+  .card{
+    background:var(--paper-raised);
+    border:1px solid var(--rule);
+    border-radius:4px;
+    box-shadow:var(--shadow);
+    display:flex;flex-direction:column;
+    scroll-margin-top:70px;
+    transition:transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .card:hover{transform:translate(-1px,-2px);box-shadow:4px 5px 0 rgba(42,36,32,0.09);}
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) .card:hover{box-shadow:4px 5px 0 rgba(0,0,0,0.45);}
+  }
+  :root[data-theme="dark"] .card:hover{box-shadow:4px 5px 0 rgba(0,0,0,0.45);}
+
+  .card-tab{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0.55rem 0.9rem;
+    border-bottom:1px dashed var(--rule);
+    font-family:'Space Mono',monospace;font-size:0.72rem;letter-spacing:0.03em;
+    color:var(--ink-soft);
+  }
+  .card-tab .call-no{color:var(--green);}
+  .card.special .card-tab .call-no{color:var(--terracotta);}
+  .card-body{padding:1.1rem 1.1rem 1.3rem;display:flex;flex-direction:column;gap:0.55rem;flex:1;}
+  .card-body h3{font-size:1.28rem;line-height:1.18;}
+  .card-topic{
+    font-size:0.82rem;font-weight:600;color:var(--green);
+    text-transform:uppercase;letter-spacing:0.02em;
+  }
+  .card.special .card-topic{color:var(--terracotta);}
+  .card-blurb{font-size:0.92rem;color:var(--ink-soft);flex:1;}
+  .card-foot{
+    margin-top:0.4rem;padding-top:0.7rem;border-top:1px solid var(--rule);
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .card-open{
+    display:inline-flex;align-items:center;gap:0.4rem;
+    font-family:'Space Mono',monospace;font-size:0.78rem;font-weight:700;
+    color:var(--green);text-decoration:none;
+  }
+  .card.special .card-open{color:var(--terracotta);}
+  .card-open svg{transition:transform 0.15s ease;}
+  .card-open:hover svg{transform:translate(2px,-2px);}
+  .week-badge{
+    font-family:'Space Mono',monospace;font-size:0.75rem;font-weight:700;
+    background:var(--green-ink);color:var(--green);
+    border-radius:3px;padding:0.15rem 0.45rem;
+  }
+  .card.special .week-badge{background:var(--terracotta-ink);color:var(--terracotta);}
+
+  /* ---------- footer ---------- */
+  footer{
+    border-top:1px solid var(--rule);padding:2.4rem 0 3rem;
+    font-size:0.85rem;color:var(--ink-soft);
+  }
+  footer .foot-row{display:flex;flex-wrap:wrap;gap:0.5rem 1.2rem;justify-content:space-between;align-items:baseline;}
+  footer strong{color:var(--ink);}
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-inner">
+      <span><strong>C.MIB318</strong> · Mine Ventilation</span>
+      <span>Course Index</span>
+    </div>
+  </div>
+
+  <header class="masthead">
+    <div class="wrap">
+      <span class="stamp">🗂️ Course Index — Live</span>
+      <h1>Mine Ventilation<br><span class="dept">C.MIB318, Third-Year Core</span></h1>
+      <p class="masthead-lede">Every seminar built this term for this course, in one place. Each session below is a self-contained interactive page — read it, run its calculators, and bring the discussion prompts to class.</p>
+      <div class="meta-row">
+        <div class="meta-item">
+          <div class="k">Instructor</div>
+          <div class="v">Dagva</div>
+        </div>
+        <div class="meta-item">
+          <div class="k">Format</div>
+          <div class="v">Interactive seminar pages</div>
+        </div>
+        <div class="meta-item">
+          <div class="k">Weekly seminars</div>
+          <div class="v">11 sessions</div>
+        </div>
+        <div class="meta-item">
+          <div class="k">Special sessions</div>
+          <div class="v">1 session</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="ledger" aria-label="Semester map">
+    <div class="wrap">
+      <div class="ledger-track" id="ledger-track"></div>
+    </div>
+  </nav>
+
+  <main>
+    <section class="section-pad" id="weekly">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Weekly seminars</h2>
+          <span class="section-count">11 sessions · Weeks 1–11</span>
+        </div>
+
+        <div class="search-wrap">
+          <div class="search-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input id="search" type="text" placeholder="Search sessions — try “heat”, “gas”, “fan”, “rescue”…" autocomplete="off">
+          </div>
+        </div>
+
+        <div class="card-grid" id="weekly-grid"></div>
+        <p class="no-results" id="weekly-empty">No sessions match that search.</p>
+      </div>
+    </section>
+
+    <section class="section-pad" id="special">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Special sessions</h2>
+          <span class="section-count">Standalone — not numbered in the weekly sequence</span>
+        </div>
+        <div class="card-grid" id="special-grid"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div class="foot-row">
+        <span><strong>C.MIB318 — Mine Ventilation.</strong> This index links out to each session's own hosted page — new sessions are added here as they're built.</span>
+        <span>Updated as the semester progresses.</span>
+      </div>
+    </div>
+  </footer>
+
+<script>
+(function(){
+  "use strict";
+
+  var WEEKLY = [
+    {
+      n: "01", icon: "⛏️", title: "Air You Can't See",
+      topic: "Mine Atmospheres & Invisible Hazards",
+      blurb: "Roof falls announce themselves. Bad air doesn't. Why the ventilation system is the only thing standing between a quiet atmosphere and a body count.",
+      url: "https://claude.ai/code/artifact/d4b5b760-e4eb-42ea-91e3-ed6946274cb6"
+    },
+    {
+      n: "02", icon: "🌡️", title: "Two Mines, One Equation",
+      topic: "Psychrometrics — Pressure, Temperature & Humidity",
+      blurb: "The entire alphabet of psychrometrics — enough to explain why a Mongolian shaft needs a giant heater and a South African gold mine pumps ice slurry.",
+      url: "https://claude.ai/code/artifact/36dfe02c-c7e4-4714-81ed-ac264257e13b"
+    },
+    {
+      n: "03", icon: "🌀", title: "From Furnace to Fan",
+      topic: "From Natural Draft to Mechanical Ventilation",
+      blurb: "Before electric fans, mines lit a furnace at the shaft bottom on purpose. Today's fans do the same job, just without the flames.",
+      url: "https://claude.ai/code/artifact/3eedb74d-13ee-4ccd-b823-9a0827b4307b"
+    },
+    {
+      n: "04", icon: "📟", title: "The Ratio That Saw It Coming",
+      topic: "Gas Monitoring & Sensor Systems",
+      blurb: "A correct sensor reading is worthless the moment someone decides not to act on it — half electronics, half human factors.",
+      url: "https://claude.ai/code/artifact/16a44a15-cc9c-451b-ad9a-fabb181b5a2a"
+    },
+    {
+      n: "05", icon: "🔌", title: "The Mine Is One Circuit",
+      topic: "Ventilation Network Analysis",
+      blurb: "Dozens to hundreds of airways, all connected, all arguing over the same air. Analyzing the whole network at once, the way it actually behaves.",
+      url: "https://claude.ai/code/artifact/80feb914-3ae2-4041-bc24-9a5e66b23f9c"
+    },
+    {
+      n: "06", icon: "🌬️", title: "The Last Hundred Metres",
+      topic: "Auxiliary & Face Ventilation",
+      blurb: "Every heading starts as a dead end. Getting air the last stretch through duct, joints, and leaks, without losing the main fan's effort along the way.",
+      url: "https://claude.ai/code/artifact/845dae7d-aba7-4598-b2ec-f352485c893a"
+    },
+    {
+      n: "07", icon: "🫁", title: "The Dust You Can't Cough Back Up",
+      topic: "Dust Control, Explosibility & Respiratory Health",
+      blurb: "Coal dust in suspension is fuel for an explosion. Breathed in daily, it's a disease with no cure. Ventilation as the control for both.",
+      url: "https://claude.ai/code/artifact/95b8fdd8-98f4-4baa-85e4-2eec58b8db1b"
+    },
+    {
+      n: "08", icon: "🔥", title: "The Mine's Own Furnace",
+      topic: "Heat, Humidity & Mine Refrigeration",
+      blurb: "Deep enough, and the air itself becomes the hazard — not from lack of oxygen, but because the body can't shed heat fast enough to survive a shift.",
+      url: "https://claude.ai/code/artifact/e2230858-e8c5-44b4-8300-09b528b5730e"
+    },
+    {
+      n: "09", icon: "📐", title: "The Redline Drawing",
+      topic: "Ventilation System Design & Sizing",
+      blurb: "Diesel exhaust, methane, dust, heat, minimum velocity — every formula from the semester, run at once, on one real design.",
+      url: "https://claude.ai/code/artifact/5a77f013-d0f9-4532-bc1a-0f5a40fae4f4"
+    },
+    {
+      n: "10", icon: "🚨", title: "The Sixty-Minute Clock",
+      topic: "Emergency Planning, Escape & Mine Rescue",
+      blurb: "One sixty-minute canister and your own two legs. When ventilation fails catastrophically, the design question flips.",
+      url: "https://claude.ai/code/artifact/aa315043-dfe2-4cbf-8dde-0995b34c4392"
+    },
+    {
+      n: "11", icon: "📋", title: "The Inspector's Checklist",
+      topic: "Ventilation System Audits & Compliance",
+      blurb: "A plan isn't finished when it's designed — it's reviewed on a schedule, measured against regulatory minimums, and enforced with real penalties. Closing session.",
+      url: "https://claude.ai/code/artifact/a13380c7-f8f1-4b0f-8a1e-a364edaafd05"
+    }
+  ];
+
+  var SPECIAL = [
+    {
+      icon: "⚙️", title: "The Hardware Behind the Airflow",
+      topic: "Key Equipment — Fans, Airway Controls & Instruments",
+      blurb: "Every calculator this semester lived on a whiteboard. This session is the physical hardware that actually moves the air — a hands-on equipment catalog with two sizing calculators.",
+      url: "https://claude.ai/code/artifact/4c4de90a-2969-47bf-b05d-66d20f39fb34"
+    }
+  ];
+
+  function esc(s){
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function arrowSvg(){
+    return '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>';
+  }
+
+  function cardHTML(item, isSpecial){
+    var callNo = isSpecial ? "C.MIB318.SP" : ("C.MIB318." + item.n);
+    var badge = isSpecial ? "SPECIAL" : ("WEEK " + item.n);
+    return (
+      '<article class="card' + (isSpecial ? ' special' : '') + '" id="week-' + (isSpecial ? 'sp' : item.n) + '" ' +
+        'data-search="' + esc((item.title + ' ' + item.topic + ' ' + item.blurb).toLowerCase()) + '">' +
+        '<div class="card-tab"><span class="call-no">' + callNo + '</span><span>' + item.icon + '</span></div>' +
+        '<div class="card-body">' +
+          '<span class="week-badge">' + badge + '</span>' +
+          '<h3>' + esc(item.title) + '</h3>' +
+          '<div class="card-topic">' + esc(item.topic) + '</div>' +
+          '<p class="card-blurb">' + esc(item.blurb) + '</p>' +
+          '<div class="card-foot">' +
+            '<a class="card-open" href="' + item.url + '" target="_blank" rel="noopener">Open session ' + arrowSvg() + '</a>' +
+          '</div>' +
+        '</div>' +
+      '</article>'
+    );
+  }
+
+  var weeklyGrid = document.getElementById('weekly-grid');
+  var specialGrid = document.getElementById('special-grid');
+  weeklyGrid.innerHTML = WEEKLY.map(function(w){ return cardHTML(w, false); }).join('');
+  specialGrid.innerHTML = SPECIAL.map(function(s){ return cardHTML(s, true); }).join('');
+
+  /* ---------- ledger (semester map) ---------- */
+  var track = document.getElementById('ledger-track');
+  var frag = '';
+  WEEKLY.forEach(function(w, idx){
+    frag += '<a class="ledger-node" href="#week-' + w.n + '"><span class="dot"></span><span class="lbl">' + w.n + '</span></a>';
+    frag += '<span class="ledger-line"></span>';
+  });
+  frag += '<a class="ledger-node special" href="#week-sp"><span class="dot"></span><span class="lbl">SP</span></a>';
+  track.innerHTML = frag;
+
+  /* ---------- search filter ---------- */
+  var searchInput = document.getElementById('search');
+  var weeklyEmpty = document.getElementById('weekly-empty');
+
+  searchInput.addEventListener('input', function(){
+    var q = searchInput.value.trim().toLowerCase();
+    var cards = weeklyGrid.querySelectorAll('.card');
+    var visibleCount = 0;
+    cards.forEach(function(card){
+      var match = !q || card.getAttribute('data-search').indexOf(q) !== -1;
+      card.style.display = match ? '' : 'none';
+      if(match) visibleCount++;
+    });
+    weeklyEmpty.style.display = visibleCount === 0 ? 'block' : 'none';
+  });
+
+})();
+</script>
+</body>
+</html>

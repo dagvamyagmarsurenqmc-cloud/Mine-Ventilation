@@ -1,0 +1,865 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Figtree:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>The Mine's Own Furnace</title>
+
+<style>
+  /* Deliberate single-theme "thermal camera" design — a cold-black instrument
+     background with a warm ironbow gradient (blue → red → orange → white)
+     reserved for temperature itself. The metaphor is a false-color heat
+     camera; a light-mode variant would break it entirely. */
+  :root{
+    --bg:#0B0E14;
+    --bg-soft:#11151E;
+    --surface:#161B26;
+    --surface-raised:#1B212E;
+    --ink:#E8EAED;
+    --ink-soft:#9AA3AF;
+    --ink-faint:#5B6472;
+    --line:rgba(232,234,237,0.12);
+    --line-strong:rgba(232,234,237,0.24);
+    --shadow: 0 1px 2px rgba(0,0,0,0.5), 0 18px 40px -20px rgba(0,0,0,0.8);
+
+    --therm-cold:#3E5C8A;
+    --therm-mid:#C9542E;
+    --therm-hot:#F2A93C;
+    --therm-extreme:#FCECC4;
+
+    --cool:#4FA8C9;
+    --cool-soft:#0F2C36;
+    --warn:#F2A93C;
+    --warn-soft:#3A2A10;
+    --bad:#E14B36;
+    --bad-soft:#3A1712;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto;} *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;} }
+
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Figtree", ui-sans-serif, system-ui, sans-serif;
+    font-size:16px; line-height:1.62; -webkit-font-smoothing:antialiased;
+    background-image: radial-gradient(ellipse 800px 420px at 50% -8%, rgba(242,169,60,0.07), transparent 62%);
+  }
+  h1,h2,h3,h4{
+    font-family:"Anton", "Arial Narrow", sans-serif;
+    font-weight:400; text-transform:uppercase; letter-spacing:0.005em;
+    text-wrap:balance; margin:0; line-height:1.04;
+  }
+  .mono{ font-family:"Roboto Mono", ui-monospace, monospace; }
+  p{ margin:0 0 1em; max-width:66ch; }
+  p:last-child{ margin-bottom:0; }
+  a{ color:inherit; }
+  ::selection{ background:var(--therm-hot); color:#0B0E14; }
+  button{ font-family:inherit; }
+  a:focus-visible, button:focus-visible, input:focus-visible{ outline:2px solid var(--therm-hot); outline-offset:3px; }
+
+  .eyebrow{
+    font-family:"Roboto Mono", monospace; font-size:0.68rem;
+    letter-spacing:0.12em; text-transform:uppercase; font-weight:500;
+    display:inline-flex; align-items:center; gap:0.55em; color:var(--ink-faint);
+  }
+  .wrap{ max-width:1100px; margin:0 auto; padding:0 clamp(1.25rem,4vw,3rem); }
+  .section-pad{ padding:clamp(3.4rem,8vw,6rem) 0; }
+  img,svg{ max-width:100%; }
+  .sec-title{ font-size:clamp(1.9rem,4.2vw,2.9rem); }
+  .sec-dek{ color:var(--ink-soft); max-width:64ch; margin-top:1rem; font-size:1.05rem; font-family:"Figtree",sans-serif; text-transform:none; letter-spacing:0; }
+  .kicker-row{ margin-bottom:1rem; }
+  section + section{ border-top:1px solid var(--line); }
+
+  /* ============ HERO ============ */
+  #hero{ padding:clamp(4rem,9vw,6.5rem) 0 clamp(2.5rem,6vw,4rem); }
+  h1.hero-title{ font-size:clamp(2.2rem,5.6vw,4rem); max-width:21ch; }
+  h1.hero-title .hl{ color:var(--therm-hot); }
+  .hero-sub{ font-size:clamp(1.02rem,1.6vw,1.18rem); color:var(--ink-soft); max-width:60ch; margin-top:1.3rem; font-family:"Figtree",sans-serif; text-transform:none; }
+  .hero-meta{ margin-top:2.4rem; display:flex; flex-wrap:wrap; gap:2.2rem; }
+  .hero-meta .k{ font-family:"Roboto Mono",monospace; font-size:0.68rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-faint); }
+  .hero-meta .v{ font-size:1.02rem; margin-top:0.25rem; }
+
+  .thermal-panel{ background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:1.3rem; margin-top:2.6rem; box-shadow:var(--shadow); }
+  .thermal-panel svg{ display:block; width:100%; height:auto; }
+  .thermal-cap{ font-family:"Roboto Mono",monospace; font-size:0.72rem; color:var(--ink-faint); text-align:center; margin-top:0.7rem; letter-spacing:0.03em; }
+
+  /* ============ CONCEPT CARDS ============ */
+  .concept-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:1.3rem; margin-top:2.4rem; }
+  @media (max-width:760px){ .concept-grid{grid-template-columns:1fr;} }
+  .concept-card{ background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:1.6rem 1.5rem; }
+  .concept-card .cc-eyebrow{ font-family:"Roboto Mono",monospace; font-size:0.64rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--therm-hot); }
+  .concept-card h4{ font-size:1.5rem; margin-top:0.4rem; text-transform:none; }
+  .concept-card p{ font-size:0.92rem; color:var(--ink-soft); margin-top:0.7rem; }
+  .concept-card .cc-num{ margin-top:0.9rem; font-family:"Roboto Mono",monospace; font-size:0.85rem; color:var(--therm-extreme); background:rgba(242,169,60,0.1); display:inline-block; padding:0.4rem 0.7rem; border-radius:6px; }
+
+  .callout{ margin-top:1.6rem; padding:1.1rem 1.3rem; border-left:3px solid var(--bad); background:var(--bad-soft); font-size:0.95rem; border-radius:0 8px 8px 0; }
+  .callout b{ color:var(--bad); display:block; font-family:"Roboto Mono",monospace; font-size:0.64rem; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:0.4rem; }
+
+  /* ============ CASE FILES ============ */
+  .case-list{ margin-top:2.2rem; display:flex; flex-direction:column; gap:1rem; }
+  .case{ background:var(--surface); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  .case-head{ width:100%; display:flex; align-items:center; gap:1.1rem; padding:1.2rem 1.4rem; background:none; border:none; cursor:pointer; text-align:left; color:var(--ink); }
+  .case-head .ch-toll{ font-family:"Anton",sans-serif; font-size:2rem; color:var(--therm-hot); min-width:4.5ch; line-height:1; }
+  .case-head .ch-body{ flex:1; }
+  .case-head .ch-name{ font-family:"Anton",sans-serif; font-size:1.25rem; text-transform:none; }
+  .case-head .ch-meta{ font-family:"Roboto Mono",monospace; font-size:0.68rem; color:var(--ink-faint); margin-top:0.2rem; letter-spacing:0.03em; }
+  .case-head .ch-chevron{ font-size:1.3rem; color:var(--ink-faint); transition:transform 0.2s; flex-shrink:0; }
+  .case.open .ch-chevron{ transform:rotate(180deg); }
+  .case-panel{ max-height:0; overflow:hidden; transition:max-height 0.28s ease; }
+  .case.open .case-panel{ max-height:700px; }
+  .case-panel-inner{ padding:0 1.4rem 1.5rem; border-top:1px solid var(--line); }
+  .case-panel-inner p{ font-size:0.94rem; color:var(--ink-soft); margin-top:1rem; }
+  .case-panel-inner .cp-lesson{ margin-top:1rem; padding:0.85rem 1rem; background:var(--cool-soft); color:var(--cool); border-radius:8px; font-size:0.86rem; }
+  .case-panel-inner .cp-flag{ margin-top:1rem; padding:0.7rem 0.9rem; background:var(--warn-soft); color:var(--warn); border-radius:8px; font-size:0.8rem; font-family:"Roboto Mono",monospace; }
+  .stat-row{ display:flex; gap:1.4rem; flex-wrap:wrap; margin-top:1rem; }
+  .stat-row .st{ background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:0.8rem 1rem; min-width:9rem; }
+  .stat-row .st .sv{ font-family:"Anton",sans-serif; font-size:1.7rem; color:var(--therm-hot); }
+  .stat-row .st .sl{ font-family:"Roboto Mono",monospace; font-size:0.62rem; color:var(--ink-faint); text-transform:uppercase; letter-spacing:0.04em; margin-top:0.15rem; }
+
+  /* ============ CALCULATOR (shared style) ============ */
+  .calc-card{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:1.9rem clamp(1.3rem,3vw,2.3rem); box-shadow:var(--shadow); margin-top:2.4rem; }
+  .calc-head{ display:flex; align-items:baseline; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+  .calc-head h3{ font-size:1.5rem; text-transform:none; }
+  .calc-num{ font-family:"Roboto Mono",monospace; font-size:0.68rem; color:var(--ink-faint); letter-spacing:0.06em; text-transform:uppercase; }
+  .calc-formula{ font-family:"Roboto Mono",monospace; font-size:0.86rem; background:var(--bg); border:1px solid var(--line); padding:0.65rem 1rem; border-radius:8px; margin-top:0.9rem; display:inline-block; }
+  .calc-body{ display:grid; grid-template-columns:1.05fr 0.95fr; gap:2rem; margin-top:1.4rem; align-items:start; }
+  @media (max-width:760px){ .calc-body{grid-template-columns:1fr;} }
+  .field{ margin-bottom:1.25rem; }
+  .field:last-child{ margin-bottom:0; }
+  .field label{ display:flex; justify-content:space-between; font-size:0.83rem; color:var(--ink-soft); margin-bottom:0.5rem; font-family:"Roboto Mono",monospace; }
+  .field label .fval{ color:var(--therm-hot); font-weight:600; }
+  input[type=range]{ width:100%; accent-color:var(--therm-hot); height:4px; cursor:pointer; }
+  .toggle-row{ display:flex; gap:0.5rem; flex-wrap:wrap; }
+  .toggle-btn{ font-family:"Roboto Mono",monospace; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.03em; background:var(--bg); border:1px solid var(--line-strong); color:var(--ink); padding:0.45rem 0.8rem; border-radius:20px; cursor:pointer; }
+  .toggle-btn.active{ background:var(--therm-hot); border-color:var(--therm-hot); color:#0B0E14; font-weight:600; }
+  .result-panel{ background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:1.2rem 1.3rem; display:flex; flex-direction:column; gap:0.85rem; }
+  .result-row{ display:flex; justify-content:space-between; align-items:baseline; gap:1rem; }
+  .result-row .rl{ font-size:0.8rem; color:var(--ink-soft); }
+  .result-row .rr{ font-family:"Roboto Mono",monospace; font-weight:500; font-size:1.08rem; font-variant-numeric:tabular-nums; text-align:right; }
+  .result-row.big .rr{ font-size:1.6rem; color:var(--therm-hot); }
+  .result-flag{ margin-top:0.15rem; padding:0.6rem 0.75rem; border-radius:8px; font-size:0.8rem; font-family:"Roboto Mono",monospace; }
+  .result-flag.ok{ background:var(--cool-soft); color:var(--cool); }
+  .result-flag.bad{ background:var(--bad-soft); color:var(--bad); }
+  .result-flag.warn{ background:var(--warn-soft); color:var(--warn); }
+  .calc-note{ font-size:0.8rem; color:var(--ink-faint); margin-top:1rem; border-top:1px dashed var(--line); padding-top:0.9rem; }
+
+  .gauge-wrap{ background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:1rem; }
+  .gauge-wrap svg{ display:block; width:100%; height:auto; }
+
+  /* ============ REFRIGERATION CARDS ============ */
+  .ref-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:1.3rem; margin-top:2.4rem; }
+  @media (max-width:760px){ .ref-grid{grid-template-columns:1fr;} }
+  .ref-card{ background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:1.5rem 1.6rem; }
+  .ref-card .rc-eyebrow{ font-family:"Roboto Mono",monospace; font-size:0.62rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--cool); }
+  .ref-card h4{ font-size:1.4rem; margin-top:0.4rem; text-transform:none; }
+  .ref-card p{ font-size:0.92rem; color:var(--ink-soft); margin-top:0.7rem; }
+  .ref-card .rc-num{ margin-top:0.9rem; font-family:"Roboto Mono",monospace; font-size:0.85rem; color:var(--cool); background:var(--cool-soft); display:inline-block; padding:0.4rem 0.7rem; border-radius:6px; }
+
+  /* ============ ACCLIMATIZATION TABLE ============ */
+  .acclim-table{ width:100%; border-collapse:collapse; margin-top:1.6rem; font-size:0.9rem; }
+  .acclim-table th{ text-align:center; font-family:"Roboto Mono",monospace; font-size:0.66rem; letter-spacing:0.05em; text-transform:uppercase; color:var(--ink-faint); border-bottom:1px solid var(--line-strong); padding:0.6rem 0.5rem; }
+  .acclim-table td{ text-align:center; padding:0.7rem 0.5rem; border-bottom:1px solid var(--line); font-family:"Roboto Mono",monospace; }
+  .acclim-table td.day-label{ text-align:left; color:var(--ink-soft); font-family:"Figtree",sans-serif; }
+  .acclim-table .bar-cell{ position:relative; }
+  .acclim-bar{ height:20px; background:linear-gradient(90deg, var(--therm-cold), var(--therm-hot)); border-radius:4px; }
+
+  /* ============ QUIZ ============ */
+  .quiz-shell{ background:var(--surface); border:1px solid var(--line); border-radius:16px; margin-top:2.4rem; overflow:hidden; box-shadow:var(--shadow); }
+  .quiz-progress{ height:4px; background:var(--line); }
+  .quiz-progress-fill{ height:100%; width:0%; background:var(--therm-hot); transition:width 0.3s; }
+  .quiz-body{ padding:clamp(1.4rem,3.5vw,2.4rem); }
+  .quiz-q-num{ font-family:"Roboto Mono",monospace; font-size:0.68rem; color:var(--therm-hot); letter-spacing:0.1em; text-transform:uppercase; }
+  .quiz-scenario{ color:var(--ink-soft); font-size:0.92rem; margin-top:0.7rem; font-style:italic; }
+  .quiz-question{ font-family:"Anton",sans-serif; text-transform:none; font-size:clamp(1.2rem,2.4vw,1.5rem); margin-top:0.6rem; line-height:1.2; }
+  .quiz-options{ display:flex; flex-direction:column; gap:0.7rem; margin-top:1.4rem; }
+  .quiz-opt{ text-align:left; background:var(--bg); border:1px solid var(--line); color:var(--ink); padding:0.85rem 1rem; border-radius:10px; cursor:pointer; font-size:0.95rem; display:flex; gap:0.7rem; transition:background 0.15s, border-color 0.15s; }
+  .quiz-opt:hover:not(:disabled){ border-color:var(--therm-hot); }
+  .quiz-opt .qletter{ font-family:"Roboto Mono",monospace; color:var(--therm-hot); flex-shrink:0; }
+  .quiz-opt.correct{ background:var(--cool-soft); border-color:var(--cool); }
+  .quiz-opt.incorrect{ background:var(--bad-soft); border-color:var(--bad); }
+  .quiz-opt:disabled{ cursor:default; }
+  .quiz-feedback{ margin-top:1.2rem; padding:1rem 1.1rem; border-radius:10px; background:var(--bg); border-left:3px solid var(--therm-hot); font-size:0.9rem; color:var(--ink-soft); display:none; }
+  .quiz-feedback.show{ display:block; }
+  .quiz-nav{ display:flex; justify-content:flex-end; margin-top:1.4rem; }
+  .btn{ font-family:"Roboto Mono",monospace; font-size:0.78rem; letter-spacing:0.04em; text-transform:uppercase; background:var(--therm-hot); color:#0B0E14; border:none; padding:0.7rem 1.3rem; border-radius:20px; cursor:pointer; font-weight:600; }
+  .btn:disabled{ opacity:0.35; cursor:default; }
+  .btn.ghost{ background:transparent; border:1px solid var(--line-strong); color:var(--ink); }
+  .quiz-result{ text-align:center; }
+  .quiz-result .score-big{ font-family:"Anton",sans-serif; font-size:3.4rem; color:var(--therm-hot); }
+  .quiz-result p{ margin:0.8rem auto 0; max-width:52ch; color:var(--ink-soft); }
+
+  /* ============ DISCUSSION ============ */
+  .disc-grid{ display:flex; flex-direction:column; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:14px; overflow:hidden; margin-top:2.2rem; }
+  .disc-item{ background:var(--surface); padding:1.4rem 1.6rem; display:grid; grid-template-columns:2.4rem 1fr; gap:1rem; }
+  .disc-item .dn{ font-family:"Anton",sans-serif; font-size:1.9rem; color:var(--line-strong); }
+  .disc-item p{ margin:0; font-size:1rem; }
+  .disc-item .dtag{ font-family:"Roboto Mono",monospace; font-size:0.62rem; color:var(--therm-hot); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.35rem; display:block; }
+
+  .lookahead{ background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:1.4rem 1.6rem; margin-top:2.2rem; display:flex; gap:1.2rem; align-items:baseline; flex-wrap:wrap; }
+  .lookahead .lw{ font-family:"Roboto Mono",monospace; color:var(--cool); font-size:0.76rem; text-transform:uppercase; letter-spacing:0.05em; }
+
+  footer{ padding:3rem 0 4rem; color:var(--ink-faint); font-size:0.85rem; border-top:1px solid var(--line); }
+
+  #instr-toggle{ position:fixed; left:1.2rem; bottom:1.2rem; z-index:180; background:var(--therm-hot); color:#0B0E14; font-family:"Roboto Mono",monospace; font-size:0.68rem; letter-spacing:0.04em; text-transform:uppercase; border:none; padding:0.65rem 1rem; border-radius:30px; cursor:pointer; box-shadow:var(--shadow); display:flex; align-items:center; gap:0.5rem; font-weight:600; }
+  #instr-panel{ position:fixed; inset:0; z-index:300; display:none; background:rgba(0,0,0,0.65); backdrop-filter:blur(2px); align-items:center; justify-content:center; padding:1.5rem; }
+  #instr-panel.open{ display:flex; }
+  .instr-card{ background:var(--surface); color:var(--ink); border-radius:18px; max-width:740px; width:100%; max-height:85vh; overflow-y:auto; padding:clamp(1.5rem,4vw,2.5rem); box-shadow:var(--shadow); border:1px solid var(--line); }
+  .instr-card h3{ font-size:1.5rem; text-transform:none; }
+  .instr-close{ float:right; background:none; border:1px solid var(--line); border-radius:50%; width:2rem; height:2rem; cursor:pointer; color:var(--ink); font-size:1rem; }
+  .run-table{ width:100%; border-collapse:collapse; margin-top:1.4rem; font-size:0.9rem; }
+  .run-table th{ text-align:left; font-family:"Roboto Mono",monospace; font-size:0.62rem; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-faint); border-bottom:1px solid var(--line); padding:0.5rem 0.6rem 0.5rem 0; }
+  .run-table td{ padding:0.65rem 0.6rem 0.65rem 0; border-bottom:1px solid var(--line); vertical-align:top; }
+  .run-table td.tt{ font-family:"Roboto Mono",monospace; color:var(--therm-hot); white-space:nowrap; }
+</style>
+
+<nav id="topbar-wrap" style="position:fixed; top:0; left:0; right:0; height:3px; z-index:200;">
+  <div id="topbar-fill" style="height:100%; width:0%; background:linear-gradient(90deg, var(--therm-cold), var(--therm-hot)); transition:width 0.08s linear;"></div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<section id="hero">
+  <div class="wrap">
+    <div class="eyebrow">Mine Ventilation · Week 8</div>
+    <h1 class="hero-title">Sometimes the mine doesn't need more air. It needs <span class="hl">colder</span> air.</h1>
+    <p class="hero-sub">Push a working mine deep enough and the air itself becomes a hazard — not because it lacks oxygen, but because the body can't shed heat fast enough to survive an 8-hour shift in it. Today: how hot deep mines actually get, how that's measured, and the refrigeration engineering that makes them survivable.</p>
+
+    <div class="hero-meta">
+      <div><div class="k">Session</div><div class="v">90 minutes</div></div>
+      <div><div class="k">Format</div><div class="v">Two calculators, one heat map</div></div>
+      <div><div class="k">You'll leave with</div><div class="v">Why some mines need megawatts just to stay livable</div></div>
+    </div>
+
+    <div class="thermal-panel">
+      <svg viewBox="0 0 600 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cutaway diagram of a mine shaft shown as a false-color heat map, with air temperature rising from a cool surface intake to a hot working level at depth.">
+        <defs>
+          <linearGradient id="shaftGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#3E5C8A"/>
+            <stop offset="45%" stop-color="#6B4E7A"/>
+            <stop offset="75%" stop-color="#C9542E"/>
+            <stop offset="100%" stop-color="#F2A93C"/>
+          </linearGradient>
+        </defs>
+        <rect x="270" y="20" width="60" height="200" rx="8" fill="url(#shaftGrad)"/>
+        <text x="240" y="30" font-family="Roboto Mono, monospace" font-size="11" fill="#9AA3AF" text-anchor="end">SURFACE · 22°C</text>
+        <line x1="245" y1="26" x2="268" y2="26" stroke="#5B6472" stroke-width="1.5"/>
+
+        <text x="360" y="95" font-family="Roboto Mono, monospace" font-size="11" fill="#9AA3AF" text-anchor="start">1000 m · ~32°C</text>
+        <line x1="332" y1="90" x2="357" y2="90" stroke="#5B6472" stroke-width="1.5"/>
+
+        <text x="360" y="155" font-family="Roboto Mono, monospace" font-size="11" fill="#F2A93C" text-anchor="start">2000 m · ~50°C</text>
+        <line x1="332" y1="150" x2="357" y2="150" stroke="#5B6472" stroke-width="1.5"/>
+
+        <text x="360" y="212" font-family="Roboto Mono, monospace" font-size="11" fill="#FCECC4" text-anchor="start">3000 m · ~70°C+</text>
+        <line x1="332" y1="207" x2="357" y2="207" stroke="#5B6472" stroke-width="1.5"/>
+      </svg>
+      <div class="thermal-cap">UNCOOLED INTAKE AIR, ILLUSTRATIVE — AUTOCOMPRESSION AND ROCK HEAT PICK-UP COMBINED, SEE CALCULATOR BELOW</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WBGT ============ -->
+<section id="wbgt" class="section-pad">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">01 · Measuring the hazard</span></div>
+    <h2 class="sec-title">Air temperature alone doesn't tell you the danger.</h2>
+    <p class="sec-dek">The standard heat-stress index blends three readings — how hot it feels wet, how hot it feels in radiant heat, and (outdoors) plain air temperature — into one number regulators actually act on.</p>
+
+    <div class="calc-card">
+      <div class="calc-head"><h3>Wet Bulb Globe Temperature</h3><span class="calc-num">Indoor / no solar load form</span></div>
+      <div class="calc-formula">WBGT = 0.7 × T(natural wet-bulb) + 0.3 × T(globe)</div>
+      <div class="calc-body">
+        <div>
+          <div class="field">
+            <label>Natural wet-bulb temperature <span class="fval mono" id="wb-tnw-val">26.0°C</span></label>
+            <input type="range" id="wb-tnw" min="18" max="36" step="0.5" value="26">
+          </div>
+          <div class="field">
+            <label>Globe temperature <span class="fval mono" id="wb-tg-val">34.0°C</span></label>
+            <input type="range" id="wb-tg" min="20" max="45" step="0.5" value="34">
+          </div>
+          <div class="field">
+            <label>Workload</label>
+            <div class="toggle-row">
+              <button class="toggle-btn" data-group="load" data-val="light">Light</button>
+              <button class="toggle-btn active" data-group="load" data-val="moderate">Moderate</button>
+              <button class="toggle-btn" data-group="load" data-val="heavy">Heavy</button>
+              <button class="toggle-btn" data-group="load" data-val="veryheavy">Very heavy</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Work / rest per hour</label>
+            <div class="toggle-row">
+              <button class="toggle-btn active" data-group="ratio" data-val="75-100">75–100%</button>
+              <button class="toggle-btn" data-group="ratio" data-val="50-75">50–75%</button>
+              <button class="toggle-btn" data-group="ratio" data-val="25-50">25–50%</button>
+              <button class="toggle-btn" data-group="ratio" data-val="0-25">0–25%</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Acclimatization</label>
+            <div class="toggle-row">
+              <button class="toggle-btn active" data-group="acclim" data-val="acclim">Acclimatized</button>
+              <button class="toggle-btn" data-group="acclim" data-val="unaccl">Unacclimatized</button>
+            </div>
+          </div>
+        </div>
+        <div class="result-panel">
+          <div class="result-row big"><span class="rl">Calculated WBGT</span><span class="rr" id="wb-result">28.4°C</span></div>
+          <div class="result-row"><span class="rl">ACGIH TLV screening limit</span><span class="rr" id="wb-limit">28.0°C</span></div>
+          <div class="gauge-wrap" style="margin-top:0.3rem;">
+            <svg id="wb-svg" viewBox="0 0 400 70" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Gauge comparing calculated WBGT against the ACGIH screening limit for the selected workload and work-rest ratio"></svg>
+          </div>
+          <div class="result-flag bad" id="wb-flag">Exceeds TLV — increase rest, reduce workload, or add cooling</div>
+        </div>
+      </div>
+      <p class="calc-note">Limit values follow the ACGIH Threshold Limit Value screening table by workload and work/rest ratio (reproduced via CCOHS). Cells with no defined limit mean that workload isn't permitted continuously at that duty cycle — more rest is mandatory, not optional.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PHYSIOLOGICAL LIMITS ============ -->
+<section id="physio" class="section-pad" style="background:var(--bg-soft);">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">02 · What the body is actually protecting</span></div>
+    <h2 class="sec-title">The number that matters is inside the miner, not the air.</h2>
+    <p class="sec-dek">WBGT is a proxy. What mining heat-stress programs actually try to control is core body temperature and cardiac strain.</p>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="cc-eyebrow">Core temperature</div>
+        <h4>The 38°C ceiling</h4>
+        <p>MSHA's heat stress program targets keeping core body temperature from rising above 38°C (100°F). Medical surveillance triggers above that — 38.0°C for unacclimatized workers, 38.5°C for acclimatized ones — flag a worker for closer monitoring before heat exhaustion or heat stroke sets in.</p>
+        <div class="cc-num">Ceiling: 38°C · Heat stroke risk climbs sharply above ~40°C</div>
+      </div>
+      <div class="concept-card">
+        <div class="cc-eyebrow">Heart rate</div>
+        <h4>The stop-work rule</h4>
+        <p>A simple field criterion used in mining heat-stress management: if a sustained heart rate minus the worker's age exceeds 180, that's a stop-work signal on its own — no thermometer required, and no waiting for a worse symptom to appear.</p>
+        <div class="cc-num">Sustained heart rate − age &gt; 180 → stop work</div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <b>Why this matters</b>
+      WBGT tells you the environment is dangerous. Core temperature and heart rate tell you a specific person is already in trouble in it — and different miners reach that point at very different WBGT levels depending on fitness, hydration, and acclimatization. That's why the tools stack: measure the air, then still watch the miner.
+    </div>
+  </div>
+</section>
+
+<!-- ============ CASE FILE ============ -->
+<section id="cases" class="section-pad">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">03 · What happens when it fails</span></div>
+    <h2 class="sec-title">One well-documented mine, one very hot summer.</h2>
+
+    <div class="case-list" id="case-list">
+      <div class="case open" data-case="0">
+        <button class="case-head">
+          <div class="ch-toll">106</div>
+          <div class="ch-body">
+            <div class="ch-name">Mount Isa Mines — Queensland, Australia</div>
+            <div class="ch-meta">A ONE-YEAR PROSPECTIVE STUDY OF HEAT EXHAUSTION UNDERGROUND</div>
+          </div>
+          <div class="ch-chevron">⌄</div>
+        </button>
+        <div class="case-panel"><div class="case-panel-inner">
+          <p>A published one-year case series at this deep underground metal mine recorded 106 heat exhaustion cases — no deaths, but a clear, measurable pattern. The mean WBGT at the time of each case was 31.5°C. Incidence was 3.17 times higher below 1,200 metres than above it, and cases peaked at 147 per million worker-hours during the Australian summer. The study's conclusion was specific enough to design around: heat exhaustion became unlikely once the site's air cooling power exceeded roughly 250 W per square metre.</p>
+          <div class="stat-row">
+            <div class="st"><div class="sv">3.17×</div><div class="sl">Higher incidence below 1,200 m</div></div>
+            <div class="st"><div class="sv">31.5°C</div><div class="sl">Mean WBGT at time of case</div></div>
+            <div class="st"><div class="sv">250 W/m²</div><div class="sl">Cooling power above which cases became rare</div></div>
+          </div>
+          <div class="cp-lesson">The lesson: heat exhaustion isn't random — it tracks depth and season closely enough that a mine can set an engineering target (cooling power per square metre) and test whether it's actually working, the same way a ventilation engineer tracks airflow against a design target.</div>
+          <p class="cp-flag">A widely repeated historical account also describes a cluster of heat-stroke deaths at a South African deep gold mine in the 1920s–30s that helped drive early acclimatization protocols — that account comes from a secondary review article, not an independently verified primary investigation, so it's flagged here rather than presented as a confirmed case.</p>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ REFRIGERATION ENGINEERING ============ -->
+<section id="refrigeration" class="section-pad" style="background:var(--bg-soft);">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">04 · The engineering answer</span></div>
+    <h2 class="sec-title">Cooling the air before it ever goes underground.</h2>
+    <p class="sec-dek">Once ventilation alone can't remove heat fast enough, mines add mechanical refrigeration — chilling intake air, or circulating chilled water, at a genuinely industrial scale.</p>
+
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="rc-eyebrow">Kidd Creek Mine, Ontario, Canada</div>
+        <h4>One of the world's deepest base-metal mines</h4>
+        <p>Mining between 2,100 m and 3,100 m below surface, with heat problems appearing around 2,300 m. A surface refrigeration plant supplies chilled water at roughly 6°C. Later planning called for a much larger combined system, mixing mechanical plant with a passive "cold stope" that banks winter cold underground.</p>
+        <div class="rc-num">7.5 MW plant (2004) → planned 19 MW mechanical + 8.5 MW-equivalent passive cooling</div>
+      </div>
+      <div class="ref-card">
+        <div class="rc-eyebrow">Creighton Mine, Sudbury, Canada</div>
+        <h4>Passive cooling banked over decades</h4>
+        <p>At roughly 3 km deep, this mine has run a natural-cooling system since the 1950s, storing winter cold for use underground. A commonly cited mechanical-refrigeration benchmark for comparison: a well-designed plant can produce about 5 units of cooling for every 1 unit of electricity it consumes.</p>
+        <div class="rc-num">~17 MW from passive/natural cooling · benchmark coefficient of performance ≈ 5</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CALCULATOR 2: DEPTH'S HEAT BILL (flagship) ============ -->
+<section id="heatload" class="section-pad">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">05 · Instrument</span></div>
+    <h2 class="sec-title">How many megawatts does depth actually cost you?</h2>
+    <p class="sec-dek">Descending air heats up two ways: autocompression (simple adiabatic heating from air pressure increasing with depth — a fixed, well-measured rate) and heat picked up from the surrounding rock. Field measurements at one deep coal mine found autocompression accounts for 40–60% of the total airway temperature rise measured — the slider below lets you explore that real range.</p>
+
+    <div class="calc-card">
+      <div class="calc-body">
+        <div>
+          <div class="field">
+            <label>Working depth <span class="fval mono" id="hl-depth-val">2000 m</span></label>
+            <input type="range" id="hl-depth" min="500" max="3000" step="50" value="2000">
+          </div>
+          <div class="field">
+            <label>Autocompression's share of total temperature rise <span class="fval mono" id="hl-share-val">50%</span></label>
+            <input type="range" id="hl-share" min="40" max="60" step="1" value="50">
+          </div>
+          <div class="field">
+            <label>Surface intake air temperature <span class="fval mono" id="hl-surface-val">22°C</span></label>
+            <input type="range" id="hl-surface" min="10" max="35" step="1" value="22">
+          </div>
+          <div class="field">
+            <label>Target temperature at the working level <span class="fval mono" id="hl-target-val">27°C</span></label>
+            <input type="range" id="hl-target" min="18" max="32" step="1" value="27">
+          </div>
+          <div class="field">
+            <label>Airflow to be cooled <span class="fval mono" id="hl-flow-val">400 m³/s</span></label>
+            <input type="range" id="hl-flow" min="100" max="950" step="10" value="400">
+          </div>
+        </div>
+        <div class="result-panel">
+          <div class="result-row"><span class="rl">Autocompression rise (0.98°C/100m)</span><span class="rr" id="hl-auto">19.6°C</span></div>
+          <div class="result-row"><span class="rl">Total rise before cooling</span><span class="rr" id="hl-total">39.2°C</span></div>
+          <div class="result-row"><span class="rl">Uncooled temperature at depth</span><span class="rr" id="hl-attemp">61.2°C</span></div>
+          <div class="result-row big"><span class="rl">Refrigeration required</span><span class="rr" id="hl-mw">16.5 MW</span></div>
+          <div class="result-flag warn" id="hl-flag">On the scale of Kidd Creek's expanded plant — well short of Resolution Copper's</div>
+        </div>
+      </div>
+      <p class="calc-note">Heat load = airflow × air density (1.2 kg/m³) × specific heat of air (1.005 kJ/kg·K) × temperature drop needed, a standard sensible-heat calculation. This ignores humidity/latent heat for simplicity — real plants size larger. For scale: Kidd Creek's plant is 7.5–19 MW; a 2012 pre-feasibility study for the Resolution Copper project (Arizona, &gt;2000 m depth) specified roughly 30.5 MW just for underground cooling duty.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ACCLIMATIZATION ============ -->
+<section id="acclim" class="section-pad" style="background:var(--bg-soft);">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">06 · The other lever</span></div>
+    <h2 class="sec-title">The body can adapt — on a schedule, not overnight.</h2>
+    <p class="sec-dek">Refrigeration isn't the only tool. A graduated exposure schedule lets a new or returning worker's body adapt to heat before it's asked to work a full shift in it.</p>
+
+    <table class="acclim-table">
+      <tr><th>Day</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr>
+      <tr>
+        <td class="day-label">New worker, % of full workload</td>
+        <td>50%</td><td>60%</td><td>70%</td><td>80%</td><td>90%</td><td>100%</td>
+      </tr>
+      <tr><th colspan="7" style="padding-top:1rem;">Returning after 9+ days away</th></tr>
+      <tr>
+        <td class="day-label">% of full workload</td>
+        <td>50%</td><td>60%</td><td>90%</td><td>100%</td><td>—</td><td>—</td>
+      </tr>
+    </table>
+    <p class="calc-note" style="margin-top:1.2rem;">MSHA's standard graduated schedule for hot sites (WBGT above 26°C / 79°F). South African deep-mine research shows how much engineering and physiology can compress this further — protocols there went from 14 days in the 1950s down to as little as 5 days once climatic-chamber testing and better nutrition science were applied.</p>
+  </div>
+</section>
+
+<!-- ============ QUIZ ============ -->
+<section id="quiz" class="section-pad">
+  <div class="wrap" style="max-width:760px;">
+    <div class="kicker-row"><span class="eyebrow">07 · Checkpoint</span></div>
+    <h2 class="sec-title">Six scenarios from the hottest part of the mine.</h2>
+    <p class="sec-dek">Pulling on today's calculators and case file.</p>
+
+    <div class="quiz-shell">
+      <div class="quiz-progress"><div class="quiz-progress-fill" id="quiz-progress-fill"></div></div>
+      <div class="quiz-body" id="quiz-body"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DISCUSSION ============ -->
+<section id="discuss" class="section-pad" style="background:var(--bg-soft);">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">08 · Debrief</span></div>
+    <h2 class="sec-title">For the last 15 minutes: talk it through.</h2>
+    <p class="sec-dek">In pairs or small groups.</p>
+
+    <div class="disc-grid">
+      <div class="disc-item">
+        <div class="dn">1</div>
+        <div><span class="dtag">Measurement vs. person</span><p>WBGT describes the air; core temperature and heart rate describe the person standing in it. If the two disagree — legal WBGT, but a worker's heart rate crossing the stop-work threshold — which one should win, and why might a site's procedures make that harder to act on than it sounds?</p></div>
+      </div>
+      <div class="disc-item">
+        <div class="dn">2</div>
+        <div><span class="dtag">Engineering economics</span><p>Refrigeration at Kidd Creek's or Resolution Copper's scale costs tens of megawatts, continuously, for the life of the mine. At what point does that become a factor in whether a deep ore body gets developed at all, rather than just how it's ventilated?</p></div>
+      </div>
+      <div class="disc-item">
+        <div class="dn">3</div>
+        <div><span class="dtag">Physics vs. geology</span><p>Autocompression is a fixed, predictable rate no matter where you mine. Geothermal heat pickup depends entirely on local rock. What does that split suggest about which parts of a mine's heat problem can be engineered away everywhere, versus which have to be solved site by site?</p></div>
+      </div>
+      <div class="disc-item">
+        <div class="dn">4</div>
+        <div><span class="dtag">Acclimatization</span><p>A graduated schedule protects a new worker but costs productive time. Mount Isa's data shows heat exhaustion incidence more than tripling below 1,200 m — does that change how strictly you'd enforce an acclimatization schedule for workers rotating into the deepest levels specifically, versus everyone else?</p></div>
+      </div>
+      <div class="disc-item">
+        <div class="dn">5</div>
+        <div><span class="dtag">Career</span><p>The Mount Isa study turned "miners are getting heat exhaustion" into a specific, testable engineering target — 250 W/m² of cooling power. As a future engineer, what would it take for you to trust a number like that enough to design around it, versus treating it as one study's result?</p></div>
+      </div>
+    </div>
+
+    <div class="lookahead">
+      <span class="lw">Still ahead</span>
+      <span>Week 13, Ventilation Planning &amp; Mine Design, pulls every calculator from this course — airflow, resistance, gas dilution, dust, and now heat — into sizing one complete system for a mine that doesn't exist yet.</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    Mine Ventilation — Week 8 seminar material. WBGT formula per OSHA Technical Manual; ACGIH TLV screening values reproduced via the Canadian Centre for Occupational Health and Safety (CCOHS). Core temperature and heart-rate criteria per MSHA's Heat Stress Manual (Safety Manual No. 6). Mount Isa Mines case per Donoghue, Sinclair &amp; Bates, "Heat Exhaustion in a Deep Underground Metalliferous Mine," Occupational and Environmental Medicine 57:165–174 (2000). Kidd Creek and Creighton figures per AusIMM (8th International Mine Ventilation Congress) and Canadian Mining Journal. Autocompression rate and Resolution Copper heat-load figures per a Jamadoba Colliery case study and the Resolution Copper pre-feasibility refrigeration/ventilation study (2012). South African acclimatization history per P.C. Schutte, CSIR, "Heat Stress Management in Hot Mines." Always verify site-specific thresholds against your jurisdiction's regulator and current medical guidance.
+  </div>
+</footer>
+
+<button id="instr-toggle" aria-haspopup="dialog" aria-controls="instr-panel">◐ Instructor view</button>
+<div id="instr-panel" role="dialog" aria-modal="true" aria-labelledby="instr-title">
+  <div class="instr-card">
+    <button class="instr-close" id="instr-close" aria-label="Close instructor view">✕</button>
+    <span class="eyebrow" style="color:var(--therm-hot);">For the instructor</span>
+    <h3 id="instr-title">Suggested 90-minute run of show</h3>
+    <table class="run-table">
+      <tr><th>Time</th><th>Segment</th></tr>
+      <tr><td class="tt">0:00–0:08</td><td>Open on the hero thermal shaft diagram. Ask cold: "why would a mine need to spend megawatts of power just to cool air, when it's already spending megawatts moving that air?"</td></tr>
+      <tr><td class="tt">0:08–0:22</td><td>WBGT calculator in pairs. Have them find combinations where light work is fine but the same WBGT would already be non-compliant for heavy work.</td></tr>
+      <tr><td class="tt">0:22–0:30</td><td>Physiological limits cards + callout. Emphasize the two-layer system: environment limit, then person-specific limit.</td></tr>
+      <tr><td class="tt">0:30–0:40</td><td>Mount Isa case file. Discuss why a 3.17× depth effect is itself useful engineering information, not just a statistic.</td></tr>
+      <tr><td class="tt">0:40–0:48</td><td>Refrigeration cards — Kidd Creek and Creighton. Connect the COP≈5 benchmark back to why refrigeration is expensive but still worth it.</td></tr>
+      <tr><td class="tt">0:48–1:05</td><td>Heat load calculator — the flagship tool. Have every pair push depth to 3000m and compare their required MW against the Kidd Creek and Resolution Copper benchmarks in the note.</td></tr>
+      <tr><td class="tt">1:05–1:12</td><td>Acclimatization table — quick read, connect to Mount Isa's depth-incidence finding.</td></tr>
+      <tr><td class="tt">1:12–1:22</td><td>Run the 6-question checkpoint as a live class poll.</td></tr>
+      <tr><td class="tt">1:22–1:28</td><td>Small-group discussion prompts.</td></tr>
+      <tr><td class="tt">1:28–1:30</td><td>Close on the "still ahead" note.</td></tr>
+    </table>
+    <p style="margin-top:1.4rem; color:var(--ink-soft); font-size:0.9rem;">Safe to project this page directly to students — this panel is only visible to whoever clicks the button.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var fill = document.getElementById('topbar-fill');
+  function onScroll(){
+    var h = document.documentElement;
+    var scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    fill.style.width = scrolled + '%';
+  }
+  document.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  var svgns = "http://www.w3.org/2000/svg";
+  function el(tag, attrs){ var e = document.createElementNS(svgns, tag); for(var k in attrs){ e.setAttribute(k, attrs[k]); } return e; }
+
+  /* ---------- case files accordion (single case, still toggle-able) ---------- */
+  var cases = document.querySelectorAll('.case');
+  cases.forEach(function(c){
+    var head = c.querySelector('.case-head');
+    head.addEventListener('click', function(){
+      c.classList.toggle('open');
+    });
+  });
+
+  /* ---------- Calculator 1: WBGT ---------- */
+  var TLV = {
+    light:     { '75-100':[31.0,28.0], '50-75':[31.0,28.5], '25-50':[32.0,29.5], '0-25':[32.5,30.0] },
+    moderate:  { '75-100':[28.0,25.0], '50-75':[29.0,26.0], '25-50':[30.0,27.0], '0-25':[31.5,29.0] },
+    heavy:     { '75-100':null,        '50-75':[27.5,24.0], '25-50':[29.0,25.5], '0-25':[30.5,28.0] },
+    veryheavy: { '75-100':null,        '50-75':null,        '25-50':[28.0,24.5], '0-25':[30.0,27.0] }
+  };
+  var wbState = { load:'moderate', ratio:'75-100', acclim:'acclim' };
+  var wbTnw = document.getElementById('wb-tnw'), wbTg = document.getElementById('wb-tg');
+  var wbToggleBtns = document.querySelectorAll('#wbgt .toggle-btn');
+
+  function calcWBGT(){
+    var tnw = parseFloat(wbTnw.value), tg = parseFloat(wbTg.value);
+    document.getElementById('wb-tnw-val').textContent = tnw.toFixed(1) + '°C';
+    document.getElementById('wb-tg-val').textContent = tg.toFixed(1) + '°C';
+
+    var wbgt = 0.7*tnw + 0.3*tg;
+    document.getElementById('wb-result').textContent = wbgt.toFixed(1) + '°C';
+
+    var cell = TLV[wbState.load][wbState.ratio];
+    var limitLabel = document.getElementById('wb-limit');
+    var flag = document.getElementById('wb-flag');
+
+    if(!cell){
+      limitLabel.textContent = 'Not permitted continuously';
+      flag.className = 'result-flag bad';
+      flag.textContent = 'This workload isn\'t permitted at this duty cycle at all — more rest is required, regardless of WBGT';
+      drawWBGTGauge(wbgt, null);
+      return;
+    }
+
+    var limit = wbState.acclim === 'acclim' ? cell[0] : cell[1];
+    limitLabel.textContent = limit.toFixed(1) + '°C';
+
+    if(wbgt <= limit){
+      flag.className = 'result-flag ok';
+      flag.textContent = 'Within TLV for this workload and work/rest ratio';
+    } else {
+      flag.className = 'result-flag bad';
+      flag.textContent = 'Exceeds TLV — increase rest, reduce workload, or add cooling';
+    }
+    drawWBGTGauge(wbgt, limit);
+  }
+
+  function drawWBGTGauge(wbgt, limit){
+    var svg = document.getElementById('wb-svg');
+    while(svg.firstChild){ svg.removeChild(svg.firstChild); }
+    var x0 = 20, x1 = 320, y = 40, scaleMin = 18, scaleMax = 36;
+    function xOf(v){ return x0 + (Math.max(scaleMin,Math.min(scaleMax,v))-scaleMin)/(scaleMax-scaleMin)*(x1-x0); }
+    function clampLabelX(x){ return Math.max(x0+38, Math.min(x1-38, x)); }
+
+    svg.appendChild(el('line',{x1:x0,y1:y,x2:x1,y2:y,stroke:'var(--line-strong)','stroke-width':6,'stroke-linecap':'round'}));
+
+    var ok = (limit !== null) && (wbgt <= limit);
+    var wColor = limit === null ? 'var(--bad)' : (ok ? 'var(--cool)' : 'var(--bad)');
+    svg.appendChild(el('line',{x1:x0,y1:y,x2:xOf(wbgt),y2:y,stroke:wColor,'stroke-width':6,'stroke-linecap':'round'}));
+
+    if(limit !== null){
+      var lx = xOf(limit);
+      svg.appendChild(el('line',{x1:lx,y1:y-16,x2:lx,y2:y+16,stroke:'var(--therm-extreme)','stroke-width':2.5}));
+      var t1 = el('text',{x:clampLabelX(lx),y:y-22,'font-family':'Roboto Mono, monospace','font-size':9,fill:'var(--therm-extreme)','text-anchor':'middle'}); t1.textContent='TLV '+limit.toFixed(1)+'°C'; svg.appendChild(t1);
+    }
+
+    var wx = xOf(wbgt);
+    svg.appendChild(el('circle',{cx:wx,cy:y,r:7,fill:wColor,stroke:'var(--bg)','stroke-width':2}));
+    var t2 = el('text',{x:clampLabelX(wx),y:y+30,'font-family':'Roboto Mono, monospace','font-size':9,fill:wColor,'text-anchor':'middle'}); t2.textContent='WBGT '+wbgt.toFixed(1)+'°C'; svg.appendChild(t2);
+  }
+
+  wbToggleBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var group = btn.getAttribute('data-group');
+      document.querySelectorAll('#wbgt .toggle-btn[data-group="'+group+'"]').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      wbState[group] = btn.getAttribute('data-val');
+      calcWBGT();
+    });
+  });
+  wbTnw.addEventListener('input', calcWBGT);
+  wbTg.addEventListener('input', calcWBGT);
+  calcWBGT();
+
+  /* ---------- Calculator 2: depth's heat bill ---------- */
+  var hlDepth = document.getElementById('hl-depth'), hlShare = document.getElementById('hl-share'),
+      hlSurface = document.getElementById('hl-surface'), hlTarget = document.getElementById('hl-target'),
+      hlFlow = document.getElementById('hl-flow');
+  var AUTOCOMP_RATE = 0.98; // degrees C per 100m, well-measured physical constant
+  var AIR_RHO = 1.2, AIR_CP = 1.005;
+
+  function calcHeatLoad(){
+    var depth = parseFloat(hlDepth.value);
+    var sharePct = parseFloat(hlShare.value);
+    var surface = parseFloat(hlSurface.value);
+    var target = parseFloat(hlTarget.value);
+    var flow = parseFloat(hlFlow.value);
+
+    document.getElementById('hl-depth-val').textContent = depth.toFixed(0) + ' m';
+    document.getElementById('hl-share-val').textContent = sharePct.toFixed(0) + '%';
+    document.getElementById('hl-surface-val').textContent = surface.toFixed(0) + '°C';
+    document.getElementById('hl-target-val').textContent = target.toFixed(0) + '°C';
+    document.getElementById('hl-flow-val').textContent = flow.toFixed(0) + ' m³/s';
+
+    var share = sharePct/100;
+    var autoRise = AUTOCOMP_RATE/100 * depth;
+    var totalRise = autoRise/share;
+    var tempAtDepth = surface + totalRise;
+    var deltaT = tempAtDepth - target;
+    var heatKW = deltaT > 0 ? flow*AIR_RHO*AIR_CP*deltaT : 0;
+    var heatMW = heatKW/1000;
+
+    document.getElementById('hl-auto').textContent = autoRise.toFixed(1) + '°C';
+    document.getElementById('hl-total').textContent = totalRise.toFixed(1) + '°C';
+    document.getElementById('hl-attemp').textContent = tempAtDepth.toFixed(1) + '°C';
+    document.getElementById('hl-mw').textContent = heatMW.toFixed(1) + ' MW';
+
+    var flag = document.getElementById('hl-flag');
+    if(deltaT <= 0){
+      flag.className = 'result-flag ok';
+      flag.textContent = 'No mechanical refrigeration required — surface air already meets target';
+    } else if(heatMW < 5){
+      flag.className = 'result-flag ok';
+      flag.textContent = 'Modest load — well within a single small refrigeration plant';
+    } else if(heatMW < 20){
+      flag.className = 'result-flag warn';
+      flag.textContent = 'On the scale of Kidd Creek\'s expanded plant — well short of Resolution Copper\'s';
+    } else {
+      flag.className = 'result-flag bad';
+      flag.textContent = 'Approaching or exceeding Resolution Copper\'s underground cooling duty (30.5 MW)';
+    }
+  }
+
+  [hlDepth,hlShare,hlSurface,hlTarget,hlFlow].forEach(function(el){ el.addEventListener('input', calcHeatLoad); });
+  calcHeatLoad();
+
+  /* ---------- QUIZ ---------- */
+  var QUESTIONS = [
+    {
+      scenario: "A working area has a natural wet-bulb temperature of 26°C and a globe temperature of 34°C.",
+      q: "Using the indoor WBGT formula, what's the calculated WBGT?",
+      options: [
+        "30.0°C — a simple average of the two readings.",
+        "28.4°C — 0.7×26 + 0.3×34.",
+        "34.0°C — WBGT always equals the higher of the two readings.",
+        "26.0°C — globe temperature isn't used indoors."
+      ],
+      correct: 1,
+      feedback: "WBGT = 0.7×Tnw + 0.3×Tg = 0.7×26 + 0.3×34 = 18.2 + 10.2 = 28.4°C. The formula deliberately weights the wet-bulb (humidity-driven) reading more heavily than radiant heat."
+    },
+    {
+      scenario: "Two crews are working at the same WBGT of 29°C — one doing light work, one doing heavy work, both at a 50–75% work/rest ratio, both acclimatized.",
+      q: "Based on the ACGIH screening table, what's different about their situations?",
+      options: [
+        "Nothing — WBGT alone determines compliance regardless of workload.",
+        "The light-work crew is within their 31.0°C limit; the heavy-work crew has already exceeded their tighter 27.5°C limit at the same WBGT.",
+        "Heavy work always has a higher WBGT limit than light work, since heavy workers generate more of their own heat tolerance.",
+        "The comparison is meaningless because heavy work isn't permitted at any WBGT."
+      ],
+      correct: 1,
+      feedback: "The ACGIH table sets progressively tighter WBGT limits as workload increases, because heavier physical work adds metabolic heat on top of the environment's heat — so the same air conditions become dangerous sooner for harder physical work."
+    },
+    {
+      scenario: "A worker's sustained heart rate is 172 bpm and their age is 35.",
+      q: "Does this trigger the field stop-work criterion described today?",
+      options: [
+        "No — 172 − 35 = 137, which is below the 180 threshold.",
+        "Yes — any heart rate above 170 automatically triggers stop-work.",
+        "Yes — because the worker is under 40 years old.",
+        "This criterion only applies to WBGT readings, not heart rate."
+      ],
+      correct: 0,
+      feedback: "172 − 35 = 137, well under the 180 threshold. The criterion (sustained heart rate minus age exceeding 180) is a simple field check precisely because it needs no equipment beyond a pulse count and doesn't require waiting for a core-temperature reading."
+    },
+    {
+      scenario: "The Mount Isa Mines study found heat exhaustion incidence was 3.17 times higher below 1,200 m depth, and cases became rare once cooling power exceeded roughly 250 W/m².",
+      q: "What makes this a strong piece of engineering evidence, rather than just a statistic?",
+      options: [
+        "It proves heat exhaustion is purely random and can't be prevented.",
+        "It converts a health outcome into a specific, testable engineering target that a mine can design a refrigeration system around and then verify against.",
+        "It shows that depth has no real effect on heat exhaustion risk.",
+        "It proves WBGT is an unreliable measurement and should be abandoned."
+      ],
+      correct: 1,
+      feedback: "A number like '250 W/m² of cooling power' is something a ventilation engineer can actually design a system to hit and then measure against — turning a correlational health finding into an actionable engineering specification."
+    },
+    {
+      scenario: "Using the heat-load calculator, you increase working depth from 500 m to 3000 m while holding all other settings fixed.",
+      q: "What happens to the required refrigeration capacity, and why?",
+      options: [
+        "It decreases, because deeper mines are naturally cooler due to rock insulation.",
+        "It increases substantially, because autocompression rise scales directly with depth, driving up both the total temperature rise and the cooling load needed to reach the same target temperature.",
+        "It stays exactly the same — depth doesn't affect autocompression.",
+        "It becomes impossible to calculate past 2000 m."
+      ],
+      correct: 1,
+      feedback: "Autocompression rise is directly proportional to depth (0.98°C per 100 m), so tripling depth roughly triples that component of the temperature rise — and with a fixed target temperature, that means a much larger gap for refrigeration to close."
+    },
+    {
+      scenario: "A mine's calculated refrigeration requirement comes out to about 28 MW at their planned working depth.",
+      q: "Based on today's real-world benchmarks, how should they interpret that number?",
+      options: [
+        "It's absurd and certainly a calculation error, since no real mine uses more than a few kW of refrigeration.",
+        "It's a large but realistic figure — in the same range as Kidd Creek's planned 19+8.5 MW system and just under Resolution Copper's 30.5 MW underground cooling duty.",
+        "It means the mine is too deep to ever be ventilated and should be abandoned.",
+        "It's irrelevant, since acclimatization schedules alone can handle any heat load."
+      ],
+      correct: 1,
+      feedback: "28 MW sits comfortably between Kidd Creek's expanded combined system and Resolution Copper's 30.5 MW underground duty — a large industrial load, but well within the range of real, operating deep-mine refrigeration systems."
+    }
+  ];
+
+  var qState = { i:0, score:0, answered:false };
+  var quizBody = document.getElementById('quiz-body');
+  var quizFill = document.getElementById('quiz-progress-fill');
+
+  function renderQuiz(){
+    if(qState.i >= QUESTIONS.length){ renderResult(); return; }
+    var item = QUESTIONS[qState.i];
+    qState.answered = false;
+    quizFill.style.width = (qState.i / QUESTIONS.length * 100) + '%';
+
+    var html = '';
+    html += '<div class="quiz-q-num">Question ' + (qState.i+1) + ' of ' + QUESTIONS.length + '</div>';
+    html += '<div class="quiz-scenario">' + item.scenario + '</div>';
+    html += '<div class="quiz-question">' + item.q + '</div>';
+    html += '<div class="quiz-options">';
+    item.options.forEach(function(opt, idx){
+      var letter = String.fromCharCode(65+idx);
+      html += '<button class="quiz-opt" data-idx="'+idx+'"><span class="qletter">'+letter+'</span><span>'+opt+'</span></button>';
+    });
+    html += '</div>';
+    html += '<div class="quiz-feedback" id="quiz-feedback"></div>';
+    html += '<div class="quiz-nav"><button class="btn" id="quiz-next" disabled>Next →</button></div>';
+    quizBody.innerHTML = html;
+
+    var opts = quizBody.querySelectorAll('.quiz-opt');
+    opts.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(qState.answered) return;
+        qState.answered = true;
+        var idx = parseInt(btn.getAttribute('data-idx'),10);
+        opts.forEach(function(o){ o.disabled = true; });
+        if(idx === item.correct){
+          btn.classList.add('correct');
+          qState.score++;
+        } else {
+          btn.classList.add('incorrect');
+          opts[item.correct].classList.add('correct');
+        }
+        var fb = document.getElementById('quiz-feedback');
+        fb.textContent = item.feedback;
+        fb.classList.add('show');
+        document.getElementById('quiz-next').disabled = false;
+      });
+    });
+    document.getElementById('quiz-next').addEventListener('click', function(){
+      qState.i++;
+      renderQuiz();
+    });
+  }
+
+  function renderResult(){
+    quizFill.style.width = '100%';
+    var msg;
+    if(qState.score === QUESTIONS.length) msg = "Perfect run. You could size a refrigeration plant and defend the number to a mine planner today.";
+    else if(qState.score >= QUESTIONS.length - 2) msg = "Solid. Go back and push the heat-load calculator's depth slider to its extremes if you haven't — watching the required MW climb makes the missed questions click.";
+    else msg = "This is exactly why the tools come before the quiz. Scroll back up, run the WBGT calculator across all four workload levels, then push the heat-load calculator's depth slider.";
+
+    quizBody.innerHTML =
+      '<div class="quiz-result">' +
+        '<div class="quiz-q-num">Checkpoint complete</div>' +
+        '<div class="score-big">' + qState.score + ' / ' + QUESTIONS.length + '</div>' +
+        '<p>' + msg + '</p>' +
+        '<div class="quiz-nav" style="justify-content:center; margin-top:1.6rem;"><button class="btn ghost" id="quiz-retry">Retry checkpoint</button></div>' +
+      '</div>';
+    document.getElementById('quiz-retry').addEventListener('click', function(){
+      qState = {i:0, score:0, answered:false};
+      renderQuiz();
+    });
+  }
+  renderQuiz();
+
+  /* ---------- instructor panel ---------- */
+  var instrToggle = document.getElementById('instr-toggle');
+  var instrPanel = document.getElementById('instr-panel');
+  var instrClose = document.getElementById('instr-close');
+  instrToggle.addEventListener('click', function(){ instrPanel.classList.add('open'); });
+  instrClose.addEventListener('click', function(){ instrPanel.classList.remove('open'); });
+  instrPanel.addEventListener('click', function(e){ if(e.target === instrPanel) instrPanel.classList.remove('open'); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') instrPanel.classList.remove('open'); });
+
+})();
+</script>

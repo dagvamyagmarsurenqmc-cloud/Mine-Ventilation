@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Sixty-Minute Clock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=Archivo:ital,wght@0,400;0,500;0,600;0,700;1,500&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   THEME: "Underground darkness / emergency signage" — a
+   deliberate single fixed DARK theme, not a light/dark toggle.
+   Justification: this week's real-world vernacular is inherently
+   one-mode — an underground mine emergency is lit only by cap
+   lamps, emergency strobes, and hazard-stripe signage against
+   total darkness. Safety-yellow + hazard black is the actual
+   color language of MSHA placards, refuge-chamber markers, and
+   escapeway reflectors. A light theme would misrepresent the
+   subject. (Distinct from Week 9's light "redline drawing" theme
+   and from prior dark themes: this is the only week to use
+   safety-yellow/black hazard striping as its primary device.)
+   ============================================================ */
+:root{
+  --bg:#101013;
+  --bg-raised:#18181C;
+  --bg-card:#1D1D22;
+  --ink:#F3F0E8;
+  --ink-soft:#A7A39C;
+  --ink-faint:#716D68;
+  --yellow:#F0B429;
+  --yellow-dim:#8A6A1E;
+  --red:#E1483C;
+  --red-soft:rgba(225,72,60,0.14);
+  --good:#4FB36B;
+  --good-soft:rgba(79,179,107,0.14);
+  --line:rgba(243,240,232,0.10);
+  --line-strong:rgba(243,240,232,0.22);
+  --font-display:'Big Shoulders Display',sans-serif;
+  --font-body:'Archivo',sans-serif;
+  --font-mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--font-body);
+  line-height:1.6;
+  font-size:16px;
+}
+.wrap{max-width:1080px;margin:0 auto;padding:0 2rem;}
+.section-pad{padding:5.5rem 0;border-top:1px solid var(--line);}
+h1,h2,h3{font-family:var(--font-display);font-weight:800;letter-spacing:0.01em;margin:0;text-transform:uppercase;}
+.eyebrow{font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--yellow);}
+.sec-title{font-size:clamp(1.7rem,3.4vw,2.5rem);line-height:1.08;margin:0.6rem 0 1.1rem;color:var(--ink);}
+.sec-dek{max-width:62ch;color:var(--ink-soft);font-size:1.05rem;}
+.mono{font-family:var(--font-mono);}
+
+/* hazard stripe utility */
+.hazard-strip{
+  height:8px;
+  background:repeating-linear-gradient(135deg,var(--yellow) 0 10px,#000 10px 20px);
+  border-radius:2px;
+}
+
+/* ---------- topbar ---------- */
+#topbar{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  background:rgba(16,16,19,0.92);backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--line);
+}
+#topbar .hazard-strip{border-radius:0;height:4px;}
+.topbar-inner{max-width:1080px;margin:0 auto;padding:0.7rem 2rem;display:flex;align-items:center;justify-content:space-between;font-family:var(--font-mono);font-size:0.78rem;color:var(--ink-soft);}
+.topbar-inner b{color:var(--yellow);}
+#progress-track{position:fixed;top:0;left:0;height:3px;background:var(--red);z-index:60;width:0%;transition:width 0.1s;}
+
+/* ---------- hero ---------- */
+#hero{padding:8.5rem 0 4rem;}
+#hero h1{font-size:clamp(2.4rem,5.6vw,4.2rem);line-height:0.98;}
+#hero h1 .accent{color:var(--yellow);}
+.hero-dek{max-width:60ch;color:var(--ink-soft);font-size:1.12rem;margin:1.4rem 0 2rem;}
+.hero-meta{display:flex;gap:2.5rem;flex-wrap:wrap;margin-bottom:2.6rem;}
+.hero-meta div span{display:block;}
+.hero-meta .hm-label{font-family:var(--font-mono);font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:0.25rem;}
+.hero-meta .hm-val{font-weight:700;font-size:1.02rem;}
+.drawing-box{background:var(--bg-raised);border:1px solid var(--line-strong);border-radius:6px;padding:1.5rem 1.5rem 1rem;}
+.drawing-cap{font-family:var(--font-mono);font-size:0.72rem;color:var(--ink-faint);text-align:center;margin-top:0.6rem;letter-spacing:0.03em;}
+
+/* ---------- principle ---------- */
+.principle-box{background:var(--bg-raised);border-left:3px solid var(--yellow);border-radius:4px;padding:1.6rem 1.8rem;margin:2.2rem 0;}
+.pb-label{font-family:var(--font-mono);font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--yellow);margin-bottom:0.6rem;}
+.principle-box blockquote{margin:0 0 0.7rem;font-size:1.08rem;font-style:italic;color:var(--ink);}
+.principle-box cite{font-size:0.85rem;color:var(--ink-soft);font-style:normal;}
+
+.layer-list{display:flex;flex-direction:column;gap:0;margin-top:2rem;border:1px solid var(--line-strong);border-radius:6px;overflow:hidden;}
+.layer-row{display:flex;gap:1.2rem;padding:1.2rem 1.4rem;border-bottom:1px solid var(--line);align-items:baseline;}
+.layer-row:last-child{border-bottom:none;}
+.layer-num{font-family:var(--font-display);font-size:1.8rem;color:var(--yellow-dim);width:2.4rem;flex-shrink:0;}
+.layer-row.active .layer-num{color:var(--yellow);}
+.layer-title{font-weight:700;font-size:1.02rem;}
+.layer-body{color:var(--ink-soft);font-size:0.94rem;}
+
+/* ---------- case files ---------- */
+.case{border:1px solid var(--line-strong);border-radius:6px;margin-bottom:1rem;overflow:hidden;background:var(--bg-raised);}
+.case-head{display:flex;align-items:center;gap:1.2rem;padding:1.2rem 1.4rem;cursor:pointer;user-select:none;}
+.case-head:hover{background:var(--bg-card);}
+.case-stat{font-family:var(--font-display);font-size:1.5rem;color:var(--yellow);min-width:6.5rem;font-weight:800;}
+.case.fail .case-stat{color:var(--red);}
+.case.success .case-stat{color:var(--good);}
+.case-head-text{flex:1;}
+.case-head-text .ct{font-weight:700;font-size:1.02rem;}
+.case-head-text .cs{font-family:var(--font-mono);font-size:0.76rem;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.04em;}
+.case-chev{color:var(--ink-faint);transition:transform 0.2s;font-family:var(--font-mono);}
+.case.open .case-chev{transform:rotate(180deg);}
+.case-body{max-height:0;overflow:hidden;transition:max-height 0.3s ease;}
+.case.open .case-body{max-height:900px;}
+.case-body-inner{padding:0 1.4rem 1.4rem;color:var(--ink-soft);font-size:0.96rem;}
+.case-tag{display:inline-block;font-family:var(--font-mono);font-size:0.68rem;background:var(--bg-card);border:1px solid var(--line-strong);border-radius:3px;padding:0.15rem 0.5rem;margin-right:0.4rem;color:var(--ink-soft);}
+.case-callout{background:var(--red-soft);border-left:3px solid var(--red);border-radius:4px;padding:0.9rem 1.1rem;margin-top:0.9rem;font-size:0.92rem;}
+.case.success .case-callout{background:var(--good-soft);border-left-color:var(--good);}
+
+/* ---------- criteria/reg cards ---------- */
+.crit-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1.8rem;}
+@media(max-width:900px){.crit-grid{grid-template-columns:repeat(2,1fr);}}
+.crit-card{background:var(--bg-raised);border:1px solid var(--line-strong);border-radius:6px;padding:1.2rem;}
+.crit-card .cc-num{font-family:var(--font-mono);font-size:0.68rem;color:var(--yellow);letter-spacing:0.08em;}
+.crit-card h4{font-size:1rem;margin:0.5rem 0 0.5rem;font-family:var(--font-body);font-weight:700;text-transform:none;}
+.crit-card p{font-size:0.88rem;color:var(--ink-soft);margin:0;}
+
+/* ---------- calculator shared ---------- */
+.calc-panel{background:var(--bg-raised);border:1px solid var(--line-strong);border-radius:8px;padding:2rem;margin-top:2rem;display:grid;grid-template-columns:1fr 1fr;gap:2rem;}
+@media(max-width:820px){.calc-panel{grid-template-columns:1fr;}}
+.field-group{background:var(--bg-card);border:1px solid var(--line);border-radius:6px;padding:1rem 1.1rem;margin-bottom:1rem;}
+.fg-title{font-family:var(--font-mono);font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);display:flex;justify-content:space-between;margin-bottom:0.6rem;}
+.fg-title .fg-result{color:var(--yellow);font-weight:600;}
+.field{margin-bottom:0.7rem;}
+.field:last-child{margin-bottom:0;}
+.field label{display:flex;justify-content:space-between;font-size:0.88rem;margin-bottom:0.35rem;color:var(--ink-soft);}
+.field .fval{color:var(--ink);font-weight:600;}
+input[type="range"]{width:100%;accent-color:var(--yellow);}
+.toggle-row{display:flex;gap:0.5rem;margin-bottom:0.7rem;}
+.toggle-btn{flex:1;background:var(--bg-card);border:1px solid var(--line-strong);color:var(--ink-soft);font-family:var(--font-mono);font-size:0.78rem;padding:0.5rem;border-radius:4px;cursor:pointer;}
+.toggle-btn.active{background:var(--yellow);border-color:var(--yellow);color:#1a1500;font-weight:700;}
+.result-panel{background:var(--bg-card);border:1px solid var(--line);border-radius:6px;padding:1.3rem 1.4rem;}
+.result-row{display:flex;justify-content:space-between;padding:0.55rem 0;border-bottom:1px solid var(--line);font-size:0.94rem;}
+.result-row:last-child{border-bottom:none;}
+.result-row .rl{color:var(--ink-soft);}
+.result-row .rr{font-family:var(--font-mono);font-weight:600;}
+.result-row.big .rr{font-size:1.3rem;}
+.result-row.flagrow{border-radius:4px;padding:0.9rem 1rem;margin:0.6rem 0;border-bottom:none;}
+.result-row.ok-row{background:var(--good-soft);}
+.result-row.ok-row .rr{color:var(--good);}
+.result-row.danger-row{background:var(--red-soft);}
+.result-row.danger-row .rr{color:var(--red);}
+.result-flag{border-radius:4px;padding:0.8rem 1rem;font-size:0.88rem;margin-top:0.8rem;font-weight:600;}
+.result-flag.ok{background:var(--good-soft);color:var(--good);}
+.result-flag.warn{background:var(--red-soft);color:var(--red);}
+.svg-wrap{margin-top:1.2rem;background:var(--bg-card);border:1px solid var(--line);border-radius:6px;padding:0.8rem;}
+.svg-wrap svg{width:100%;height:auto;display:block;}
+.calc-note{font-size:0.85rem;color:var(--ink-faint);margin-top:1rem;padding-top:1rem;border-top:1px dashed var(--line-strong);}
+
+/* ---------- stat cards ---------- */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.8rem;}
+@media(max-width:820px){.stat-grid{grid-template-columns:1fr;}}
+.stat-card{background:var(--bg-raised);border:1px solid var(--line-strong);border-radius:6px;padding:1.4rem 1.5rem;}
+.stat-card .sv{font-family:var(--font-display);font-size:2rem;color:var(--yellow);font-weight:800;}
+.stat-card .sl{font-size:0.9rem;color:var(--ink-soft);margin-top:0.3rem;}
+.stat-card .ss{font-family:var(--font-mono);font-size:0.72rem;color:var(--ink-faint);margin-top:0.6rem;}
+
+/* ---------- quiz ---------- */
+.quiz-box{background:var(--bg-raised);border:1px solid var(--line-strong);border-radius:8px;padding:2rem;margin-top:2rem;}
+.quiz-qnum{font-family:var(--font-mono);font-size:0.72rem;color:var(--yellow);letter-spacing:0.08em;text-transform:uppercase;}
+.quiz-scenario{font-style:italic;color:var(--ink-soft);margin:0.7rem 0;font-size:0.96rem;}
+.quiz-q{font-size:1.15rem;font-weight:700;margin-bottom:1.2rem;font-family:var(--font-body);}
+.quiz-options{display:flex;flex-direction:column;gap:0.7rem;}
+.quiz-opt{text-align:left;background:var(--bg-card);border:1px solid var(--line-strong);color:var(--ink);padding:0.85rem 1rem;border-radius:4px;cursor:pointer;font-size:0.95rem;display:flex;gap:0.7rem;transition:background 0.15s,border-color 0.15s;font-family:var(--font-body);}
+.quiz-opt:hover:not(:disabled){border-color:var(--yellow);}
+.quiz-opt .qletter{font-family:var(--font-mono);color:var(--yellow);flex-shrink:0;}
+.quiz-opt.correct{background:var(--good-soft);border-color:var(--good);}
+.quiz-opt.incorrect{background:var(--red-soft);border-color:var(--red);}
+.quiz-opt:disabled{cursor:default;}
+.quiz-explain{background:var(--bg-card);border-left:3px solid var(--yellow);border-radius:4px;padding:0.9rem 1.1rem;margin-top:1.2rem;font-size:0.92rem;color:var(--ink-soft);}
+.quiz-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.4rem;}
+.quiz-next{background:var(--yellow);color:#1a1500;border:none;font-family:var(--font-mono);font-weight:700;padding:0.7rem 1.4rem;border-radius:4px;cursor:pointer;font-size:0.85rem;}
+.quiz-next:disabled{opacity:0.35;cursor:default;}
+.quiz-score{font-family:var(--font-mono);font-size:0.85rem;color:var(--ink-soft);}
+
+/* ---------- discuss ---------- */
+.disc-list{border:1px solid var(--line-strong);border-radius:8px;overflow:hidden;margin-top:1.8rem;}
+.disc-item{display:flex;gap:1.4rem;padding:1.4rem;border-bottom:1px solid var(--line);}
+.disc-item:last-child{border-bottom:none;}
+.disc-num{font-family:var(--font-display);font-size:1.7rem;color:var(--yellow-dim);width:2rem;flex-shrink:0;}
+.disc-tag{font-family:var(--font-mono);font-size:0.68rem;color:var(--yellow);text-transform:uppercase;letter-spacing:0.06em;}
+.lookahead{background:var(--bg-raised);border:1px solid var(--line-strong);border-left:3px solid var(--yellow);border-radius:6px;padding:1.4rem 1.6rem;margin-top:1.6rem;}
+.lookahead .la-label{font-family:var(--font-mono);font-size:0.68rem;color:var(--yellow);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.5rem;}
+
+/* ---------- footer ---------- */
+footer{padding:3.5rem 0;border-top:1px solid var(--line);}
+footer .fnote{font-size:0.8rem;color:var(--ink-faint);line-height:1.9;}
+footer .fnote a{color:var(--ink-soft);}
+
+/* ---------- instructor panel ---------- */
+#instr-toggle{position:fixed;bottom:1.4rem;left:1.4rem;z-index:70;background:var(--red);color:#fff;border:none;border-radius:24px;padding:0.7rem 1.2rem;font-family:var(--font-mono);font-size:0.78rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.4);}
+#instr-panel{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:80;display:none;align-items:flex-start;justify-content:center;padding:4rem 1.5rem;overflow:auto;}
+#instr-panel.open{display:flex;}
+.instr-inner{background:var(--bg-card);border:1px solid var(--line-strong);border-radius:8px;max-width:760px;width:100%;padding:2rem;}
+.instr-inner h3{font-size:1.1rem;text-transform:none;font-family:var(--font-body);font-weight:700;}
+.instr-close{float:right;background:none;border:1px solid var(--line-strong);color:var(--ink-soft);border-radius:50%;width:2rem;height:2rem;cursor:pointer;font-size:1rem;}
+.run-table{width:100%;border-collapse:collapse;margin-top:1rem;font-size:0.9rem;}
+.run-table th{text-align:left;font-family:var(--font-mono);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-faint);padding-bottom:0.5rem;border-bottom:1px solid var(--line-strong);}
+.run-table td{padding:0.6rem 0.6rem 0.6rem 0;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink-soft);}
+.run-table td:first-child{font-family:var(--font-mono);color:var(--yellow);white-space:nowrap;}
+</style>
+</head>
+<body>
+
+<div id="progress-track"></div>
+<div id="topbar">
+  <div class="hazard-strip"></div>
+  <div class="topbar-inner">
+    <span><b>MINE VENTILATION</b> · WEEK 10</span>
+    <span>EMERGENCY PLANNING, ESCAPE &amp; MINE RESCUE</span>
+  </div>
+</div>
+
+<!-- ============ HERO ============ -->
+<section id="hero">
+  <div class="wrap">
+    <span class="eyebrow">Mine ventilation · Week 10</span>
+    <h1>You get one <span class="accent">sixty-minute</span> canister and your own two legs.</h1>
+    <p class="hero-dek">Every calculator this semester assumed the mine keeps running. This week assumes it doesn't. When ventilation fails catastrophically — fire, explosion, an unplanned inrush — the design question flips: not "how much air does the mine need," but "does the air on your back get you out before it runs out."</p>
+    <div class="hero-meta">
+      <div><span class="hm-label">Session</span><span class="hm-val">90 minutes</span></div>
+      <div><span class="hm-label">Format</span><span class="hm-val">Two calculators, three case files</span></div>
+      <div><span class="hm-label">You'll leave with</span><span class="hm-val">Why "close enough" escape plans kill miners</span></div>
+    </div>
+
+    <div class="drawing-box">
+      <svg viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schematic evacuation map showing a working face connected by a primary escapeway marked with hazard striping to a refuge chamber rated for ninety-six hours, and onward to a surface portal, with a sixty-minute self-contained self-rescuer clock shown above the route.">
+        <defs>
+          <pattern id="hazstripe" width="14" height="14" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+            <rect width="14" height="14" fill="#F0B429"/>
+            <rect width="7" height="14" fill="#000"/>
+          </pattern>
+        </defs>
+
+        <!-- working face -->
+        <rect x="40" y="120" width="70" height="60" rx="3" fill="none" stroke="#5A5650" stroke-width="1.5"/>
+        <text x="75" y="205" font-family="IBM Plex Mono, monospace" font-size="10" fill="#A7A39C" text-anchor="middle">WORKING FACE</text>
+
+        <!-- escapeway corridor with hazard stripe edge -->
+        <rect x="110" y="144" width="330" height="12" fill="url(#hazstripe)"/>
+        <line x1="110" y1="163" x2="440" y2="163" stroke="#5A5650" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="275" y="185" font-family="IBM Plex Mono, monospace" font-size="10" fill="#F0B429" text-anchor="middle">PRIMARY ESCAPEWAY — HAZARD-MARKED</text>
+
+        <!-- refuge chamber -->
+        <rect x="440" y="118" width="90" height="64" rx="4" fill="none" stroke="#F0B429" stroke-width="2"/>
+        <text x="485" y="145" font-family="IBM Plex Mono, monospace" font-size="10" fill="#F3F0E8" text-anchor="middle" font-weight="700">REFUGE</text>
+        <text x="485" y="159" font-family="IBM Plex Mono, monospace" font-size="10" fill="#F3F0E8" text-anchor="middle" font-weight="700">CHAMBER</text>
+        <text x="485" y="205" font-family="IBM Plex Mono, monospace" font-size="9" fill="#A7A39C" text-anchor="middle">96 HR RATED</text>
+
+        <!-- second leg to surface -->
+        <rect x="530" y="144" width="110" height="12" fill="url(#hazstripe)"/>
+        <text x="585" y="185" font-family="IBM Plex Mono, monospace" font-size="10" fill="#F0B429" text-anchor="middle">TO SURFACE</text>
+        <path d="M640 118 L640 182 L670 150 Z" fill="none" stroke="#F3F0E8" stroke-width="1.5"/>
+        <text x="655" y="205" font-family="IBM Plex Mono, monospace" font-size="9" fill="#A7A39C" text-anchor="middle">PORTAL</text>
+
+        <!-- clock motif, clear of every other element -->
+        <circle cx="230" cy="60" r="26" fill="none" stroke="#E1483C" stroke-width="2.5"/>
+        <line x1="230" y1="60" x2="230" y2="42" stroke="#E1483C" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="230" y1="60" x2="243" y2="66" stroke="#E1483C" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="230" y1="86" x2="230" y2="96" stroke="#E1483C" stroke-width="1" stroke-dasharray="2,2"/>
+        <text x="230" y="105" font-family="IBM Plex Mono, monospace" font-size="12" fill="#E1483C" text-anchor="middle" font-weight="700">60 MIN SCSR</text>
+        <line x1="230" y1="112" x2="230" y2="140" stroke="#E1483C" stroke-width="1" stroke-dasharray="2,2"/>
+      </svg>
+      <div class="drawing-cap">ONE ESCAPE ROUTE, THREE INDEPENDENT SAFETY LAYERS — SELF-ESCAPE, REFUGE, RESCUE</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PRINCIPLE ============ -->
+<section id="principle" class="section-pad">
+  <div class="wrap">
+    <span class="eyebrow">01 · The layered plan</span>
+    <h2 class="sec-title">A real escape plan doesn't bet on one thing working.</h2>
+    <p class="sec-dek">Every underground emergency plan on paper is really three fallback layers stacked in order. Each one is designed to catch the miner if the layer before it fails — and each layer is governed by a completely different piece of engineering, not just good intentions.</p>
+
+    <div class="layer-list">
+      <div class="layer-row active">
+        <div class="layer-num">01</div>
+        <div>
+          <div class="layer-title">Self-escape, on a 60-minute clock</div>
+          <div class="layer-body">Every miner carries a self-contained self-rescuer (SCSR) rated for roughly 60 minutes of oxygen. If the primary escapeway is walkable, this is the whole plan: get out, or get to a refuge chamber, before the canister runs dry.</div>
+        </div>
+      </div>
+      <div class="layer-row">
+        <div class="layer-num">02</div>
+        <div>
+          <div class="layer-title">Refuge, for up to 96 hours</div>
+          <div class="layer-body">If self-escape isn't possible — smoke, collapse, unknown atmosphere — the plan shifts to surviving in place. A refuge alternative is required to sustain its occupants for 96 hours: its own air, its own scrubbers, its own food and water.</div>
+        </div>
+      </div>
+      <div class="layer-row">
+        <div class="layer-num">03</div>
+        <div>
+          <div class="layer-title">Rescue, from the surface in</div>
+          <div class="layer-body">Trained mine rescue teams, breathing on closed-circuit apparatus, go in to find and bring out anyone the first two layers couldn't reach on their own. This is the layer everyone hopes never gets used.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="principle-box">
+      <div class="pb-label">What this week is really about</div>
+      <blockquote>Three of this course's real disasters happened because one specific layer above failed — a missing stopping let smoke into an escapeway, a mine map didn't show flooded workings, an atmosphere made the third layer impossible to use at all. The engineering, not the heroics, decided who came home.</blockquote>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CASE FILES ============ -->
+<section id="cases" class="section-pad">
+  <div class="wrap">
+    <span class="eyebrow">02 · Three mines, three outcomes</span>
+    <h2 class="sec-title">Same layered plan. Wildly different results.</h2>
+    <p class="sec-dek">Two of these are American coal mines nine days apart in January 2006 — together they rewrote federal mine safety law. The third shows the layered plan working exactly as designed.</p>
+
+    <div class="case fail" id="case-sago">
+      <div class="case-head" data-case="case-sago">
+        <div class="case-stat">12 of 13</div>
+        <div class="case-head-text">
+          <div class="ct">Sago Mine, West Virginia — January 2, 2006</div>
+          <div class="cs">Escapeway failure · barricade · delayed rescue callout</div>
+        </div>
+        <div class="case-chev">▾</div>
+      </div>
+      <div class="case-body"><div class="case-body-inner">
+        <p><span class="case-tag">EXPLOSION</span><span class="case-tag">13 TRAPPED</span><span class="case-tag">12 DEAD</span> A methane explosion in a sealed area — the leading theory points to a lightning strike detected at the surface roughly two seconds before the underground seismic signature — trapped 13 miners roughly 2.5 miles from the portal. With the escapeway impassable, the crew built a makeshift barricade of curtain material rather than attempt to walk out.</p>
+        <p>Specialized mine rescue teams were not dispatched until 8:04 a.m. — more than 90 minutes after the blast — and were later withdrawn for over nine hours out of concern that rescue equipment could trigger a second explosion. One survivor, Randal McCloy Jr., was found roughly 41 hours after the explosion. He lived; the other twelve did not.</p>
+        <div class="case-callout">This disaster — plus two more in West Virginia and Kentucky within the same five months — became the direct cause of the MINER Act of 2006, the law that created today's refuge-alternative and tracking-system requirements.</div>
+      </div></div>
+    </div>
+
+    <div class="case fail" id="case-aracoma">
+      <div class="case-head" data-case="case-aracoma">
+        <div class="case-stat">2 dead</div>
+        <div class="case-head-text">
+          <div class="ct">Aracoma Alma Mine No. 1, West Virginia — January 19, 2006</div>
+          <div class="cs">Two missing stoppings let smoke into the primary escapeway</div>
+        </div>
+        <div class="case-chev">▾</div>
+      </div>
+      <div class="case-body"><div class="case-body-inner">
+        <p><span class="case-tag">CONVEYOR FIRE</span><span class="case-tag">VENTILATION FAILURE</span> A conveyor-belt fire broke out seventeen days after Sago, at a mine owned by Massey Energy subsidiary Aracoma Coal. The fire itself was survivable — the failure was in the ventilation control around it. Two required stopping-wall sections, each roughly 18 by 6 feet, were missing from the wall separating the belt entry from the designated escapeway.</p>
+        <p>Smoke poured through the gaps directly into the route miners were supposed to walk out on. Two miners, Ellery Hatfield and Don Bragg, became separated from their crew in the smoke and died of carbon monoxide poisoning. Four mine foremen later pleaded guilty to skipping the mandated escapeway fire drills that might have prepared the crew for exactly this scenario.</p>
+        <div class="case-callout">This is the case for a ventilation course specifically: the emergency plan on paper was fine. The physical stoppings that were supposed to keep the escapeway smoke-free simply weren't there.</div>
+      </div></div>
+    </div>
+
+    <div class="case success" id="case-quecreek">
+      <div class="case-head" data-case="case-quecreek">
+        <div class="case-stat">9 of 9</div>
+        <div class="case-head-text">
+          <div class="ct">Quecreek Mine, Pennsylvania — July 24–28, 2002</div>
+          <div class="cs">Trapped 77 hours by a flooded-mine breach — all nine rescued alive</div>
+        </div>
+        <div class="case-chev">▾</div>
+      </div>
+      <div class="case-body"><div class="case-body-inner">
+        <p><span class="case-tag">INRUSH</span><span class="case-tag">ALL SURVIVED</span> A crew broke through into the abandoned, water-filled Saxman/Harrison #2 Mine — the map they were working from was uncertified and didn't show the full extent of the old workings. Nine miners retreated to the highest point of their section as water rose behind them and became trapped for roughly 77 hours.</p>
+        <p>Surface crews drilled a 6.5-inch borehole to the trapped pocket and pumped in pressurized compressed air, both to hold the floodwater back and to keep the air pocket breathable. A separate rescue shaft was then drilled, and each miner was raised individually in a purpose-built 26-inch steel-mesh capsule at roughly 15-minute intervals.</p>
+        <div class="case-callout">Every miner survived. The difference from Sago wasn't luck — it was a known, plannable engineering path (a borehole to a known pocket) executed fast, instead of an unknown atmosphere that made intervention too dangerous to attempt quickly.</div>
+      </div></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ CALCULATOR 1: THE SIXTY-MINUTE CLOCK ============ -->
+<section id="escape" class="section-pad">
+  <div class="wrap">
+    <span class="eyebrow">03 · Instrument 1 — The flagship</span>
+    <h2 class="sec-title">Will you actually make it?</h2>
+    <p class="sec-dek">NIOSH timed real miners self-escaping on SCSRs across travelway heights from a 30-inch crawl to a full 7-foot walk — speeds ranged from 96 to 264 feet per minute. Set your escapeway height and distance to safety, and see whether a standard 60-minute canister gets you there. Figures are kept in the feet and minutes the underlying US regulations and NIOSH studies actually use.</p>
+
+    <div class="calc-panel">
+      <div>
+        <div class="field-group">
+          <div class="fg-title">Escapeway height <span class="fg-result" id="e-speed-label">152 ft/min</span></div>
+          <div class="field">
+            <label>Height of travelway <span class="fval mono" id="e-height-val">48 in</span></label>
+            <input type="range" id="e-height" min="30" max="84" step="1" value="48">
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="fg-title">Distance to safety <span class="fg-result" id="e-dist-label">6000 ft</span></div>
+          <div class="field">
+            <label>Distance to nearest refuge or exit <span class="fval mono" id="e-dist-val">6000 ft</span></label>
+            <input type="range" id="e-dist" min="500" max="9000" step="100" value="6000">
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="fg-title">SCSR rating</div>
+          <div class="toggle-row">
+            <button class="toggle-btn active" id="e-scsr60" data-min="60">60-MIN STANDARD</button>
+            <button class="toggle-btn" id="e-scsr30" data-min="30">30-MIN CLASS-30</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="result-panel">
+          <div class="result-row"><span class="rl">Escape speed</span><span class="rr" id="e-r-speed">152 ft/min</span></div>
+          <div class="result-row"><span class="rl">Time required</span><span class="rr" id="e-r-time">39.5 min</span></div>
+          <div class="result-row big"><span class="rl">SCSR duration</span><span class="rr" id="e-r-scsr">60 min</span></div>
+          <div class="result-row flagrow ok-row" id="e-r-margin-row"><span class="rl">Margin</span><span class="rr" id="e-r-margin">+20.5 min</span></div>
+          <div id="e-flag" class="result-flag ok">Comfortable margin — you reach safety with time to spare.</div>
+          <div class="svg-wrap">
+            <svg id="e-svg" viewBox="0 0 420 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Bar chart comparing time required to self-escape against available SCSR duration"></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="calc-note">Escape speeds interpolated linearly between NIOSH's two measured endpoints — 96 ft/min crawling at 30 inches of height, 264 ft/min walking upright at 7 feet — as a teaching approximation across the tested range, not as additional measured data points. Source: Berry, Doyle, Kamon &amp; Mitchell, NIOSH, "Escapetime Studies in Underground Coal Mines," 1983.</div>
+  </div>
+</section>
+
+<!-- ============ MINER ACT / REGULATION CARDS ============ -->
+<section id="reg" class="section-pad">
+  <div class="wrap">
+    <span class="eyebrow">04 · What the law now requires</span>
+    <h2 class="sec-title">The MINER Act of 2006 — written in the aftermath of Sago and Aracoma.</h2>
+    <p class="sec-dek">Signed five months after Sago and three disasters in one year, the MINER Act didn't just add paperwork — it mandated specific hardware and specific response times that didn't exist in US coal mines before 2006.</p>
+
+    <div class="crit-grid">
+      <div class="crit-card">
+        <div class="cc-num">REQUIREMENT 1</div>
+        <h4>Tracking &amp; two-way comms</h4>
+        <p>Within three years, every mine required to deploy wireless two-way communication and electronic tracking so surface command knows where trapped miners actually are — technology that simply wasn't standard before 2006.</p>
+      </div>
+      <div class="crit-card">
+        <div class="cc-num">REQUIREMENT 2</div>
+        <h4>Refuge alternatives</h4>
+        <p>A mine-wide network of refuge chambers or built refuge bays, sized and rated so that when self-escape fails, staying put for up to 96 hours is a survivable choice rather than a barricade of curtain cloth.</p>
+      </div>
+      <div class="crit-card">
+        <div class="cc-num">REQUIREMENT 3</div>
+        <h4>Two rescue teams, one hour</h4>
+        <p>Every mine must maintain at least two experienced mine rescue teams able to reach the site within one hour of ground travel — Sago's callout took over 90 minutes just to begin.</p>
+      </div>
+      <div class="crit-card">
+        <div class="cc-num">REQUIREMENT 4</div>
+        <h4>15-minute notification</h4>
+        <p>Any incident posing a reasonable risk of death must be reported within 15 minutes, with real civil penalties for delay — closing the gap that let Sago's response start so late.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CALCULATOR 2: REFUGE CHAMBER SIZING ============ -->
+<section id="refuge" class="section-pad">
+  <div class="wrap">
+    <span class="eyebrow">05 · Instrument 2</span>
+    <h2 class="sec-title">Does an off-the-shelf chamber actually fit your crew?</h2>
+    <p class="sec-dek">30 CFR Part 7 Subpart L sets hard minimums for refuge alternatives: floor space, interior volume by seam height, airflow, and food energy, all sized to hold a crew for 96 hours. Set your crew size and seam height and see what the regulation actually demands — and whether a real MSHA-approved unit covers it.</p>
+
+    <div class="calc-panel">
+      <div>
+        <div class="field-group">
+          <div class="fg-title">Crew size</div>
+          <div class="field">
+            <label>Occupants to shelter <span class="fval mono" id="r-n-val">12 people</span></label>
+            <input type="range" id="r-n" min="4" max="30" step="1" value="12">
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="fg-title">Seam height <span class="fg-result" id="r-vol-label">45.0 ft³/person</span></div>
+          <div class="field">
+            <label>Mining/seam height band <span class="fval mono" id="r-height-val">42–48 in</span></label>
+            <input type="range" id="r-height" min="0" max="4" step="1" value="2">
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="fg-title">Rated duration</div>
+          <div class="field">
+            <label>Hours of survivability required <span class="fval mono" id="r-dur-val">96 hr</span></label>
+            <input type="range" id="r-dur" min="48" max="96" step="4" value="96">
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="result-panel">
+          <div class="result-row"><span class="rl">Minimum floor area (15 ft²/person)</span><span class="rr" id="r-r-area">180 ft²</span></div>
+          <div class="result-row"><span class="rl">Minimum interior volume</span><span class="rr" id="r-r-vol">540 ft³</span></div>
+          <div class="result-row"><span class="rl">Minimum airflow (12.5 cfm/person)</span><span class="rr" id="r-r-flow">150 ft³/min</span></div>
+          <div class="result-row big"><span class="rl">Food energy for full duration</span><span class="rr" id="r-r-food">96,000 kcal</span></div>
+          <div id="r-flag" class="result-flag ok">Fits a standard 12-person MSHA-approved chamber (MineARC CoalSAFE).</div>
+        </div>
+      </div>
+    </div>
+    <div class="calc-note">Floor space, volume-by-seam-height bands, airflow rate, and 2,000 kcal/person/day are drawn directly from 30 CFR §7.504–.506, current eCFR text. Reference chamber capacities (12 / 16 / 20 / 24-person) from MineARC's MSHA-approved CoalSAFE HS spec sheet. Atmosphere inside a compliant chamber must stay between 18.5–23% O₂ and average ≤1.0% CO₂ (spikes capped at 2.5%) — fixed regulatory limits, not affected by the sliders above.</div>
+  </div>
+</section>
+
+<!-- ============ FAN REVERSAL ============ -->
+<section id="ventcontrol" class="section-pad">
+  <div class="wrap">
+    <span class="eyebrow">06 · The judgment call nobody has fully solved</span>
+    <h2 class="sec-title">Should you reverse the main fans during a fire?</h2>
+    <p class="sec-dek">This is the one part of emergency ventilation planning that isn't reducible to a formula. NIOSH's own fire-ventilation researchers state it plainly: "a quantified ventilation strategy is not generally available" for mine fires. Reversal can clear smoke from one escapeway — or push it into another.</p>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="sv">Q<sup>0.30</sup></div>
+        <div class="sl">Critical velocity needed to stop smoke rolling back upwind of a fire scales with fire intensity to roughly the 0.30 power — a real, tested relationship, not a rule of thumb.</div>
+        <div class="ss">Edwards, Franks, Friel &amp; Yuan, NIOSH/SME, 2005</div>
+      </div>
+      <div class="stat-card">
+        <div class="sv">1.4–3.7 m</div>
+        <div class="sl">Measured visibility at only 54% of critical velocity, for a 130 kW test fire — roughly one to two body-lengths, in the smoke you'd be walking through to self-escape.</div>
+        <div class="ss">Same NIOSH/SME fire-ventilation study, 2005</div>
+      </div>
+      <div class="stat-card">
+        <div class="sv">30–65%</div>
+        <div class="sl">A main fan run in reverse typically delivers only this share of its forward-mode airflow, with static pressure dropping to 9–42% of normal — reversal is a materially weaker ventilation mode, not a free switch.</div>
+        <div class="ss">Dunn, Bhattacharya &amp; Rajaram, NIOSH contract report, 1983</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RESCUE TEAMS ============ -->
+<section id="rescueteam" class="section-pad">
+  <div class="wrap">
+    <span class="eyebrow">07 · The last layer</span>
+    <h2 class="sec-title">Who actually goes back in.</h2>
+    <p class="sec-dek">Mine rescue teams are the layer that operates when the first two have already failed for someone underground — trained, drilled, and equipped specifically for atmospheres nobody else is allowed to enter.</p>
+
+    <div class="crit-grid">
+      <div class="crit-card">
+        <div class="cc-num">TEAM SIZE</div>
+        <h4>5 members + 1 alternate</h4>
+        <p>The federal minimum team structure for underground coal mine rescue, per 30 CFR Part 49 — six defined roles including captain, gas person, and map person.</p>
+      </div>
+      <div class="crit-card">
+        <div class="cc-num">APPARATUS</div>
+        <h4>Dräger BG-4</h4>
+        <p>The closed-circuit, compressed-oxygen breathing apparatus found to be the overwhelmingly dominant standard among US mine rescue teams at national competitions.</p>
+      </div>
+      <div class="crit-card">
+        <div class="cc-num">TRAINING</div>
+        <h4>96 hours a year</h4>
+        <p>Minimum annual refresher training, plus underground drills every 6 months and two local mine rescue contests a year — competition as an institutionalized training tool, not just a sport.</p>
+      </div>
+      <div class="crit-card">
+        <div class="cc-num">RESPONSE</div>
+        <h4>1-hour travel, always</h4>
+        <p>Two full teams must be reachable within one hour of ground travel at all times miners are underground — a direct, numeric MINER Act requirement.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ QUIZ ============ -->
+<section id="quiz" class="section-pad">
+  <div class="wrap">
+    <span class="eyebrow">08 · Checkpoint</span>
+    <h2 class="sec-title">Six scenarios before the debrief.</h2>
+    <p class="sec-dek">Pulling on today's calculators and case files — and everything before them.</p>
+
+    <div class="quiz-box" id="quiz-box"></div>
+  </div>
+</section>
+
+<!-- ============ DISCUSSION ============ -->
+<section id="discuss" class="section-pad">
+  <div class="wrap">
+    <span class="eyebrow">09 · Debrief</span>
+    <h2 class="sec-title">For the last 15 minutes: talk it through.</h2>
+    <p class="sec-dek">In pairs or small groups.</p>
+
+    <div class="disc-list">
+      <div class="disc-item">
+        <div class="disc-num">1</div>
+        <div>
+          <div class="disc-tag">Chamber spacing</div>
+          <p>Refuge alternatives must sit within 30 minutes' travel of the working face. What happens to a mine's refuge network — and its cost — as the workings extend further from the portal over the mine's life?</p>
+        </div>
+      </div>
+      <div class="disc-item">
+        <div class="disc-num">2</div>
+        <div>
+          <div class="disc-tag">Fan reversal authority</div>
+          <p>Given that "a quantified ventilation strategy is not generally available" for mine fires, who should have the authority to order a fan reversal in the first five minutes, and what information would they actually need in hand to make that call?</p>
+        </div>
+      </div>
+      <div class="disc-item">
+        <div class="disc-num">3</div>
+        <div>
+          <div class="disc-tag">The barricade decision</div>
+          <p>Sago's crew chose to barricade rather than attempt to walk out through an unknown atmosphere. With today's tracking and communication requirements, what information could change that calculation for a future crew facing the same choice?</p>
+        </div>
+      </div>
+      <div class="disc-item">
+        <div class="disc-num">4</div>
+        <div>
+          <div class="disc-tag">When rescue isn't an option</div>
+          <p>At Pike River in 2010, repeated explosions in a gas-rich seam made entry too dangerous to attempt at all — 29 miners were never recovered in a rescue. If rescue itself can become impossible, what does that imply about how much weight mine design should put on prevention versus response?</p>
+        </div>
+      </div>
+      <div class="disc-item">
+        <div class="disc-num">5</div>
+        <div>
+          <div class="disc-tag">Regulation after tragedy</div>
+          <p>The MINER Act's major provisions all trace to specific 2006 disasters. What's the tradeoff between a safety requirement written in direct response to one incident versus one designed proactively — and can you think of a failure mode the MINER Act doesn't cover?</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="lookahead">
+      <div class="la-label">Still ahead</div>
+      With individual systems, planning, and now emergency response all covered, the semester's closing sessions turn to auditing a complete ventilation plan end to end — reading a real mine's actual submissions and regulatory record, and stress-testing a design the way an inspector would.
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="fnote">
+      Sources: Sago Mine disaster and Aracoma Alma Mine accident, Wikipedia (cross-referenced with West Virginia Encyclopedia and MSHA investigation records) · Quecreek Mine rescue, Wikipedia and U.S. Department of Labor 20th-anniversary retrospective · Pike River mine disaster, New Zealand Ministry for Culture and Heritage (nzhistory.govt.nz) and NZ Police "Operation Pike" records · MINER Act of 2006 (Public Law 109-236), MSHA summary and Federal Register implementing rule · 30 CFR Part 7, Subpart L (Refuge Alternatives) and Part 49 (Mine Rescue Teams), current eCFR text · MineARC CoalSAFE MSHA-HS refuge chamber specification sheet · Berry, Doyle, Kamon &amp; Mitchell, NIOSH, "Recommended Guidelines for Oxygen Self-Rescuers, Vol. III: Escapetime Studies in Underground Coal Mines," 1983 · Edwards, Franks, Friel &amp; Yuan, "Experimental and Modeling Investigation of the Effect of Ventilation on Smoke Rollback in a Mine Entry," NIOSH/SME, 2005 · Dunn, Bhattacharya &amp; Rajaram, "Reverse Performance Characteristics of Main Mine Fans," NIOSH contract report, 1983 · PMC4823775, "A Review of Mine Rescue Ensembles for Underground Coal Mining in the United States."
+    </div>
+  </div>
+</footer>
+
+<button id="instr-toggle">⚑ INSTRUCTOR VIEW</button>
+<div id="instr-panel">
+  <div class="instr-inner">
+    <button class="instr-close" id="instr-close">×</button>
+    <div class="eyebrow">FOR THE INSTRUCTOR</div>
+    <h3>Suggested 90-minute run of show</h3>
+    <table class="run-table">
+      <tr><th>Time</th><th>Segment</th></tr>
+      <tr><td>0:00–0:08</td><td>Open on the hero evacuation map. Ask cold: "you have a 60-minute canister — what three numbers do you actually need to know it's enough?"</td></tr>
+      <tr><td>0:08–0:18</td><td>The three-layer principle (self-escape / refuge / rescue), tied to which layer failed in each upcoming case file.</td></tr>
+      <tr><td>0:18–0:34</td><td>Three case files — Sago, Aracoma Alma, Quecreek. Assign one row each to small groups; have each report which layer failed or held.</td></tr>
+      <tr><td>0:34–0:50</td><td>Escape-time calculator in pairs. Have every pair find a height/distance combination where the margin goes negative.</td></tr>
+      <tr><td>0:50–0:58</td><td>MINER Act cards — trace each of the four requirements back to a specific 2006 disaster.</td></tr>
+      <tr><td>0:58–1:12</td><td>Refuge chamber sizing calculator. Have students size a chamber for their own hypothetical 18-person crew.</td></tr>
+      <tr><td>1:12–1:18</td><td>Fan reversal stat cards — use as a discussion primer, not a formula to memorize.</td></tr>
+      <tr><td>1:18–1:28</td><td>Run the 6-question checkpoint as a live class poll.</td></tr>
+      <tr><td>1:28–1:30</td><td>Close on the "still ahead" note.</td></tr>
+    </table>
+    <p style="margin-top:1.2rem;font-size:0.85rem;color:var(--ink-soft);">Safe to project this page directly to students — this panel is only visible to whoever clicks the button.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- topbar / scroll progress ---------- */
+  window.addEventListener('scroll', function(){
+    var h = document.documentElement;
+    var scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    document.getElementById('progress-track').style.width = scrolled + '%';
+  });
+
+  /* ---------- case accordion ---------- */
+  document.querySelectorAll('.case-head').forEach(function(head){
+    head.addEventListener('click', function(){
+      head.closest('.case').classList.toggle('open');
+    });
+  });
+  document.getElementById('case-sago').classList.add('open');
+
+  function el(tag, attrs){
+    var e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for(var k in attrs){ e.setAttribute(k, attrs[k]); }
+    return e;
+  }
+
+  /* ---------- Calculator 1: Sixty-minute clock (escape feasibility) ---------- */
+  var eHeight = document.getElementById('e-height'), eDist = document.getElementById('e-dist');
+  var scsrBtn60 = document.getElementById('e-scsr60'), scsrBtn30 = document.getElementById('e-scsr30');
+  var scsrMinutes = 60;
+
+  scsrBtn60.addEventListener('click', function(){ scsrMinutes = 60; scsrBtn60.classList.add('active'); scsrBtn30.classList.remove('active'); calcEscape(); });
+  scsrBtn30.addEventListener('click', function(){ scsrMinutes = 30; scsrBtn30.classList.add('active'); scsrBtn60.classList.remove('active'); calcEscape(); });
+
+  function escapeSpeed(heightIn){
+    // linear interpolation between NIOSH's two measured endpoints
+    var lowH = 30, highH = 84, lowSpeed = 96, highSpeed = 264;
+    var frac = (heightIn - lowH) / (highH - lowH);
+    return lowSpeed + frac * (highSpeed - lowSpeed);
+  }
+
+  function calcEscape(){
+    var height = parseFloat(eHeight.value);
+    var dist = parseFloat(eDist.value);
+    var speed = escapeSpeed(height);
+    var timeReq = dist / speed;
+    var margin = scsrMinutes - timeReq;
+
+    document.getElementById('e-height-val').textContent = height.toFixed(0) + ' in';
+    document.getElementById('e-speed-label').textContent = speed.toFixed(0) + ' ft/min';
+    document.getElementById('e-dist-val').textContent = dist.toFixed(0) + ' ft';
+    document.getElementById('e-dist-label').textContent = dist.toFixed(0) + ' ft';
+    document.getElementById('e-r-speed').textContent = speed.toFixed(0) + ' ft/min';
+    document.getElementById('e-r-time').textContent = timeReq.toFixed(1) + ' min';
+    document.getElementById('e-r-scsr').textContent = scsrMinutes.toFixed(0) + ' min';
+
+    var marginEl = document.getElementById('e-r-margin');
+    var marginRow = document.getElementById('e-r-margin-row');
+    var flag = document.getElementById('e-flag');
+
+    if(margin >= 0){
+      marginEl.textContent = '+' + margin.toFixed(1) + ' min';
+      marginRow.className = 'result-row flagrow ok-row';
+      flag.className = 'result-flag ok';
+      flag.textContent = margin >= 15 ? 'Comfortable margin — you reach safety with time to spare.' : 'You make it, but with less than 15 minutes to spare — thin margin for a real emergency.';
+    } else {
+      marginEl.textContent = margin.toFixed(1) + ' min';
+      marginRow.className = 'result-row flagrow danger-row';
+      flag.className = 'result-flag warn';
+      flag.textContent = 'Does not make it on this canister alone — needs a closer refuge alternative or a cached second SCSR along the route.';
+    }
+
+    drawEscapeBars(timeReq, scsrMinutes);
+  }
+
+  function drawEscapeBars(timeReq, scsrDur){
+    var svg = document.getElementById('e-svg');
+    while(svg.firstChild){ svg.removeChild(svg.firstChild); }
+    var x0 = 140, x1 = 330;
+    var rowH = 34, top = 24;
+    var maxVal = Math.max(timeReq, scsrDur) || 1;
+
+    var rows = [
+      {label:'Time required', val:timeReq, color: timeReq > scsrDur ? '#E1483C' : '#F0B429'},
+      {label:'SCSR duration', val:scsrDur, color:'#F3F0E8'}
+    ];
+
+    rows.forEach(function(r, i){
+      var y = top + i * rowH;
+      var w = Math.max(2, (r.val / maxVal) * (x1 - x0));
+
+      var lbl = el('text',{x:x0-8,y:y+4,'font-family':'IBM Plex Mono, monospace','font-size':10,fill:'#A7A39C','text-anchor':'end'}); lbl.textContent = r.label; svg.appendChild(lbl);
+      svg.appendChild(el('rect',{x:x0,y:y-8,width:x1-x0,height:16,fill:'none',stroke:'rgba(243,240,232,0.18)','stroke-width':1}));
+      svg.appendChild(el('rect',{x:x0,y:y-8,width:w,height:16,fill:r.color}));
+
+      var vt = el('text',{x:x0+w+8,y:y+4,'font-family':'IBM Plex Mono, monospace','font-size':10,fill:r.color,'text-anchor':'start'}); vt.textContent = r.val.toFixed(1) + ' min'; svg.appendChild(vt);
+    });
+  }
+
+  [eHeight, eDist].forEach(function(inp){ inp.addEventListener('input', calcEscape); });
+  calcEscape();
+
+  /* ---------- Calculator 2: Refuge chamber sizing ---------- */
+  var rN = document.getElementById('r-n'), rHeight = document.getElementById('r-height'), rDur = document.getElementById('r-dur');
+  var HEIGHT_BANDS = [
+    {label:'≤36 in', vol:30},
+    {label:'36–42 in', vol:37.5},
+    {label:'42–48 in', vol:45},
+    {label:'48–54 in', vol:52.5},
+    {label:'>54 in', vol:60}
+  ];
+  var CHAMBER_SIZES = [12, 16, 20, 24];
+
+  function calcRefuge(){
+    var n = parseInt(rN.value, 10);
+    var bandIdx = parseInt(rHeight.value, 10);
+    var band = HEIGHT_BANDS[bandIdx];
+    var durHr = parseFloat(rDur.value);
+
+    var area = n * 15;
+    var vol = n * band.vol;
+    var flow = n * 12.5;
+    var food = n * 2000 * (durHr / 24);
+
+    document.getElementById('r-n-val').textContent = n + ' people';
+    document.getElementById('r-height-val').textContent = band.label;
+    document.getElementById('r-vol-label').textContent = band.vol.toFixed(1) + ' ft³/person';
+    document.getElementById('r-dur-val').textContent = durHr.toFixed(0) + ' hr';
+
+    document.getElementById('r-r-area').textContent = area.toFixed(0) + ' ft²';
+    document.getElementById('r-r-vol').textContent = vol.toFixed(0) + ' ft³';
+    document.getElementById('r-r-flow').textContent = flow.toFixed(0) + ' ft³/min';
+    document.getElementById('r-r-food').textContent = food.toLocaleString('en-US', {maximumFractionDigits:0}) + ' kcal';
+
+    var flag = document.getElementById('r-flag');
+    var fitSize = null;
+    for(var i=0;i<CHAMBER_SIZES.length;i++){
+      if(n <= CHAMBER_SIZES[i]){ fitSize = CHAMBER_SIZES[i]; break; }
+    }
+    if(fitSize){
+      flag.className = 'result-flag ok';
+      flag.textContent = 'Fits a standard ' + fitSize + '-person MSHA-approved chamber (MineARC CoalSAFE).';
+    } else {
+      flag.className = 'result-flag warn';
+      flag.textContent = 'Exceeds the largest standard off-the-shelf configuration (24-person) — needs a custom or multi-chamber installation.';
+    }
+  }
+
+  [rN, rHeight, rDur].forEach(function(inp){ inp.addEventListener('input', calcRefuge); });
+  calcRefuge();
+
+  /* ---------- QUIZ ---------- */
+  var QUESTIONS = [
+    {
+      scenario: "A crew works in a 30-inch-high heading, 6,000 feet from the nearest refuge chamber, each carrying a standard SCSR.",
+      q: "Using NIOSH's crawling escape speed of 96 ft/min, do they reach the chamber inside a 60-minute canister?",
+      opts: [
+        "Yes — it takes about 39.5 minutes, comfortably inside 60.",
+        "No — it takes about 62.5 minutes, which exceeds a 60-minute canister.",
+        "Yes, exactly at the 60-minute limit with no margin.",
+        "It's impossible to estimate without knowing the mine's total airflow."
+      ],
+      correct: 1,
+      explain: "6,000 ft ÷ 96 ft/min = 62.5 minutes — 2.5 minutes past a 60-minute SCSR's rated duration. This is exactly the kind of low-seam, long-distance combination the escape calculator is built to expose."
+    },
+    {
+      scenario: "A refuge alternative needs to shelter a 20-person crew for the standard rated duration.",
+      q: "What is the minimum floor area required under 30 CFR Part 7 Subpart L?",
+      opts: [
+        "100 ft² (5 ft² per person)",
+        "300 ft² (15 ft² per person)",
+        "500 ft² (25 ft² per person)",
+        "600 ft² (30 ft² per person)"
+      ],
+      correct: 1,
+      explain: "The regulation sets a floor-space minimum of 15 ft² per person: 20 × 15 = 300 ft². (25 ft²/person is a commonly misremembered figure — it isn't the actual regulatory minimum.)"
+    },
+    {
+      q: "What specific 2006 disaster was the direct trigger for the MINER Act's refuge-alternative and tracking-system requirements?",
+      opts: [
+        "Upper Big Branch",
+        "Pike River",
+        "Sago Mine",
+        "Quecreek Mine"
+      ],
+      correct: 2,
+      explain: "The Sago Mine disaster (January 2, 2006) — plus the Aracoma Alma fire and Darby Mine explosion later that year — directly led to the MINER Act, signed just over five months later in June 2006."
+    },
+    {
+      q: "Why isn't reversing the main fan always the right call during an underground fire?",
+      opts: [
+        "It's illegal under federal regulation in every case.",
+        "Reversed fans typically deliver only 30–65% of forward-mode airflow, and reversal can push smoke into a different escapeway instead of clearing it.",
+        "Fans are mechanically incapable of running in reverse.",
+        "Reversal only matters for auxiliary fans, never main fans."
+      ],
+      correct: 1,
+      explain: "NIOSH research found no fixed rule for when to reverse — it's a genuine engineering judgment call, complicated by the fact that reverse-mode fans lose a large share of their airflow and pressure, and can route smoke toward, not away from, people trying to escape."
+    },
+    {
+      q: "What made Quecreek's outcome so different from Sago's, given both involved miners trapped underground?",
+      opts: [
+        "Quecreek's miners were rescued by mine rescue teams entering on foot.",
+        "Quecreek had a known, engineerable path to the trapped miners (a borehole to a known air pocket), while Sago's atmosphere was too dangerous to approach quickly.",
+        "Quecreek's miners were never actually in danger.",
+        "Sago had no self-rescuers available underground."
+      ],
+      correct: 1,
+      explain: "Quecreek's rescue plan — pressurized air through a borehole, then a rescue shaft and capsule — was executable quickly because the miners' location and the water hazard were both known and stable. Sago's post-explosion atmosphere was unknown and possibly still explosive, which is what delayed entry for hours."
+    },
+    {
+      q: "Inside a compliant refuge chamber, what CO2 limit must be maintained on average?",
+      opts: [
+        "≤ 0.1%",
+        "≤ 1.0%, with short excursions capped at 2.5%",
+        "≤ 5.0% at all times",
+        "There is no regulated CO2 limit, only an oxygen limit"
+      ],
+      correct: 1,
+      explain: "30 CFR §7.506(b)(3) caps average CO2 at 1.0%, with brief excursions allowed up to 2.5% — alongside a separate oxygen band of 18.5–23%."
+    }
+  ];
+
+  var quizState = { idx:0, score:0, answered:false };
+  var quizBox = document.getElementById('quiz-box');
+
+  function renderQuestion(){
+    var q = QUESTIONS[quizState.idx];
+    var html = '<div class="quiz-qnum">QUESTION ' + (quizState.idx+1) + ' OF ' + QUESTIONS.length + '</div>';
+    if(q.scenario){ html += '<div class="quiz-scenario">' + q.scenario + '</div>'; }
+    html += '<div class="quiz-q">' + q.q + '</div>';
+    html += '<div class="quiz-options">';
+    var letters = ['A','B','C','D'];
+    q.opts.forEach(function(opt, idx){
+      html += '<button class="quiz-opt" data-idx="'+idx+'"><span class="qletter">'+letters[idx]+'</span><span>'+opt+'</span></button>';
+    });
+    html += '</div>';
+    html += '<div id="quiz-explain-slot"></div>';
+    html += '<div class="quiz-nav"><span class="quiz-score">SCORE: ' + quizState.score + ' / ' + QUESTIONS.length + '</span><button class="quiz-next" id="quiz-next-btn" disabled>' + (quizState.idx === QUESTIONS.length-1 ? 'FINISH' : 'NEXT →') + '</button></div>';
+    quizBox.innerHTML = html;
+    quizState.answered = false;
+
+    var opts = quizBox.querySelectorAll('.quiz-opt');
+    opts.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(quizState.answered) return;
+        quizState.answered = true;
+        var idx = parseInt(btn.getAttribute('data-idx'), 10);
+        opts.forEach(function(b){ b.disabled = true; });
+        if(idx === q.correct){
+          btn.classList.add('correct');
+          quizState.score++;
+        } else {
+          btn.classList.add('incorrect');
+          opts[q.correct].classList.add('correct');
+        }
+        document.getElementById('quiz-explain-slot').innerHTML = '<div class="quiz-explain">' + q.explain + '</div>';
+        document.getElementById('quiz-next-btn').disabled = false;
+        quizBox.querySelector('.quiz-score').textContent = 'SCORE: ' + quizState.score + ' / ' + QUESTIONS.length;
+      });
+    });
+
+    document.getElementById('quiz-next-btn').addEventListener('click', function(){
+      if(quizState.idx < QUESTIONS.length - 1){
+        quizState.idx++;
+        renderQuestion();
+      } else {
+        quizBox.innerHTML = '<div class="quiz-q">Checkpoint complete — ' + quizState.score + ' / ' + QUESTIONS.length + ' correct.</div><p style="color:var(--ink-soft);">Review any missed questions with your discussion group before moving on.</p>';
+      }
+    });
+  }
+  renderQuestion();
+
+  /* ---------- Instructor panel ---------- */
+  var instrToggle = document.getElementById('instr-toggle');
+  var instrPanel = document.getElementById('instr-panel');
+  var instrClose = document.getElementById('instr-close');
+  instrToggle.addEventListener('click', function(){ instrPanel.classList.add('open'); });
+  instrClose.addEventListener('click', function(){ instrPanel.classList.remove('open'); });
+  instrPanel.addEventListener('click', function(e){ if(e.target === instrPanel){ instrPanel.classList.remove('open'); } });
+
+})();
+</script>
+</body>
+</html>

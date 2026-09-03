@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Hardware Behind the Airflow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,500&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   THEME: "Equipment catalog / spec sheet" — a deliberate single
+   fixed DARK theme, not a light/dark toggle.
+   Justification: this special session's subject is physical
+   hardware — fans, stoppings, gas monitors — the kind of gear
+   photographed and spec'd in a manufacturer's dark-background
+   technical catalog. Dual accent colors (orange for hardware,
+   teal for instrumentation) are a structural device unique to
+   this session, distinguishing it from every numbered week's
+   single-accent palette.
+   ============================================================ */
+:root{
+  --bg:#1C1F22;
+  --bg-raised:#24282C;
+  --bg-card:#2B3035;
+  --ink:#ECEEF0;
+  --ink-soft:#9BA3AA;
+  --ink-faint:#6B7278;
+  --orange:#E8722C;
+  --orange-soft:rgba(232,114,44,0.14);
+  --teal:#3FA8A0;
+  --teal-soft:rgba(63,168,160,0.14);
+  --good:#4FB36B;
+  --good-soft:rgba(79,179,107,0.14);
+  --warn:#D9503F;
+  --warn-soft:rgba(217,80,63,0.14);
+  --line:rgba(236,238,240,0.10);
+  --line-strong:rgba(236,238,240,0.22);
+  --font-display:'Bebas Neue',sans-serif;
+  --font-body:'Public Sans',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--font-body);
+  line-height:1.62;
+  font-size:16px;
+}
+.wrap{max-width:1080px;margin:0 auto;padding:0 2rem;}
+.section-pad{padding:5.5rem 0;border-top:1px solid var(--line);}
+h1,h2,h3{font-family:var(--font-display);font-weight:400;letter-spacing:0.01em;margin:0;}
+.eyebrow{font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--orange);}
+.eyebrow.teal{color:var(--teal);}
+.sec-title{font-size:clamp(1.8rem,3.6vw,2.6rem);line-height:1.08;margin:0.6rem 0 1.1rem;color:var(--ink);}
+.sec-dek{max-width:64ch;color:var(--ink-soft);font-size:1.05rem;}
+.mono{font-family:var(--font-mono);}
+
+/* ---------- topbar ---------- */
+#topbar{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  background:rgba(28,31,34,0.94);backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--line);
+}
+.topbar-inner{max-width:1080px;margin:0 auto;padding:0.75rem 2rem;display:flex;align-items:center;justify-content:space-between;font-family:var(--font-mono);font-size:0.76rem;color:var(--ink-soft);}
+.topbar-inner b{color:var(--orange);}
+#progress-track{position:fixed;top:0;left:0;height:3px;background:var(--orange);z-index:60;width:0%;transition:width 0.1s;}
+
+/* ---------- hero ---------- */
+#hero{padding:7.5rem 0 4rem;}
+#hero h1{font-size:clamp(2.4rem,5.6vw,4rem);line-height:0.98;}
+#hero h1 .accent{color:var(--orange);}
+.hero-dek{max-width:62ch;color:var(--ink-soft);font-size:1.1rem;margin:1.4rem 0 2rem;}
+.hero-meta{display:flex;gap:2.5rem;flex-wrap:wrap;margin-bottom:2.6rem;}
+.hero-meta div span{display:block;}
+.hero-meta .hm-label{font-family:var(--font-mono);font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:0.25rem;}
+.hero-meta .hm-val{font-weight:700;font-size:1.02rem;}
+.drawing-box{background:var(--bg-raised);border:1px solid var(--line-strong);border-radius:6px;padding:1.5rem 1.5rem 1rem;}
+.drawing-cap{font-family:var(--font-mono);font-size:0.72rem;color:var(--ink-faint);text-align:center;margin-top:0.6rem;letter-spacing:0.03em;}
+
+/* ---------- part-catalog cards ---------- */
+.part-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.8rem;}
+@media(max-width:900px){.part-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:640px){.part-grid{grid-template-columns:1fr;}}
+.part-card{background:var(--bg-raised);border:1px solid var(--line-strong);border-radius:6px;padding:1.3rem;}
+.part-card .pc-num{font-family:var(--font-mono);font-size:0.68rem;color:var(--orange);letter-spacing:0.06em;}
+.part-card.teal .pc-num{color:var(--teal);}
+.part-card h4{font-size:1.05rem;margin:0.5rem 0 0.5rem;font-family:var(--font-body);font-weight:700;text-transform:none;}
+.part-card p{font-size:0.88rem;color:var(--ink-soft);margin:0;}
+.part-card .pc-src{font-family:var(--font-mono);font-size:0.68rem;color:var(--ink-faint);margin-top:0.6rem;}
+
+.crit-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1.8rem;}
+@media(max-width:900px){.crit-grid{grid-template-columns:repeat(2,1fr);}}
+.crit-card{background:var(--bg-raised);border:1px solid var(--line-strong);border-radius:6px;padding:1.2rem;}
+.crit-card .cc-num{font-family:var(--font-mono);font-size:0.68rem;color:var(--orange);letter-spacing:0.08em;}
+.crit-card.teal .cc-num{color:var(--teal);}
+.crit-card h4{font-size:1rem;margin:0.5rem 0 0.5rem;font-family:var(--font-body);font-weight:700;text-transform:none;}
+.crit-card p{font-size:0.88rem;color:var(--ink-soft);margin:0;}
+
+/* ---------- flagged-fact note ---------- */
+.flag-note{background:var(--warn-soft);border:1px dashed var(--warn);border-radius:6px;padding:1.1rem 1.4rem;margin-top:1.6rem;font-size:0.9rem;color:var(--ink-soft);}
+.flag-note b{color:var(--warn);}
+.principle-box{background:var(--bg-raised);border-left:3px solid var(--orange);border-radius:4px;padding:1.6rem 1.8rem;margin:2.2rem 0;}
+.pb-label{font-family:var(--font-mono);font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--orange);margin-bottom:0.6rem;}
+.principle-box blockquote{margin:0 0 0.7rem;font-size:1.05rem;font-style:italic;color:var(--ink);}
+.principle-box cite{font-size:0.85rem;color:var(--ink-soft);font-style:normal;}
+
+/* ---------- timeline (seal strength) ---------- */
+.timeline{display:flex;gap:0;margin-top:1.8rem;border:1px solid var(--line-strong);border-radius:6px;overflow:hidden;}
+.tl-step{flex:1;padding:1.3rem 1.4rem;border-right:1px solid var(--line);position:relative;}
+.tl-step:last-child{border-right:none;}
+.tl-step .tl-year{font-family:var(--font-mono);font-size:0.72rem;color:var(--ink-faint);}
+.tl-step .tl-val{font-family:var(--font-display);font-size:2.2rem;color:var(--warn);margin:0.3rem 0;}
+.tl-step.after .tl-val{color:var(--good);}
+.tl-step p{font-size:0.85rem;color:var(--ink-soft);margin:0;}
+@media(max-width:820px){.timeline{flex-direction:column;} .tl-step{border-right:none;border-bottom:1px solid var(--line);} .tl-step:last-child{border-bottom:none;}}
+
+/* ---------- calculator shared ---------- */
+.calc-panel{background:var(--bg-raised);border:1px solid var(--line-strong);border-radius:8px;padding:2rem;margin-top:2rem;display:grid;grid-template-columns:1fr 1fr;gap:2rem;}
+@media(max-width:820px){.calc-panel{grid-template-columns:1fr;}}
+.field-group{background:var(--bg-card);border:1px solid var(--line);border-radius:6px;padding:1rem 1.1rem;margin-bottom:1rem;}
+.fg-title{font-family:var(--font-mono);font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);display:flex;justify-content:space-between;margin-bottom:0.6rem;}
+.fg-title .fg-result{color:var(--orange);font-weight:600;}
+.field{margin-bottom:0.7rem;}
+.field:last-child{margin-bottom:0;}
+.field label{display:flex;justify-content:space-between;font-size:0.88rem;margin-bottom:0.35rem;color:var(--ink-soft);}
+.field .fval{color:var(--ink);font-weight:600;}
+input[type="range"]{width:100%;accent-color:var(--orange);}
+.toggle-row{display:flex;gap:0.5rem;margin-bottom:0.7rem;}
+.toggle-btn{flex:1;background:var(--bg-card);border:1px solid var(--line-strong);color:var(--ink-soft);font-family:var(--font-mono);font-size:0.78rem;padding:0.5rem;border-radius:4px;cursor:pointer;}
+.toggle-btn.active{background:var(--orange);border-color:var(--orange);color:#1a0e00;font-weight:700;}
+.result-panel{background:var(--bg-card);border:1px solid var(--line);border-radius:6px;padding:1.3rem 1.4rem;}
+.result-row{display:flex;justify-content:space-between;padding:0.55rem 0;border-bottom:1px solid var(--line);font-size:0.94rem;}
+.result-row:last-child{border-bottom:none;}
+.result-row .rl{color:var(--ink-soft);}
+.result-row .rr{font-family:var(--font-mono);font-weight:600;}
+.result-row.big .rr{font-size:1.3rem;}
+.result-flag{border-radius:4px;padding:0.8rem 1rem;font-size:0.88rem;margin-top:0.8rem;font-weight:600;}
+.result-flag.ok{background:var(--good-soft);color:var(--good);}
+.result-flag.warn{background:var(--warn-soft);color:var(--warn);}
+.result-flag.info{background:var(--teal-soft);color:var(--teal);}
+.calc-note{font-size:0.85rem;color:var(--ink-faint);margin-top:1rem;padding-top:1rem;border-top:1px dashed var(--line-strong);}
+
+/* ---------- stat cards ---------- */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.8rem;}
+@media(max-width:820px){.stat-grid{grid-template-columns:1fr;}}
+.stat-card{background:var(--bg-raised);border:1px solid var(--line-strong);border-radius:6px;padding:1.4rem 1.5rem;}
+.stat-card .sv{font-family:var(--font-display);font-size:2rem;color:var(--teal);font-weight:400;}
+.stat-card .sl{font-size:0.9rem;color:var(--ink-soft);margin-top:0.3rem;}
+.stat-card .ss{font-family:var(--font-mono);font-size:0.72rem;color:var(--ink-faint);margin-top:0.6rem;}
+
+/* ---------- quiz ---------- */
+.quiz-box{background:var(--bg-raised);border:1px solid var(--line-strong);border-radius:8px;padding:2rem;margin-top:2rem;}
+.quiz-qnum{font-family:var(--font-mono);font-size:0.72rem;color:var(--orange);letter-spacing:0.08em;text-transform:uppercase;}
+.quiz-scenario{font-style:italic;color:var(--ink-soft);margin:0.7rem 0;font-size:0.96rem;}
+.quiz-q{font-size:1.15rem;font-weight:700;margin-bottom:1.2rem;font-family:var(--font-body);}
+.quiz-options{display:flex;flex-direction:column;gap:0.7rem;}
+.quiz-opt{text-align:left;background:var(--bg-card);border:1px solid var(--line-strong);color:var(--ink);padding:0.85rem 1rem;border-radius:4px;cursor:pointer;font-size:0.95rem;display:flex;gap:0.7rem;transition:background 0.15s,border-color 0.15s;}
+.quiz-opt:hover:not(:disabled){border-color:var(--orange);}
+.quiz-opt .qletter{font-family:var(--font-mono);color:var(--orange);flex-shrink:0;}
+.quiz-opt.correct{background:var(--good-soft);border-color:var(--good);}
+.quiz-opt.incorrect{background:var(--warn-soft);border-color:var(--warn);}
+.quiz-opt:disabled{cursor:default;}
+.quiz-explain{background:var(--bg-card);border-left:3px solid var(--orange);border-radius:4px;padding:0.9rem 1.1rem;margin-top:1.2rem;font-size:0.92rem;color:var(--ink-soft);}
+.quiz-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.4rem;}
+.quiz-next{background:var(--orange);color:#1a0e00;border:none;font-family:var(--font-mono);font-weight:700;padding:0.7rem 1.4rem;border-radius:4px;cursor:pointer;font-size:0.85rem;}
+.quiz-next:disabled{opacity:0.35;cursor:default;}
+.quiz-score{font-family:var(--font-mono);font-size:0.85rem;color:var(--ink-soft);}
+
+/* ---------- discuss ---------- */
+.disc-list{border:1px solid var(--line-strong);border-radius:8px;overflow:hidden;margin-top:1.8rem;}
+.disc-item{display:flex;gap:1.4rem;padding:1.4rem;border-bottom:1px solid var(--line);}
+.disc-item:last-child{border-bottom:none;}
+.disc-num{font-family:var(--font-display);font-size:1.7rem;color:var(--orange);width:2rem;flex-shrink:0;}
+.disc-tag{font-family:var(--font-mono);font-size:0.68rem;color:var(--orange);text-transform:uppercase;letter-spacing:0.06em;}
+.closing-note{background:var(--bg-raised);border:1px solid var(--line-strong);border-left:3px solid var(--teal);border-radius:6px;padding:1.4rem 1.6rem;margin-top:1.6rem;}
+.closing-note .la-label{font-family:var(--font-mono);font-size:0.68rem;color:var(--teal);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.5rem;}
+
+/* ---------- footer ---------- */
+footer{padding:3.5rem 0;border-top:1px solid var(--line);}
+footer .fnote{font-size:0.8rem;color:var(--ink-faint);line-height:1.9;}
+
+/* ---------- instructor panel ---------- */
+#instr-toggle{position:fixed;bottom:1.4rem;left:1.4rem;z-index:70;background:var(--orange);color:#1a0e00;border:none;border-radius:24px;padding:0.7rem 1.2rem;font-family:var(--font-mono);font-size:0.78rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.4);}
+#instr-panel{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:80;display:none;align-items:flex-start;justify-content:center;padding:4rem 1.5rem;overflow:auto;}
+#instr-panel.open{display:flex;}
+.instr-inner{background:var(--bg-card);border:1px solid var(--line-strong);border-radius:8px;max-width:760px;width:100%;padding:2rem;}
+.instr-inner h3{font-size:1.1rem;text-transform:none;font-family:var(--font-body);font-weight:700;}
+.instr-close{float:right;background:none;border:1px solid var(--line-strong);color:var(--ink-soft);border-radius:50%;width:2rem;height:2rem;cursor:pointer;font-size:1rem;}
+.run-table{width:100%;border-collapse:collapse;margin-top:1rem;font-size:0.9rem;}
+.run-table th{text-align:left;font-family:var(--font-mono);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-faint);padding-bottom:0.5rem;border-bottom:1px solid var(--line-strong);}
+.run-table td{padding:0.6rem 0.6rem 0.6rem 0;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink-soft);}
+.run-table td:first-child{font-family:var(--font-mono);color:var(--orange);white-space:nowrap;}
+</style>
+</head>
+<body>
+
+<div id="progress-track"></div>
+<div id="topbar">
+  <div class="topbar-inner">
+    <span><b>MINE VENTILATION</b> · SPECIAL SESSION</span>
+    <span>KEY EQUIPMENT: FANS, CONTROLS &amp; INSTRUMENTS</span>
+  </div>
+</div>
+
+<!-- ============ HERO ============ -->
+<section id="hero">
+  <div class="wrap">
+    <span class="eyebrow">Special session · practical equipment</span>
+    <h1>Every calculator this semester lived on a whiteboard. This equipment is what <span class="accent">actually moves the air</span>.</h1>
+    <p class="hero-dek">A ventilation design is only as real as the fan that produces the pressure, the stopping that holds the split, and the instrument that tells you whether any of it is working. This session is a hands-on tour of the physical hardware behind every number you've calculated this term.</p>
+    <div class="hero-meta">
+      <div><span class="hm-label">Session</span><span class="hm-val">90 minutes</span></div>
+      <div><span class="hm-label">Format</span><span class="hm-val">Two calculators, three equipment families</span></div>
+      <div><span class="hm-label">You'll leave with</span><span class="hm-val">What to actually specify, and why</span></div>
+    </div>
+
+    <div class="drawing-box">
+      <svg viewBox="0 0 640 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cutaway schematic of an axial mine ventilation fan showing the casing, hub and blades, and drive motor, with an airflow arrow through the fan and a real power range from 37 kilowatts to 4 megawatts.">
+        <!-- casing -->
+        <rect x="120" y="80" width="320" height="120" rx="8" fill="none" stroke="#9BA3AA" stroke-width="2"/>
+        <text x="280" y="65" font-family="JetBrains Mono, monospace" font-size="11" fill="#9BA3AA" text-anchor="middle">CASING</text>
+        <line x1="280" y1="70" x2="280" y2="80" stroke="#9BA3AA" stroke-width="1" stroke-dasharray="2,2"/>
+
+        <!-- hub + blades -->
+        <circle cx="280" cy="140" r="18" fill="none" stroke="#E8722C" stroke-width="2.5"/>
+        <g stroke="#E8722C" stroke-width="3" stroke-linecap="round">
+          <line x1="280" y1="140" x2="280" y2="95"/>
+          <line x1="280" y1="140" x2="317" y2="118"/>
+          <line x1="280" y1="140" x2="317" y2="162"/>
+          <line x1="280" y1="140" x2="280" y2="185"/>
+          <line x1="280" y1="140" x2="243" y2="162"/>
+          <line x1="280" y1="140" x2="243" y2="118"/>
+        </g>
+        <text x="280" y="235" font-family="JetBrains Mono, monospace" font-size="11" fill="#E8722C" text-anchor="middle">HUB &amp; BLADES</text>
+        <line x1="280" y1="205" x2="280" y2="225" stroke="#E8722C" stroke-width="1" stroke-dasharray="2,2"/>
+
+        <!-- motor -->
+        <rect x="440" y="105" width="70" height="70" rx="4" fill="none" stroke="#3FA8A0" stroke-width="2"/>
+        <text x="475" y="200" font-family="JetBrains Mono, monospace" font-size="11" fill="#3FA8A0" text-anchor="middle">DRIVE MOTOR</text>
+        <line x1="475" y1="180" x2="475" y2="189" stroke="#3FA8A0" stroke-width="1" stroke-dasharray="2,2"/>
+        <line x1="440" y1="140" x2="410" y2="140" stroke="#9BA3AA" stroke-width="2"/>
+
+        <!-- airflow arrow -->
+        <line x1="60" y1="140" x2="105" y2="140" stroke="#ECEEF0" stroke-width="2"/>
+        <path d="M100 132 L112 140 L100 148 Z" fill="#ECEEF0"/>
+        <text x="80" y="118" font-family="JetBrains Mono, monospace" font-size="10" fill="#ECEEF0" text-anchor="middle">AIRFLOW</text>
+
+        <line x1="450" y1="140" x2="440" y2="140" stroke="#ECEEF0" stroke-width="2"/>
+
+        <!-- spec strip -->
+        <text x="280" y="270" font-family="JetBrains Mono, monospace" font-size="13" fill="#ECEEF0" text-anchor="middle" font-weight="700">REAL INSTALLED RANGE: 37 kW (AUXILIARY) → 4 MW (PRIMARY)</text>
+      </svg>
+      <div class="drawing-cap">SAME BASIC MACHINE, THREE ORDERS OF MAGNITUDE OF SCALE — HOWDEN AFRICA'S UNDERGROUND MINE FAN RANGE</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FANS ============ -->
+<section id="fans" class="section-pad">
+  <div class="wrap">
+    <span class="eyebrow">01 · The machine that produces the pressure</span>
+    <h2 class="sec-title">One basic design, doing three very different jobs.</h2>
+    <p class="sec-dek">Nearly every fan you'll meet underground is some variation on the vane-axial design in the hero diagram above — a hub, blades, a casing, and a motor. What changes between an auxiliary face fan and a primary mine fan is scale, construction rating, and where it sits in the system.</p>
+
+    <div class="part-grid">
+      <div class="part-card">
+        <div class="pc-num">DUTY 1 — AUXILIARY / FACE</div>
+        <h4>Small, portable, in the ducting</h4>
+        <p>Sits at the bottom of Howden Africa's real cited range — as small as 37 kW — pushing or pulling air through flexible or rigid ducting directly to an active heading. This is the fan behind every "auxiliary ventilation" calculation earlier this semester.</p>
+        <div class="pc-src">Howden Africa, underground mine fan range</div>
+      </div>
+      <div class="part-card">
+        <div class="pc-num">DUTY 2 — BOOSTER</div>
+        <h4>Mid-system, adds pressure partway along</h4>
+        <p>Installed underground partway through a long airway to restore pressure that's been lost to friction and leakage — exactly the equipment behind the booster reach calculator from the auxiliary &amp; booster ventilation session.</p>
+        <div class="pc-src">Same underlying vane-axial or centrifugal design, larger scale</div>
+      </div>
+      <div class="part-card">
+        <div class="pc-num">DUTY 3 — MAIN / PRIMARY</div>
+        <h4>Surface-mounted, moves the whole mine's air</h4>
+        <p>The largest machines in the fleet — Howden's real cited range tops out around 4 MW. Zitrón's installation at Prominent Hill mine (South Australia) was described by International Mining as among the largest underground axial ventilation fans installed anywhere to date.</p>
+        <div class="pc-src">Howden Africa; International Mining, Zitrón/Prominent Hill, 2020</div>
+      </div>
+    </div>
+
+    <div class="principle-box">
+      <div class="pb-label">A common assumption worth correcting</div>
+      <blockquote>There is no blanket US federal design mandate that main mine fans be reversible. 30 CFR §75.310 addresses preventing uncontrolled air reversal through a stopped fan — it does not require fans to be built reversible in the first place. Where reversal capability does exist, it's a mine-specific engineering choice, and it comes at a real cost: NIOSH testing found reversed airflow is 30–65% lower than the same fan running forward.</blockquote>
+      <cite>— 30 CFR §75.310; NIOSH/Bureau of Mines, "Reverse Performance Characteristics of Main Mine Fans"</cite>
+    </div>
+
+    <h3 style="font-family:var(--font-body);font-size:1.15rem;font-weight:700;margin-top:2.4rem;">Why a fan motor can sit in a methane atmosphere at all</h3>
+    <p class="sec-dek">Underground electric fan motors are built to a real federal "permissible" standard (30 CFR Part 18) — and the engineering logic is more interesting than "explosion-proof" suggests.</p>
+    <div class="crit-grid">
+      <div class="crit-card">
+        <div class="cc-num">CONTAIN, DON'T PREVENT</div>
+        <h4>150 psi enclosure rating</h4>
+        <p>Motor enclosures must withstand a minimum internal pressure of 150 psi — the design assumes an internal methane-air explosion can happen, and simply contains it.</p>
+      </div>
+      <div class="crit-card">
+        <div class="cc-num">COOL THE ESCAPING GAS</div>
+        <h4>Flame-arresting joints</h4>
+        <p>Gas escapes through narrow, precisely-machined joint paths (as little as 0.002 in. clearance) long and tight enough to cool it below ignition temperature before it reaches the outside atmosphere.</p>
+      </div>
+      <div class="crit-card">
+        <div class="cc-num">NO HOT SURFACES</div>
+        <h4>150°C max external temperature</h4>
+        <p>Independent of the enclosure itself, no external surface may exceed 150°C during normal operation — hot enough to ignite methane on contact if this cap didn't exist.</p>
+      </div>
+      <div class="crit-card">
+        <div class="cc-num">EVEN THE BEARINGS</div>
+        <h4>No shortcuts on the flame path</h4>
+        <p>The regulation explicitly bars ball and roller bearings and oil seals from serving as a flame-arresting path — a separate dedicated path is required regardless.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CALCULATOR 1: SIZE THE FAN ============ -->
+<section id="fan-calc" class="section-pad">
+  <div class="wrap">
+    <span class="eyebrow">02 · Instrument 1 — The flagship</span>
+    <h2 class="sec-title">Size a fan, then see where it lands in the real fleet.</h2>
+    <p class="sec-dek">Shaft power is simply hydraulic power (airflow × pressure) divided by fan efficiency. Set your duty point and see whether your fan falls in auxiliary, booster, or main-fan territory — benchmarked against Howden's real cited underground range of 37 kW to 4 MW.</p>
+
+    <div class="calc-panel">
+      <div>
+        <div class="field-group">
+          <div class="fg-title">Duty point</div>
+          <div class="field">
+            <label>Airflow required <span class="fval mono" id="f-q-val">150 m³/s</span></label>
+            <input type="range" id="f-q" min="5" max="350" step="5" value="150">
+          </div>
+          <div class="field">
+            <label>Pressure required <span class="fval mono" id="f-dp-val">2500 Pa</span></label>
+            <input type="range" id="f-dp" min="200" max="6500" step="50" value="2500">
+          </div>
+          <div class="field">
+            <label>Assumed fan efficiency <span class="fval mono" id="f-eta-val">75%</span></label>
+            <input type="range" id="f-eta" min="50" max="85" step="1" value="75">
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="fg-title">Emergency reversal</div>
+          <div class="toggle-row">
+            <button class="toggle-btn active" id="f-rev-off">FORWARD OPERATION</button>
+            <button class="toggle-btn" id="f-rev-on">REVERSED FOR EMERGENCY</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="result-panel">
+          <div class="result-row"><span class="rl">Hydraulic power</span><span class="rr" id="f-r-hyd">375.0 kW</span></div>
+          <div class="result-row big"><span class="rl">Shaft power required</span><span class="rr" id="f-r-shaft">500.0 kW</span></div>
+          <div id="f-flag" class="result-flag info">Booster or mid-size primary fan duty — within Howden's real cited underground fan range (37 kW–4 MW).</div>
+          <div class="result-row" id="f-rev-row" style="display:none;"><span class="rl">Airflow if reversed (30–65% loss)</span><span class="rr" id="f-r-revflow">52.5–105.0 m³/s</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="calc-note">Fan efficiency is left as an adjustable assumption (50–85%) rather than a fixed spec — real efficiency varies by fan design and operating point. Duty-range benchmarks and the 30–65% reversal penalty are both real, cited figures (Howden Africa; NIOSH/Bureau of Mines) — the specific 37 kW/4 MW boundary is Howden's actual cited range, not a universal industry cutoff.</div>
+  </div>
+</section>
+
+<!-- ============ AIRWAY CONTROLS ============ -->
+<section id="controls" class="section-pad">
+  <div class="wrap">
+    <span class="eyebrow">03 · The hardware that shapes the split</span>
+    <h2 class="sec-title">Fans push air. This is what tells it where to go.</h2>
+    <p class="sec-dek">A fan alone doesn't create a ventilation system — stoppings separate intake from return, overcasts let two airways cross without mixing, and regulators intentionally throttle a split to the airflow the design actually calls for.</p>
+
+    <div class="part-grid">
+      <div class="part-card">
+        <div class="pc-num">STOPPING TYPE 1</div>
+        <h4>Standard concrete block</h4>
+        <p>8 in. × 8 in. × 16 in. hollow-core block, roughly 18 kg each, minimum flexural strength 190.42 kg/m² — passes a full 2-hour ASTM E-119 fire test.</p>
+        <div class="pc-src">MSHA, Stoppings: Technology Developments and Mine Safety Engineering Evaluations</div>
+      </div>
+      <div class="part-card">
+        <div class="pc-num">STOPPING TYPE 2</div>
+        <h4>Omega Block (rigid, not inflatable)</h4>
+        <p>A common misconception worth correcting: Omega Block is a rigid, air-impermeable block system — not an inflatable stopping. Real sizes range from 6"×16"×24" (35 lb) up to 4 ft × 4 ft × 32 in.; R-value 2.15 at 3 in. thickness; also 2-hour fire rated.</p>
+        <div class="pc-src">GMS Mine Repair &amp; Maintenance, Omega Block spec sheet</div>
+      </div>
+      <div class="part-card">
+        <div class="pc-num">OVERCASTS &amp; UNDERCASTS</div>
+        <h4>Letting two airways cross without mixing</h4>
+        <p>An enclosed airway bridge (overcast) or tunnel (undercast) lets an intake and a return current physically cross paths without ever sharing air — engineered per site-specific structural load, not a single universal spec.</p>
+        <div class="pc-src">General mine ventilation engineering practice</div>
+      </div>
+    </div>
+
+    <h3 style="font-family:var(--font-body);font-size:1.15rem;font-weight:700;margin-top:2.4rem;">How hard does a seal actually have to be built?</h3>
+    <p class="sec-dek">Seal strength requirements changed dramatically after Sago — a direct, quantified example of a disaster rewriting a hardware spec, not just a procedure.</p>
+    <div class="timeline">
+      <div class="tl-step">
+        <div class="tl-year">BEFORE 2008</div>
+        <div class="tl-val">20 psi</div>
+        <p>The design/test standard for coal mine seals for decades — documented in NIOSH's own "Compendium of Structural Testing Data for 20-psi Coal Mine Seals."</p>
+      </div>
+      <div class="tl-step">
+        <div class="tl-year">SAGO MINE, JAN 2006</div>
+        <div class="tl-val" style="color:var(--ink);">12 dead</div>
+        <p>A methane explosion in a sealed area exposed how far a 20-psi seal was from surviving a real explosive overpressure event.</p>
+      </div>
+      <div class="tl-step after">
+        <div class="tl-year">CURRENT — 30 CFR §75.335</div>
+        <div class="tl-val">50 / 120 / &gt;120 psi</div>
+        <p>Tiered by risk: 50 psi for monitored inert atmospheres, 120 psi for unmonitored ones, and higher still where methane-oxygen mixture or detonation risk is plausible.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CALCULATOR 2: SIZE A REGULATOR ============ -->
+<section id="reg-calc" class="section-pad">
+  <div class="wrap">
+    <span class="eyebrow">04 · Instrument 2 — Throttling a split</span>
+    <h2 class="sec-title">How big does the opening actually need to be?</h2>
+    <p class="sec-dek">A regulator is a deliberately restrictive opening sized with the same orifice physics used since McElroy's 1935 work on mine ventilation — a contraction coefficient (Cc), not a simple textbook discharge coefficient, because most regulators are square-edged. Set the airflow and pressure you need, and the calculator solves for the opening.</p>
+
+    <div class="calc-panel">
+      <div>
+        <div class="field-group">
+          <div class="fg-title">Target</div>
+          <div class="field">
+            <label>Desired airflow through regulator <span class="fval mono" id="rg-q-val">5.0 m³/s</span></label>
+            <input type="range" id="rg-q" min="1" max="20" step="0.5" value="5">
+          </div>
+          <div class="field">
+            <label>Pressure differential available <span class="fval mono" id="rg-dp-val">250 Pa</span></label>
+            <input type="range" id="rg-dp" min="50" max="1000" step="10" value="250">
+          </div>
+          <div class="field">
+            <label>Airway cross-sectional area <span class="fval mono" id="rg-area-val">6.0 m²</span></label>
+            <input type="range" id="rg-area" min="2" max="15" step="0.5" value="6">
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="result-panel">
+          <div class="result-row"><span class="rl">Contraction coefficient (Cc)</span><span class="rr" id="rg-r-cc">0.90</span></div>
+          <div class="result-row"><span class="rl">Opening / airway ratio (N)</span><span class="rr" id="rg-r-n">0.046</span></div>
+          <div class="result-row big"><span class="rl">Required regulator opening</span><span class="rr" id="rg-r-area">0.27 m²</span></div>
+          <div id="rg-flag" class="result-flag ok">A modest, clearly-restrictive opening — this is doing real regulating work.</div>
+        </div>
+      </div>
+    </div>
+    <div class="calc-note">Solved numerically from Q = Cc·Ar·√(2ΔP/ρ) / √(1−N²), with N = Ar/Aairway and Cc = 1 / (Z·N + √(Z·N²+1)) using Z = 2.5 for square-edged openings — the real McElroy (1935) model as presented in Gillies, "The Challenge of Measuring Airflow Through Mine Regulators." Velocity coefficient taken as 1.0 and air density as 1.2 kg/m³, both standard simplifying assumptions for this calculation.</div>
+  </div>
+</section>
+
+<!-- ============ MONITORING INSTRUMENTS ============ -->
+<section id="instruments" class="section-pad">
+  <div class="wrap">
+    <span class="eyebrow teal">05 · The hardware that tells you the truth</span>
+    <h2 class="sec-title">A design is only as good as what you can measure of it.</h2>
+    <p class="sec-dek">Every real airflow and gas number in a ventilation plan came from an instrument with its own range, its own alarm logic, and its own real installed base underground.</p>
+
+    <div class="part-grid">
+      <div class="part-card teal">
+        <div class="pc-num">VELOCITY — VANE ANEMOMETER</div>
+        <h4>Alnor RVA801 rotating vane</h4>
+        <p>Real manufacturer-stated measurement range: 50–6,000 ft/min (0.25–30 m/s) — this is the handheld instrument behind most of this semester's "measured velocity" calculator inputs.</p>
+        <div class="pc-src">TSI, Alnor Rotating Vane RVA801 product page</div>
+      </div>
+      <div class="part-card teal">
+        <div class="pc-num">GAS — PERSONAL MULTI-GAS DETECTOR</div>
+        <h4>MSA Altair 4X</h4>
+        <p>CH4: 0–5% range, alarms at 0.5% / 1.0%. CO: 0–1,999 ppm, alarms at 25 / 100 ppm. O2: 0–30%, alarms at 19.5% / 23.0% — all factory defaults from MSA's own MSHA-approved instruction manual.</p>
+        <div class="pc-src">MSA, ALTAIR 4X MSHA Multigas Detector Instruction Manual</div>
+      </div>
+      <div class="part-card teal">
+        <div class="pc-num">SEALED-ATMOSPHERE — TUBE BUNDLE</div>
+        <h4>Continuous multi-point gas sampling</h4>
+        <p>Tubes run from multiple underground points to a surface vacuum pump, continuously analyzed for O2, CH4, CO2 and CO — the standard method for watching a sealed area or spontaneous-combustion risk without sending anyone in.</p>
+        <div class="pc-src">NIOSH, Tube Bundle System for Monitoring of Coal Mine Atmosphere</div>
+      </div>
+    </div>
+
+    <div class="principle-box" style="border-left-color:var(--teal);">
+      <div class="pb-label" style="color:var(--teal);">A real, verified design choice worth pointing out</div>
+      <blockquote>The Altair 4X's factory-default high alarm for methane is 1.0% — the same percentage where 30 CFR §75.323 requires equipment to be de-energized and ventilation adjusted, but a full 0.5 points below the 1.5% threshold that triggers evacuation. The personal instrument is deliberately tuned to warn a miner before the regulatory action level is even reached, not at it.</blockquote>
+      <cite>— MSA Altair 4X manual; 30 CFR §75.323</cite>
+    </div>
+
+    <h3 style="font-family:var(--font-body);font-size:1.15rem;font-weight:700;margin-top:2.4rem;color:var(--teal);">Mine-wide, not just personal: Atmospheric Monitoring Systems</h3>
+    <p class="sec-dek">30 CFR §75.351 requires a real, continuously-operating sensor network in coal mines with belt air courses — not just handheld instruments carried by individual miners.</p>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="sv">≤1,000 ft</div>
+        <div class="sl">Maximum spacing for CO/smoke sensors along a belt air course — tightening to 500 ft or 350 ft at lower belt speeds.</div>
+        <div class="ss">30 CFR §75.351</div>
+      </div>
+      <div class="stat-card">
+        <div class="sv">1.0% / 1.5%</div>
+        <div class="sl">System-wide methane alert and alarm thresholds — the same two numbers that govern the personal detector and the working-place action levels.</div>
+        <div class="ss">30 CFR §75.351 and §75.323</div>
+      </div>
+      <div class="stat-card">
+        <div class="sv">31 days</div>
+        <div class="sl">Maximum interval between sensor calibrations, with a full alarm functionality test required at least every 7 days.</div>
+        <div class="ss">30 CFR §75.351</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ QUIZ ============ -->
+<section id="quiz" class="section-pad">
+  <div class="wrap">
+    <span class="eyebrow">06 · Checkpoint</span>
+    <h2 class="sec-title">Six scenarios before the debrief.</h2>
+    <p class="sec-dek">Pulling on today's equipment families and both calculators.</p>
+
+    <div class="quiz-box" id="quiz-box"></div>
+  </div>
+</section>
+
+<!-- ============ DISCUSSION ============ -->
+<section id="discuss" class="section-pad">
+  <div class="wrap">
+    <span class="eyebrow">07 · Debrief</span>
+    <h2 class="sec-title">For the last 15 minutes: talk it through.</h2>
+    <p class="sec-dek">In pairs or small groups.</p>
+
+    <div class="disc-list">
+      <div class="disc-item">
+        <div class="disc-num">1</div>
+        <div>
+          <div class="disc-tag">The reversal tradeoff</div>
+          <p>Reversing a main fan for an emergency costs 30–65% of its forward airflow. Under what real conditions would that tradeoff still clearly be worth making — and when would it clearly not be?</p>
+        </div>
+      </div>
+      <div class="disc-item">
+        <div class="disc-num">2</div>
+        <div>
+          <div class="disc-tag">Contain, don't prevent</div>
+          <p>Permissible fan motor construction doesn't stop an internal explosion from happening — it contains it and cools the escaping gas. Where else in engineering have you seen this "let it happen safely" philosophy instead of trying to prevent the event outright?</p>
+        </div>
+      </div>
+      <div class="disc-item">
+        <div class="disc-num">3</div>
+        <div>
+          <div class="disc-tag">20 psi to 120 psi</div>
+          <p>Seal strength requirements jumped by up to 6x after Sago. What does a change that dramatic suggest about how confident the pre-2008 standard actually was — and how would you know today's tiered standard is adequate before the next disaster tests it?</p>
+        </div>
+      </div>
+      <div class="disc-item">
+        <div class="disc-num">4</div>
+        <div>
+          <div class="disc-tag">Alarm margins</div>
+          <p>The Altair 4X alarms at 1.0% methane — the same level as the regulatory action threshold — rather than exactly at the 1.5% evacuation trigger. Should the personal-device margin be built into the regulation itself, or is keeping them separate the right design?</p>
+        </div>
+      </div>
+      <div class="disc-item">
+        <div class="disc-num">5</div>
+        <div>
+          <div class="disc-tag">Where would you spend the budget</div>
+          <p>Given a fixed equipment budget, would you prioritize a bigger/more capable fan, better airway controls, or a denser instrument network? Defend your answer using something specific from today's session.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="closing-note">
+      <div class="la-label">About this special session</div>
+      This was a standalone, hands-on companion to the semester's regular sequence — the physical equipment behind the airflow, gas, and pressure numbers every earlier calculator assumed you already had. It doesn't replace a numbered week; treat it as a reference session to return to whenever a design conversation turns to "what would I actually specify here."
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="fnote">
+      Sources: ABC Industries, Vane Axial Fans (Mine and Tunnel) catalog · Howden Africa underground mine fan range, via Mining Outlook · International Mining, "Zitrón installs two of the largest underground axial ventilation fans to date in Australia at Prominent Hill" (2020) · 30 CFR §75.310 (Installation of main mine fans) and Part 18, Subpart B (Construction and Design Requirements), current eCFR text · NIOSH/Bureau of Mines, "Reverse Performance Characteristics of Main Mine Fans" · MSHA, "Stoppings: Technology Developments and Mine Safety Engineering Evaluations" · GMS Mine Repair &amp; Maintenance, Omega Block spec sheet · NIOSH, "Compendium of Structural Testing Data for 20-psi Coal Mine Seals" · 30 CFR §75.335 (Seal strengths) and Federal Register, "Sealing of Abandoned Areas" Final Rule (2008) · Gillies, "The Challenge of Measuring Airflow Through Mine Regulators," Queensland Mining Industry Health and Safety Conference · TSI, Alnor Rotating Vane RVA801 product page · MSA, ALTAIR 4X MSHA Multigas Detector Instruction Manual · NIOSH, "Tube Bundle System for Monitoring of Coal Mine Atmosphere" · 30 CFR §75.323 and §75.351, current eCFR text.
+    </div>
+  </div>
+</footer>
+
+<button id="instr-toggle">⚑ INSTRUCTOR VIEW</button>
+<div id="instr-panel">
+  <div class="instr-inner">
+    <button class="instr-close" id="instr-close">×</button>
+    <div class="eyebrow">FOR THE INSTRUCTOR</div>
+    <h3>Suggested 90-minute run of show</h3>
+    <table class="run-table">
+      <tr><th>Time</th><th>Segment</th></tr>
+      <tr><td>0:00–0:08</td><td>Open on the hero fan cutaway. Ask cold: "same basic machine — what actually changes between a 37 kW fan and a 4 MW fan?"</td></tr>
+      <tr><td>0:08–0:20</td><td>Fan duty families and the permissible/explosion-proof cards — spend extra time on "contain, don't prevent," it's the section students find most counterintuitive.</td></tr>
+      <tr><td>0:20–0:34</td><td>Fan sizing calculator in pairs. Have every pair find a duty point that lands exactly on the auxiliary/booster boundary.</td></tr>
+      <tr><td>0:34–0:46</td><td>Airway controls — stoppings and the seal-strength timeline. Ask why a 6x strength jump happened all at once instead of gradually.</td></tr>
+      <tr><td>0:46–1:00</td><td>Regulator sizing calculator. Have students find an N ratio that makes the regulator stop acting like a regulator (too large an opening).</td></tr>
+      <tr><td>1:00–1:12</td><td>Instruments section — the Altair 4X vs. regulatory threshold comparison is the section's best "aha" moment, don't rush it.</td></tr>
+      <tr><td>1:12–1:22</td><td>Run the 6-question checkpoint as a live class poll.</td></tr>
+      <tr><td>1:22–1:30</td><td>Close on the "where would you spend the budget" discussion prompt as a full-class vote.</td></tr>
+    </table>
+    <p style="margin-top:1.2rem;font-size:0.85rem;color:var(--ink-soft);">Safe to project this page directly to students — this panel is only visible to whoever clicks the button.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- topbar / scroll progress ---------- */
+  window.addEventListener('scroll', function(){
+    var h = document.documentElement;
+    var scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    document.getElementById('progress-track').style.width = scrolled + '%';
+  });
+
+  /* ---------- Calculator 1: Size the fan ---------- */
+  var fQ = document.getElementById('f-q'), fDp = document.getElementById('f-dp'), fEta = document.getElementById('f-eta');
+  var revOffBtn = document.getElementById('f-rev-off'), revOnBtn = document.getElementById('f-rev-on');
+  var reversed = false;
+
+  revOffBtn.addEventListener('click', function(){ reversed = false; revOffBtn.classList.add('active'); revOnBtn.classList.remove('active'); calcFan(); });
+  revOnBtn.addEventListener('click', function(){ reversed = true; revOnBtn.classList.add('active'); revOffBtn.classList.remove('active'); calcFan(); });
+
+  function calcFan(){
+    var q = parseFloat(fQ.value), dp = parseFloat(fDp.value), eta = parseFloat(fEta.value) / 100;
+
+    document.getElementById('f-q-val').textContent = q.toFixed(0) + ' m³/s';
+    document.getElementById('f-dp-val').textContent = dp.toFixed(0) + ' Pa';
+    document.getElementById('f-eta-val').textContent = (eta*100).toFixed(0) + '%';
+
+    var hydraulicKW = (q * dp) / 1000;
+    var shaftKW = hydraulicKW / eta;
+
+    document.getElementById('f-r-hyd').textContent = hydraulicKW.toFixed(1) + ' kW';
+    document.getElementById('f-r-shaft').textContent = shaftKW.toFixed(1) + ' kW';
+
+    var flag = document.getElementById('f-flag');
+    if(shaftKW < 37){
+      flag.className = 'result-flag warn';
+      flag.textContent = 'Below Howden\'s smallest real cited auxiliary fan (37 kW) — likely too small for standard underground duty.';
+    } else if(shaftKW < 1000){
+      flag.className = 'result-flag info';
+      flag.textContent = 'Auxiliary-to-booster fan duty — within Howden\'s real cited underground fan range (37 kW–4 MW).';
+    } else if(shaftKW <= 4000){
+      flag.className = 'result-flag info';
+      flag.textContent = 'Large primary/main fan duty, approaching the upper end of real cited installations (~4 MW).';
+    } else {
+      flag.className = 'result-flag warn';
+      flag.textContent = 'Exceeds Howden\'s largest cited real underground installation (~4 MW) — an exceptionally large ventilation system.';
+    }
+
+    var revRow = document.getElementById('f-rev-row');
+    if(reversed){
+      revRow.style.display = 'flex';
+      var lo = q * 0.35, hi = q * 0.70;
+      document.getElementById('f-r-revflow').textContent = lo.toFixed(1) + '–' + hi.toFixed(1) + ' m³/s';
+    } else {
+      revRow.style.display = 'none';
+    }
+  }
+
+  [fQ, fDp, fEta].forEach(function(inp){ inp.addEventListener('input', calcFan); });
+  calcFan();
+
+  /* ---------- Calculator 2: Size a regulator ---------- */
+  var rgQ = document.getElementById('rg-q'), rgDp = document.getElementById('rg-dp'), rgArea = document.getElementById('rg-area');
+  var Z = 2.5, RHO = 1.2, CS = 1.0;
+
+  function regulatorSolve(qTarget, dp, aAirway){
+    var lo = 1e-6, hi = aAirway * 0.995;
+    function qFor(ar){
+      var n = ar / aAirway;
+      var cc = 1 / (Z*n + Math.sqrt(Z*n*n + 1));
+      return cc * CS * ar * Math.sqrt(2*dp/RHO) / Math.sqrt(1 - n*n);
+    }
+    for(var i=0;i<80;i++){
+      var mid = (lo+hi)/2;
+      if(qFor(mid) < qTarget){ lo = mid; } else { hi = mid; }
+    }
+    var arSolved = (lo+hi)/2;
+    var nSolved = arSolved / aAirway;
+    var ccSolved = 1 / (Z*nSolved + Math.sqrt(Z*nSolved*nSolved + 1));
+    return { ar: arSolved, n: nSolved, cc: ccSolved };
+  }
+
+  function calcRegulator(){
+    var q = parseFloat(rgQ.value), dp = parseFloat(rgDp.value), aAirway = parseFloat(rgArea.value);
+
+    document.getElementById('rg-q-val').textContent = q.toFixed(1) + ' m³/s';
+    document.getElementById('rg-dp-val').textContent = dp.toFixed(0) + ' Pa';
+    document.getElementById('rg-area-val').textContent = aAirway.toFixed(1) + ' m²';
+
+    var sol = regulatorSolve(q, dp, aAirway);
+
+    document.getElementById('rg-r-cc').textContent = sol.cc.toFixed(2);
+    document.getElementById('rg-r-n').textContent = sol.n.toFixed(3);
+    document.getElementById('rg-r-area').textContent = sol.ar.toFixed(2) + ' m²';
+
+    var flag = document.getElementById('rg-flag');
+    if(sol.n > 0.4){
+      flag.className = 'result-flag warn';
+      flag.textContent = 'Opening is large relative to the airway (N > 0.4) — this isn\'t acting as a real restriction anymore; consider a different control strategy.';
+    } else if(sol.n > 0.15){
+      flag.className = 'result-flag info';
+      flag.textContent = 'A moderate opening — still functioning as a regulator, but check whether a smaller pressure differential would size it more comfortably.';
+    } else {
+      flag.className = 'result-flag ok';
+      flag.textContent = 'A modest, clearly-restrictive opening — this is doing real regulating work.';
+    }
+  }
+
+  [rgQ, rgDp, rgArea].forEach(function(inp){ inp.addEventListener('input', calcRegulator); });
+  calcRegulator();
+
+  /* ---------- QUIZ ---------- */
+  var QUESTIONS = [
+    {
+      scenario: "A fan needs to move 100 m³/s against 2,000 Pa, at an assumed 70% efficiency.",
+      q: "What shaft power does this require?",
+      opts: [
+        "140 kW",
+        "200 kW",
+        "285.7 kW",
+        "2,000 kW"
+      ],
+      correct: 2,
+      explain: "Hydraulic power = 100 × 2,000 / 1,000 = 200 kW. Shaft power = 200 / 0.70 ≈ 285.7 kW — the same arithmetic the fan calculator runs on every slider move."
+    },
+    {
+      q: "Does 30 CFR Part 18 \"permissible\" motor construction prevent an internal methane-air explosion inside the enclosure?",
+      opts: [
+        "Yes — the enclosure is sealed airtight so gas can never enter.",
+        "No — it assumes an internal explosion can happen, and is designed to contain it (150 psi rating) and cool the escaping gas below ignition temperature through narrow flame-arresting joints.",
+        "Yes — permissible motors don't use any electrical components that could spark.",
+        "No — permissible construction only applies to fans, never to motors."
+      ],
+      correct: 1,
+      explain: "The real engineering logic is containment, not prevention: a 150 psi minimum pressure rating and precisely-machined flame-arresting joints (as narrow as 0.002 in.) let an internal explosion happen safely without igniting the outside atmosphere."
+    },
+    {
+      q: "What was the real coal mine seal strength standard before 2008, and what is it now under 30 CFR §75.335?",
+      opts: [
+        "50 psi before, unchanged today",
+        "20 psi before; now tiered at 50 / 120 / >120 psi depending on atmosphere monitoring and risk",
+        "100 psi before; 20 psi today, since modern seals are more reliable",
+        "There has never been a numeric seal strength standard"
+      ],
+      correct: 1,
+      explain: "NIOSH documented the pre-2008 standard at 20 psi. Following the Sago Mine disaster, the 2008 rulemaking (now codified at §75.335) introduced a tiered system: 50 psi for monitored inert atmospheres, 120 psi for unmonitored ones, and higher still where detonation risk is plausible."
+    },
+    {
+      q: "In the regulator sizing model, what happens to the contraction coefficient (Cc) as the opening ratio N gets larger?",
+      opts: [
+        "Cc increases without limit, making the regulator more effective.",
+        "Cc stays exactly constant regardless of N.",
+        "Cc decreases as N grows — a larger opening relative to the airway contracts the flow less, weakening the regulator's restrictive effect.",
+        "Cc is undefined for any N greater than zero."
+      ],
+      correct: 2,
+      explain: "Cc = 1 / (Z·N + √(Z·N²+1)) falls as N rises. Physically, as the opening approaches the full airway size, there's less of an airway left to force the flow to contract through — it stops behaving like a restrictive regulator."
+    },
+    {
+      q: "The MSA Altair 4X's factory-default HIGH methane alarm is set at 1.0%. How does that compare to the 30 CFR §75.323 regulatory action levels?",
+      opts: [
+        "It matches the 1.5% evacuation threshold exactly.",
+        "It's set above both regulatory thresholds, so it alarms later than required.",
+        "It matches the 1.0% de-energize/adjust-ventilation threshold — meaning the personal alarm and the regulatory action level trigger at the same point, ahead of the 1.5% evacuation trigger.",
+        "Methane has no regulatory threshold, only an alarm setpoint."
+      ],
+      correct: 2,
+      explain: "The Altair 4X's 1.0% high alarm lines up with §75.323's ventilation-adjustment/de-energization trigger — well ahead of the 1.5% evacuation threshold, giving a real early-warning margin before the more serious action level is reached."
+    },
+    {
+      q: "Under 30 CFR §75.351, how often must an Atmospheric Monitoring System's sensors be calibrated, and how often must alarms be functionally tested?",
+      opts: [
+        "Calibrated once a year; tested once a month",
+        "Calibrated at least every 31 days; alarms functionally tested at least every 7 days",
+        "Calibrated every 7 days; alarms tested every 31 days",
+        "Neither calibration nor testing is required once installed"
+      ],
+      correct: 1,
+      explain: "§75.351 requires sensor calibration at least every 31 days and a full alarm functionality test at least every 7 days — a real, recurring maintenance obligation, not a one-time installation requirement."
+    }
+  ];
+
+  var quizState = { idx:0, score:0, answered:false };
+  var quizBox = document.getElementById('quiz-box');
+
+  function renderQuestion(){
+    var q = QUESTIONS[quizState.idx];
+    var html = '<div class="quiz-qnum">QUESTION ' + (quizState.idx+1) + ' OF ' + QUESTIONS.length + '</div>';
+    if(q.scenario){ html += '<div class="quiz-scenario">' + q.scenario + '</div>'; }
+    html += '<div class="quiz-q">' + q.q + '</div>';
+    html += '<div class="quiz-options">';
+    var letters = ['A','B','C','D'];
+    q.opts.forEach(function(opt, idx){
+      html += '<button class="quiz-opt" data-idx="'+idx+'"><span class="qletter">'+letters[idx]+'</span><span>'+opt+'</span></button>';
+    });
+    html += '</div>';
+    html += '<div id="quiz-explain-slot"></div>';
+    html += '<div class="quiz-nav"><span class="quiz-score">SCORE: ' + quizState.score + ' / ' + QUESTIONS.length + '</span><button class="quiz-next" id="quiz-next-btn" disabled>' + (quizState.idx === QUESTIONS.length-1 ? 'FINISH' : 'NEXT →') + '</button></div>';
+    quizBox.innerHTML = html;
+    quizState.answered = false;
+
+    var opts = quizBox.querySelectorAll('.quiz-opt');
+    opts.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(quizState.answered) return;
+        quizState.answered = true;
+        var idx = parseInt(btn.getAttribute('data-idx'), 10);
+        opts.forEach(function(b){ b.disabled = true; });
+        if(idx === q.correct){
+          btn.classList.add('correct');
+          quizState.score++;
+        } else {
+          btn.classList.add('incorrect');
+          opts[q.correct].classList.add('correct');
+        }
+        document.getElementById('quiz-explain-slot').innerHTML = '<div class="quiz-explain">' + q.explain + '</div>';
+        document.getElementById('quiz-next-btn').disabled = false;
+        quizBox.querySelector('.quiz-score').textContent = 'SCORE: ' + quizState.score + ' / ' + QUESTIONS.length;
+      });
+    });
+
+    document.getElementById('quiz-next-btn').addEventListener('click', function(){
+      if(quizState.idx < QUESTIONS.length - 1){
+        quizState.idx++;
+        renderQuestion();
+      } else {
+        quizBox.innerHTML = '<div class="quiz-q">Checkpoint complete — ' + quizState.score + ' / ' + QUESTIONS.length + ' correct.</div><p style="color:var(--ink-soft);">Review any missed questions with your discussion group before moving on.</p>';
+      }
+    });
+  }
+  renderQuestion();
+
+  /* ---------- Instructor panel ---------- */
+  var instrToggle = document.getElementById('instr-toggle');
+  var instrPanel = document.getElementById('instr-panel');
+  var instrClose = document.getElementById('instr-close');
+  instrToggle.addEventListener('click', function(){ instrPanel.classList.add('open'); });
+  instrClose.addEventListener('click', function(){ instrPanel.classList.remove('open'); });
+  instrPanel.addEventListener('click', function(e){ if(e.target === instrPanel){ instrPanel.classList.remove('open'); } });
+
+})();
+</script>
+</body>
+</html>

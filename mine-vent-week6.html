@@ -1,0 +1,917 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Staatliches&family=Overpass:wght@400;500;600;700;800&family=Overpass+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>The Last Hundred Metres</title>
+
+<style>
+  /* Deliberate single-theme "site signage" design — safety yellow / black / paper,
+     colors painted explicitly, no light/dark switching. The whole point of this
+     palette IS mine hazard signage — a dark-mode variant would break the metaphor. */
+  :root{
+    --paper:#EFEFE7;
+    --paper-raised:#F7F7F1;
+    --ink:#171512;
+    --ink-soft:#4A473F;
+    --ink-faint:#8A8676;
+    --line:rgba(23,21,18,0.16);
+    --line-strong:rgba(23,21,18,0.32);
+    --shadow: 0 1px 2px rgba(23,21,18,0.08), 0 14px 30px -18px rgba(23,21,18,0.35);
+
+    --safety:#F3C400;
+    --safety-deep:#C99A00;
+    --safety-ink:#171512;
+    --hazard:#D5482E;
+    --hazard-soft:#FBE4DC;
+    --good:#3F7D4E;
+    --good-soft:#E1EEDF;
+    --steel:#3D5A6C;
+    --steel-soft:#E2E9EB;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto;} *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;} }
+
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:"Overpass", ui-sans-serif, system-ui, sans-serif;
+    font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(23,21,18,0.025) 0px, rgba(23,21,18,0.025) 1px, transparent 1px, transparent 32px),
+      repeating-linear-gradient(90deg, rgba(23,21,18,0.025) 0px, rgba(23,21,18,0.025) 1px, transparent 1px, transparent 32px);
+  }
+  h1,h2,h3,h4{
+    font-family:"Staatliches", "Arial Narrow", sans-serif;
+    font-weight:400; text-transform:uppercase; letter-spacing:0.015em;
+    text-wrap:balance; margin:0; line-height:1.02;
+  }
+  .mono{ font-family:"Overpass Mono", ui-monospace, monospace; }
+  p{ margin:0 0 1em; max-width:66ch; }
+  p:last-child{ margin-bottom:0; }
+  a{ color:inherit; }
+  ::selection{ background:var(--safety); color:var(--ink); }
+  button{ font-family:inherit; }
+  a:focus-visible, button:focus-visible, input:focus-visible{ outline:3px solid var(--safety-deep); outline-offset:2px; }
+
+  .eyebrow{
+    font-family:"Overpass Mono", monospace; font-size:0.7rem;
+    letter-spacing:0.14em; text-transform:uppercase; font-weight:700;
+    display:inline-flex; align-items:center; gap:0.55em; color:var(--ink-soft);
+  }
+  .hazard-tick{ display:inline-block; width:0.9em; height:0.9em; background:
+    repeating-linear-gradient(45deg, var(--safety) 0 4px, var(--ink) 4px 8px); flex-shrink:0; }
+  .wrap{ max-width:1100px; margin:0 auto; padding:0 clamp(1.25rem,4vw,3rem); }
+  .section-pad{ padding:clamp(3.2rem,7.5vw,5.6rem) 0; }
+  img,svg{ max-width:100%; }
+  .sec-title{ font-size:clamp(2rem,4.4vw,3rem); }
+  .sec-dek{ color:var(--ink-soft); max-width:64ch; margin-top:1rem; font-size:1.05rem; font-family:"Overpass",sans-serif; text-transform:none; letter-spacing:0; }
+  .kicker-row{ margin-bottom:1rem; }
+  section + section{ border-top:2px solid var(--line); }
+
+  /* ============ HAZARD STRIPE RULE ============ */
+  .stripe-rule{ height:10px; background:repeating-linear-gradient(135deg, var(--safety) 0 18px, var(--ink) 18px 36px); }
+
+  /* ============ HERO ============ */
+  #hero{ padding:clamp(3.4rem,8vw,5.6rem) 0 clamp(2.2rem,5vw,3.4rem); }
+  h1.hero-title{ font-size:clamp(2.5rem,6.4vw,4.6rem); max-width:22ch; }
+  h1.hero-title .hl{ color:var(--hazard); }
+  .hero-sub{ font-size:clamp(1.02rem,1.6vw,1.18rem); color:var(--ink-soft); max-width:60ch; margin-top:1.3rem; font-family:"Overpass",sans-serif; text-transform:none; }
+  .hero-meta{ margin-top:2.2rem; display:flex; flex-wrap:wrap; gap:2.2rem; }
+  .hero-meta .k{ font-family:"Overpass Mono",monospace; font-size:0.68rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-faint); font-weight:700; }
+  .hero-meta .v{ font-size:1.02rem; margin-top:0.25rem; font-weight:600; }
+
+  .schematic{ background:var(--paper-raised); border:2px solid var(--ink); border-radius:4px; padding:1.3rem; margin-top:2.4rem; box-shadow:var(--shadow); }
+  .schematic svg{ display:block; width:100%; height:auto; }
+  .schematic-cap{ font-family:"Overpass Mono",monospace; font-size:0.72rem; color:var(--ink-soft); text-align:center; margin-top:0.7rem; letter-spacing:0.03em; font-weight:600; }
+
+  /* ============ CONCEPT CARDS (forcing/exhaust/overlap) ============ */
+  .config-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1.3rem; margin-top:2.4rem; }
+  @media (max-width:860px){ .config-grid{grid-template-columns:1fr;} }
+  .config-card{ background:var(--paper-raised); border:2px solid var(--ink); border-radius:4px; padding:1.5rem; display:flex; flex-direction:column; gap:0.9rem; }
+  .config-card .cc-tag{ font-family:"Overpass Mono",monospace; font-size:0.66rem; letter-spacing:0.08em; text-transform:uppercase; font-weight:700; color:var(--steel); background:var(--steel-soft); display:inline-block; padding:0.25rem 0.55rem; border-radius:3px; align-self:flex-start; }
+  .config-card h4{ font-size:1.7rem; text-transform:none; font-family:"Staatliches",sans-serif; letter-spacing:0.01em; }
+  .config-card svg{ width:100%; height:auto; }
+  .config-card p{ font-size:0.92rem; color:var(--ink-soft); }
+  .config-card .cc-pro{ font-size:0.85rem; color:var(--good); font-weight:700; }
+  .config-card .cc-con{ font-size:0.85rem; color:var(--hazard); font-weight:700; }
+
+  /* ============ CASE FILES ============ */
+  .case-list{ margin-top:2.2rem; display:flex; flex-direction:column; gap:1rem; }
+  .case{ background:var(--paper-raised); border:2px solid var(--ink); border-radius:4px; overflow:hidden; }
+  .case-head{ width:100%; display:flex; align-items:center; gap:1.1rem; padding:1.2rem 1.4rem; background:none; border:none; cursor:pointer; text-align:left; color:var(--ink); }
+  .case-head .ch-toll{ font-family:"Staatliches",sans-serif; font-size:2.1rem; color:var(--hazard); min-width:3ch; line-height:1; }
+  .case-head .ch-body{ flex:1; }
+  .case-head .ch-name{ font-family:"Staatliches",sans-serif; font-size:1.35rem; letter-spacing:0.01em; }
+  .case-head .ch-meta{ font-family:"Overpass Mono",monospace; font-size:0.72rem; color:var(--ink-faint); margin-top:0.2rem; letter-spacing:0.03em; }
+  .case-head .ch-chevron{ font-size:1.3rem; color:var(--ink-faint); transition:transform 0.2s; flex-shrink:0; }
+  .case.open .ch-chevron{ transform:rotate(180deg); }
+  .case-panel{ max-height:0; overflow:hidden; transition:max-height 0.28s ease; }
+  .case.open .case-panel{ max-height:600px; }
+  .case-panel-inner{ padding:0 1.4rem 1.5rem; border-top:1px solid var(--line); }
+  .case-panel-inner p{ font-size:0.94rem; color:var(--ink-soft); margin-top:1rem; }
+  .case-panel-inner .cp-lesson{ margin-top:1rem; padding:0.85rem 1rem; background:var(--safety); color:var(--ink); border-radius:3px; font-size:0.86rem; font-weight:600; }
+
+  /* ============ CALCULATOR (shared style) ============ */
+  .calc-card{ background:var(--paper-raised); border:2px solid var(--ink); border-radius:4px; padding:1.9rem clamp(1.3rem,3vw,2.3rem); box-shadow:var(--shadow); margin-top:2.4rem; }
+  .calc-head{ display:flex; align-items:baseline; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+  .calc-head h3{ font-size:1.7rem; text-transform:none; font-family:"Staatliches",sans-serif; }
+  .calc-num{ font-family:"Overpass Mono",monospace; font-size:0.72rem; color:var(--ink-faint); letter-spacing:0.08em; text-transform:uppercase; font-weight:700; }
+  .calc-formula{ font-family:"Overpass Mono",monospace; font-size:0.9rem; background:var(--paper); border:1px solid var(--line); padding:0.65rem 1rem; border-radius:3px; margin-top:0.9rem; display:inline-block; font-weight:600; }
+  .calc-body{ display:grid; grid-template-columns:1.05fr 0.95fr; gap:2rem; margin-top:1.4rem; align-items:start; }
+  @media (max-width:760px){ .calc-body{grid-template-columns:1fr;} }
+  .field{ margin-bottom:1.25rem; }
+  .field:last-child{ margin-bottom:0; }
+  .field label{ display:flex; justify-content:space-between; font-size:0.85rem; color:var(--ink-soft); margin-bottom:0.5rem; font-family:"Overpass Mono",monospace; font-weight:600; }
+  .field label .fval{ color:var(--hazard); font-weight:700; }
+  input[type=range]{ width:100%; accent-color:var(--hazard); height:4px; cursor:pointer; }
+  .toggle-row{ display:flex; gap:0.6rem; flex-wrap:wrap; }
+  .toggle-btn{ font-family:"Overpass Mono",monospace; font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; background:var(--paper); border:2px solid var(--ink); color:var(--ink); padding:0.5rem 0.9rem; border-radius:3px; cursor:pointer; }
+  .toggle-btn.active{ background:var(--ink); color:var(--paper-raised); }
+  .result-panel{ background:var(--paper); border:2px solid var(--ink); border-radius:3px; padding:1.2rem 1.3rem; display:flex; flex-direction:column; gap:0.85rem; }
+  .result-row{ display:flex; justify-content:space-between; align-items:baseline; gap:1rem; }
+  .result-row .rl{ font-size:0.82rem; color:var(--ink-soft); }
+  .result-row .rr{ font-family:"Overpass Mono",monospace; font-weight:700; font-size:1.12rem; font-variant-numeric:tabular-nums; text-align:right; }
+  .result-row.big .rr{ font-size:1.7rem; color:var(--hazard); }
+  .result-flag{ margin-top:0.15rem; padding:0.65rem 0.8rem; border-radius:3px; font-size:0.84rem; font-family:"Overpass Mono",monospace; font-weight:700; }
+  .result-flag.ok{ background:var(--good-soft); color:var(--good); }
+  .result-flag.bad{ background:var(--hazard-soft); color:var(--hazard); }
+  .calc-note{ font-size:0.82rem; color:var(--ink-faint); margin-top:1rem; border-top:1px dashed var(--line); padding-top:0.9rem; }
+
+  /* ============ DUCT DIAGRAM (calc 2) ============ */
+  .duct-diagram{ background:var(--paper); border:2px solid var(--ink); border-radius:3px; padding:1rem; }
+  .duct-diagram svg{ display:block; width:100%; height:auto; }
+
+  /* ============ REGULATION / SAFETY CALLOUT ============ */
+  .callout{ margin-top:1.6rem; padding:1.1rem 1.3rem; border:2px solid var(--ink); border-left:10px solid var(--hazard); background:var(--paper-raised); font-size:0.95rem; border-radius:2px; }
+  .callout b{ color:var(--hazard); display:block; font-family:"Overpass Mono",monospace; font-size:0.7rem; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:0.4rem; font-weight:700; }
+  .reg-grid{ display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; margin-top:1.6rem; }
+  @media (max-width:760px){ .reg-grid{grid-template-columns:1fr;} }
+  .reg-card{ background:var(--paper-raised); border:2px solid var(--ink); border-radius:4px; padding:1.3rem 1.4rem; }
+  .reg-card .rc-eyebrow{ font-family:"Overpass Mono",monospace; font-size:0.66rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--steel); font-weight:700; }
+  .reg-card h4{ font-size:1.3rem; margin-top:0.4rem; text-transform:none; font-family:"Staatliches",sans-serif; }
+  .reg-card p{ font-size:0.9rem; color:var(--ink-soft); margin-top:0.6rem; }
+
+  /* ============ POSITIVE CASE ============ */
+  .positive-card{ margin-top:2.2rem; background:var(--good-soft); border:2px solid var(--good); border-radius:4px; padding:1.6rem 1.8rem; display:grid; grid-template-columns:1fr auto; gap:1.5rem; align-items:center; }
+  @media (max-width:700px){ .positive-card{grid-template-columns:1fr;} }
+  .positive-card h4{ font-size:1.5rem; text-transform:none; font-family:"Staatliches",sans-serif; color:var(--good); }
+  .positive-card p{ font-size:0.92rem; color:var(--ink-soft); margin-top:0.6rem; }
+  .positive-stats{ display:flex; flex-direction:column; gap:0.6rem; }
+  .positive-stats .ps-row{ font-family:"Overpass Mono",monospace; font-size:0.85rem; }
+  .positive-stats .ps-row b{ color:var(--good); font-size:1.15rem; }
+
+  /* ============ QUIZ ============ */
+  .quiz-shell{ background:var(--paper-raised); border:2px solid var(--ink); border-radius:4px; margin-top:2.4rem; overflow:hidden; box-shadow:var(--shadow); }
+  .quiz-progress{ height:6px; background:var(--line); }
+  .quiz-progress-fill{ height:100%; width:0%; background:var(--safety); transition:width 0.3s; }
+  .quiz-body{ padding:clamp(1.4rem,3.5vw,2.4rem); }
+  .quiz-q-num{ font-family:"Overpass Mono",monospace; font-size:0.72rem; color:var(--hazard); letter-spacing:0.1em; text-transform:uppercase; font-weight:700; }
+  .quiz-scenario{ color:var(--ink-soft); font-size:0.92rem; margin-top:0.7rem; font-style:italic; }
+  .quiz-question{ font-family:"Staatliches",sans-serif; text-transform:none; font-size:clamp(1.35rem,2.6vw,1.7rem); margin-top:0.6rem; line-height:1.15; }
+  .quiz-options{ display:flex; flex-direction:column; gap:0.7rem; margin-top:1.4rem; }
+  .quiz-opt{ text-align:left; background:var(--paper); border:2px solid var(--ink); color:var(--ink); padding:0.85rem 1rem; border-radius:3px; cursor:pointer; font-size:0.95rem; display:flex; gap:0.7rem; transition:background 0.15s, border-color 0.15s; }
+  .quiz-opt:hover:not(:disabled){ border-color:var(--hazard); }
+  .quiz-opt .qletter{ font-family:"Overpass Mono",monospace; color:var(--hazard); flex-shrink:0; font-weight:700; }
+  .quiz-opt.correct{ background:var(--good-soft); border-color:var(--good); }
+  .quiz-opt.incorrect{ background:var(--hazard-soft); border-color:var(--hazard); }
+  .quiz-opt:disabled{ cursor:default; }
+  .quiz-feedback{ margin-top:1.2rem; padding:1rem 1.1rem; border-radius:3px; background:var(--paper); border-left:4px solid var(--safety-deep); font-size:0.9rem; color:var(--ink-soft); display:none; }
+  .quiz-feedback.show{ display:block; }
+  .quiz-nav{ display:flex; justify-content:flex-end; margin-top:1.4rem; }
+  .btn{ font-family:"Overpass Mono",monospace; font-size:0.82rem; letter-spacing:0.05em; text-transform:uppercase; background:var(--safety); color:var(--ink); border:2px solid var(--ink); padding:0.7rem 1.3rem; border-radius:3px; cursor:pointer; font-weight:700; }
+  .btn:disabled{ opacity:0.35; cursor:default; }
+  .btn.ghost{ background:transparent; border:2px solid var(--ink); color:var(--ink); }
+  .quiz-result{ text-align:center; }
+  .quiz-result .score-big{ font-family:"Staatliches",sans-serif; font-size:3.6rem; color:var(--hazard); }
+  .quiz-result p{ margin:0.8rem auto 0; max-width:52ch; color:var(--ink-soft); }
+
+  /* ============ DISCUSSION ============ */
+  .disc-grid{ display:flex; flex-direction:column; gap:2px; background:var(--ink); border:2px solid var(--ink); border-radius:4px; overflow:hidden; margin-top:2.2rem; }
+  .disc-item{ background:var(--paper-raised); padding:1.4rem 1.6rem; display:grid; grid-template-columns:2.4rem 1fr; gap:1rem; }
+  .disc-item .dn{ font-family:"Staatliches",sans-serif; font-size:2.1rem; color:var(--line-strong); }
+  .disc-item p{ margin:0; font-size:1rem; }
+  .disc-item .dtag{ font-family:"Overpass Mono",monospace; font-size:0.66rem; color:var(--hazard); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.35rem; display:block; font-weight:700; }
+
+  .lookahead{ background:var(--steel-soft); border:2px solid var(--steel); border-radius:4px; padding:1.4rem 1.6rem; margin-top:2.2rem; display:flex; gap:1.2rem; align-items:baseline; flex-wrap:wrap; }
+  .lookahead .lw{ font-family:"Overpass Mono",monospace; color:var(--steel); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.06em; font-weight:700; }
+
+  footer{ padding:3rem 0 4rem; color:var(--ink-faint); font-size:0.85rem; border-top:2px solid var(--line); }
+
+  #instr-toggle{ position:fixed; left:1.2rem; bottom:1.2rem; z-index:180; background:var(--safety); color:var(--ink); font-family:"Overpass Mono",monospace; font-size:0.72rem; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; border:2px solid var(--ink); padding:0.65rem 1rem; border-radius:30px; cursor:pointer; box-shadow:var(--shadow); display:flex; align-items:center; gap:0.5rem; }
+  #instr-panel{ position:fixed; inset:0; z-index:300; display:none; background:rgba(23,21,18,0.55); backdrop-filter:blur(2px); align-items:center; justify-content:center; padding:1.5rem; }
+  #instr-panel.open{ display:flex; }
+  .instr-card{ background:var(--paper-raised); color:var(--ink); border-radius:6px; max-width:740px; width:100%; max-height:85vh; overflow-y:auto; padding:clamp(1.5rem,4vw,2.5rem); box-shadow:var(--shadow); border:2px solid var(--ink); }
+  .instr-card h3{ font-size:1.7rem; text-transform:none; font-family:"Staatliches",sans-serif; }
+  .instr-close{ float:right; background:none; border:2px solid var(--ink); border-radius:50%; width:2rem; height:2rem; cursor:pointer; color:var(--ink); font-size:1rem; }
+  .run-table{ width:100%; border-collapse:collapse; margin-top:1.4rem; font-size:0.9rem; }
+  .run-table th{ text-align:left; font-family:"Overpass Mono",monospace; font-size:0.66rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-faint); border-bottom:2px solid var(--ink); padding:0.5rem 0.6rem 0.5rem 0; font-weight:700; }
+  .run-table td{ padding:0.65rem 0.6rem 0.65rem 0; border-bottom:1px solid var(--line); vertical-align:top; }
+  .run-table td.tt{ font-family:"Overpass Mono",monospace; color:var(--hazard); white-space:nowrap; font-weight:700; }
+</style>
+
+<nav id="topbar-wrap" style="position:fixed; top:0; left:0; right:0; height:5px; z-index:200; background:var(--line);">
+  <div id="topbar-fill" style="height:100%; width:0%; background:repeating-linear-gradient(135deg, var(--safety) 0 10px, var(--ink) 10px 20px); transition:width 0.08s linear;"></div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<section id="hero">
+  <div class="wrap">
+    <div class="eyebrow"><span class="hazard-tick"></span>Mine Ventilation · Week 6</div>
+    <h1 class="hero-title">A big fan at the shaft does nothing for the <span class="hl">last few hundred metres.</span></h1>
+    <p class="hero-sub">Every heading starts as a dead end. Whatever air reaches the face has to be pushed there through a duct, one joint and one leak at a time — and the further that duct runs, the more the main fan's effort gets eaten before it arrives. Today: what actually gets lost along the way, and when one fan simply isn't enough.</p>
+
+    <div class="hero-meta">
+      <div><div class="k">Session</div><div class="v">90 minutes</div></div>
+      <div><div class="k">Format</div><div class="v">Two calculators, three disasters</div></div>
+      <div><div class="k">You'll leave with</div><div class="v">A feel for why boosters exist — and why coal mines fear them</div></div>
+    </div>
+
+    <div class="schematic">
+      <svg viewBox="0 0 620 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schematic of a forcing auxiliary ventilation system: a fan at the portal pushes air through a duct toward a dead-end face, with small leakage losses shown escaping along the duct's length, and reduced airflow reaching the face.">
+        <!-- heading outline -->
+        <rect x="20" y="60" width="580" height="100" fill="none" stroke="var(--ink)" stroke-width="2"/>
+        <text x="30" y="50" font-family="Overpass Mono, monospace" font-size="11" fill="var(--ink-faint)" font-weight="700">PORTAL / INTAKE</text>
+        <text x="590" y="50" font-family="Overpass Mono, monospace" font-size="11" fill="var(--ink-faint)" text-anchor="end" font-weight="700">DEAD-END FACE</text>
+
+        <!-- fan -->
+        <circle cx="58" cy="110" r="22" fill="var(--paper-raised)" stroke="var(--ink)" stroke-width="2.5"/>
+        <path d="M58,92 L67,106 L49,106 Z M58,128 L67,114 L49,114 Z" fill="var(--ink)"/>
+
+        <!-- duct -->
+        <rect x="86" y="98" width="430" height="24" rx="10" fill="var(--paper)" stroke="var(--ink)" stroke-width="2"/>
+        <line x1="130" y1="98" x2="130" y2="122" stroke="var(--ink)" stroke-width="1.5" opacity="0.5"/>
+        <line x1="180" y1="98" x2="180" y2="122" stroke="var(--ink)" stroke-width="1.5" opacity="0.5"/>
+        <line x1="230" y1="98" x2="230" y2="122" stroke="var(--ink)" stroke-width="1.5" opacity="0.5"/>
+        <line x1="280" y1="98" x2="280" y2="122" stroke="var(--ink)" stroke-width="1.5" opacity="0.5"/>
+        <line x1="330" y1="98" x2="330" y2="122" stroke="var(--ink)" stroke-width="1.5" opacity="0.5"/>
+        <line x1="380" y1="98" x2="380" y2="122" stroke="var(--ink)" stroke-width="1.5" opacity="0.5"/>
+        <line x1="430" y1="98" x2="430" y2="122" stroke="var(--ink)" stroke-width="1.5" opacity="0.5"/>
+        <line x1="480" y1="98" x2="480" y2="122" stroke="var(--ink)" stroke-width="1.5" opacity="0.5"/>
+
+        <!-- leakage puffs -->
+        <path d="M180,98 Q186,82 196,80" fill="none" stroke="var(--hazard)" stroke-width="2" stroke-dasharray="3,3" marker-end="url(#arrh)"/>
+        <path d="M280,98 Q286,80 298,76" fill="none" stroke="var(--hazard)" stroke-width="2" stroke-dasharray="3,3" marker-end="url(#arrh)"/>
+        <path d="M380,98 Q386,80 400,76" fill="none" stroke="var(--hazard)" stroke-width="2" stroke-dasharray="3,3" marker-end="url(#arrh)"/>
+        <text x="196" y="70" font-family="Overpass Mono, monospace" font-size="9" fill="var(--hazard)" font-weight="700">LEAK</text>
+        <text x="298" y="66" font-family="Overpass Mono, monospace" font-size="9" fill="var(--hazard)" font-weight="700">LEAK</text>
+        <text x="400" y="66" font-family="Overpass Mono, monospace" font-size="9" fill="var(--hazard)" font-weight="700">LEAK</text>
+
+        <!-- flow into face, thinner than at fan -->
+        <path d="M516,110 L556,110" stroke="var(--steel)" stroke-width="6" marker-end="url(#arrs)"/>
+        <text x="536" y="140" font-family="Overpass Mono, monospace" font-size="10" fill="var(--steel)" text-anchor="middle" font-weight="700">REDUCED</text>
+        <text x="536" y="152" font-family="Overpass Mono, monospace" font-size="10" fill="var(--steel)" text-anchor="middle" font-weight="700">DELIVERY</text>
+
+        <!-- return airflow around duct -->
+        <path d="M556,150 L100,150" fill="none" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="1,5"/>
+        <text x="330" y="170" font-family="Overpass Mono, monospace" font-size="9" fill="var(--ink-faint)" text-anchor="middle">CONTAMINATED RETURN AIR, OPEN HEADING</text>
+
+        <defs>
+          <marker id="arrh" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="var(--hazard)"/></marker>
+          <marker id="arrs" markerWidth="9" markerHeight="9" refX="4.5" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="var(--steel)"/></marker>
+        </defs>
+      </svg>
+      <div class="schematic-cap">FORCING SYSTEM — FAN PUSHES AIR DOWN A DUCT; EVERY JOINT LEAKS A LITTLE; WHAT'S LEFT REACHES THE FACE</div>
+    </div>
+  </div>
+</section>
+
+<div class="stripe-rule"></div>
+
+<!-- ============ THREE CONFIGURATIONS ============ -->
+<section id="configs" class="section-pad">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">01 · Three ways to duct one heading</span></div>
+    <h2 class="sec-title">Push it, pull it, or both.</h2>
+    <p class="sec-dek">Every auxiliary ventilation system is a variation on three basic layouts. The choice isn't about airflow quantity alone — it's about where the dust and gas end up relative to the people working there.</p>
+
+    <div class="config-grid">
+      <div class="config-card">
+        <span class="cc-tag">Forcing</span>
+        <h4>Blower system</h4>
+        <p>A duct carries fresh air from the fan straight to the face. Contaminated air finds its own way back through the open heading. Simple, cheap, and the fastest way to dilute gas right at the face — which is why gassy mines often mandate it as the only permitted method.</p>
+        <p class="cc-pro">+ Fastest gas dilution at the face</p>
+        <p class="cc-con">− Dust and fumes travel back over the crew</p>
+      </div>
+      <div class="config-card">
+        <span class="cc-tag">Exhaust</span>
+        <h4>Extraction system</h4>
+        <p>Fresh air moves up the open heading on its own; a duct pulls contaminated air away from near the face. Workers stand in cleaner air on the way in. It only works if the duct inlet is actually capturing the dirty air — get the position wrong and pockets of gas simply sit still.</p>
+        <p class="cc-pro">+ Crew works in fresher air</p>
+        <p class="cc-con">− Depends entirely on duct-inlet placement</p>
+      </div>
+      <div class="config-card">
+        <span class="cc-tag">Overlap</span>
+        <h4>Combined system</h4>
+        <p>Both ducts run at once, overlapping near the face. Gets close to the best of both — but the exhaust leg has to pull noticeably harder than the forcing leg pushes, or contaminated air recirculates straight back into the fresh supply instead of leaving.</p>
+        <p class="cc-pro">+ Closest to "best of both"</p>
+        <p class="cc-con">− Exhaust must run ~30% higher than forcing, or it backfires</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CASE FILES ============ -->
+<section id="cases" class="section-pad" style="background:var(--paper-raised);">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">02 · When the duct fails</span></div>
+    <h2 class="sec-title">Three case files.</h2>
+    <p class="sec-dek">One is about a fan simply being switched off. One is about a curtain hung in the wrong place. One is about the fan itself becoming the fire.</p>
+
+    <div class="case-list" id="case-list">
+      <div class="case" data-case="0">
+        <button class="case-head">
+          <div class="ch-toll">6</div>
+          <div class="ch-body">
+            <div class="ch-name">Oxcroft Colliery — Derbyshire, UK, 1919</div>
+            <div class="ch-meta">A BYPASS DOOR, LEFT CLOSED</div>
+          </div>
+          <div class="ch-chevron">⌄</div>
+        </button>
+        <div class="case-panel"><div class="case-panel-inner">
+          <p>An underground booster fan was being stopped so another fan could be disconnected. To do it, workers closed the fan's bypass door — the door meant to let air keep flowing around a stopped fan. With it shut, ventilation to part of the mine simply stopped. Firedamp (methane) built up in the dead air and was ignited by electrical equipment. Six men died.</p>
+          <div class="cp-lesson">The lesson regulators drew: a booster fan's bypass door must open automatically the instant the fan stops — never rely on someone remembering.</div>
+        </div></div>
+      </div>
+
+      <div class="case" data-case="1">
+        <button class="case-head">
+          <div class="ch-toll">47</div>
+          <div class="ch-body">
+            <div class="ch-name">Auchengeich Colliery — Chryston, Scotland, 1959</div>
+            <div class="ch-meta">THE FAN BECAME THE FIRE</div>
+          </div>
+          <div class="ch-chevron">⌄</div>
+        </button>
+        <div class="case-panel"><div class="case-panel-inner">
+          <p>A belt-driven underground booster fan overheated and caught fire. The roadway it sat in was lined with combustible lagging, which let the fire spread far faster than anyone could respond. Forty-seven men died — almost all from carbon monoxide, trapped by smoke in a mine with no other way out of that section. It remains one of Scotland's worst mining disasters.</p>
+          <div class="cp-lesson">The lesson: a fan burning underground isn't a ventilation failure, it's an ignition source — which is exactly why coal-mining regulators now treat booster fans as explosion-protected equipment, not ordinary machinery.</div>
+        </div></div>
+      </div>
+
+      <div class="case" data-case="2">
+        <button class="case-head">
+          <div class="ch-toll">1</div>
+          <div class="ch-body">
+            <div class="ch-name">R&amp;D Coal Company — Schuylkill County, PA, USA, 2006</div>
+            <div class="ch-meta">A CURTAIN, 300 FEET SHORT</div>
+          </div>
+          <div class="ch-chevron">⌄</div>
+        </button>
+        <div class="case-panel"><div class="case-panel-inner">
+          <p>The mine's plan permitted this single-entry heading to be driven a maximum of 65 feet unventilated before line curtain had to reach the face. It was actually driven 377 feet. Investigators later found methane above 5% and carbon monoxide above 1,500 ppm in the unventilated section. A shot fired without proper stemming ignited the accumulated gas. One miner, age 43, was killed.</p>
+          <div class="cp-lesson">The lesson: leakage and misplacement aren't abstract inefficiencies — "the duct isn't quite reaching the face" is the exact gap where gas has room to accumulate.</div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CALCULATOR 1: DUCT LEAKAGE ============ -->
+<section id="leakage" class="section-pad">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">03 · Instrument 1</span></div>
+    <h2 class="sec-title">Most of what the fan pushes never reaches the face.</h2>
+    <p class="sec-dek">Every joint, seam, and worn patch along a duct leaks a little. Over hundreds of metres, "a little" adds up to a lot. These percentages are field-measured industry rules of thumb, not a universal formula — always check the actual delivered airflow at the face.</p>
+
+    <div class="calc-card">
+      <div class="calc-head"><h3>Delivered-to-face estimator</h3><span class="calc-num">Fan supplies 20 m³/s at the duct inlet</span></div>
+      <div class="calc-body">
+        <div>
+          <div class="field">
+            <label>Duct type</label>
+            <div class="toggle-row">
+              <button class="toggle-btn active" data-group="type" data-val="flexible">Flexible / fabric</button>
+              <button class="toggle-btn" data-group="type" data-val="rigid">Rigid steel</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Installation &amp; joint quality</label>
+            <div class="toggle-row">
+              <button class="toggle-btn" data-group="quality" data-val="good">Good</button>
+              <button class="toggle-btn active" data-group="quality" data-val="average">Average</button>
+              <button class="toggle-btn" data-group="quality" data-val="poor">Poor</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Duct length <span class="fval mono" id="lk-l-val">800 m (band: 300–1000 m)</span></label>
+            <input type="range" id="lk-l" min="100" max="2000" step="10" value="800">
+          </div>
+        </div>
+        <div class="result-panel">
+          <div class="result-row"><span class="rl">Estimated leakage</span><span class="rr" id="lk-pct">35%</span></div>
+          <div class="result-row big"><span class="rl">Airflow reaching the face</span><span class="rr" id="lk-face">13.0 m³/s</span></div>
+          <div class="result-row"><span class="rl">Lost along the duct</span><span class="rr" id="lk-lost">7.0 m³/s</span></div>
+        </div>
+      </div>
+      <p class="calc-note">Ranges drawn from Le Roux / Holtzhausen field-derived benchmarks: flexible duct commonly loses 10–55% over its length depending on condition; well-maintained rigid steel duct loses as little as 2–25%. Notice how much the "good vs. poor" toggle moves the result at the same length — installation discipline is often a bigger lever than duct material.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CALCULATOR 2: BOOSTER REACH (flagship) ============ -->
+<section id="booster" class="section-pad" style="background:var(--paper-raised);">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">04 · Instrument 2</span></div>
+    <h2 class="sec-title">How far can one fan actually reach?</h2>
+    <p class="sec-dek">Remember the cube law from last week — resistance depends on airway area cubed? It's back, and this time it decides whether a single auxiliary fan can still ventilate the face, or whether the heading has grown too long without a second fan in series.</p>
+
+    <div class="calc-card">
+      <div class="calc-body">
+        <div>
+          <div class="field">
+            <label>Distance from fan to face <span class="fval mono" id="bo-l-val">1600 m</span></label>
+            <input type="range" id="bo-l" min="200" max="3000" step="10" value="1600">
+          </div>
+          <div class="field">
+            <label>Duct diameter <span class="fval mono" id="bo-d-val">1.00 m</span></label>
+            <input type="range" id="bo-d" min="0.8" max="1.6" step="0.05" value="1.0">
+          </div>
+          <div class="field">
+            <label>Booster fan partway down the duct</label>
+            <div class="toggle-row">
+              <button class="toggle-btn" id="bo-off" data-val="off">Off</button>
+              <button class="toggle-btn active" id="bo-on" data-val="on">Installed</button>
+            </div>
+          </div>
+
+          <div class="duct-diagram" style="margin-top:1.2rem;">
+            <svg id="bo-svg" viewBox="0 0 400 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Live diagram showing duct airflow from main fan to face, with an optional booster fan partway along"></svg>
+          </div>
+        </div>
+        <div class="result-panel">
+          <div class="result-row"><span class="rl">Duct resistance R</span><span class="rr" id="bo-r">20.75</span></div>
+          <div class="result-row big"><span class="rl">Airflow delivered to face</span><span class="rr" id="bo-q">14.9 m³/s</span></div>
+          <div class="result-row"><span class="rl">Assumed minimum needed</span><span class="rr">12.0 m³/s</span></div>
+          <div class="result-flag ok" id="bo-flag">Sufficient — booster fan closes the gap</div>
+        </div>
+      </div>
+      <p class="calc-note">Minimum airflow is an illustrative assumption for face dust and diesel-exhaust dilution, not a fixed regulatory number — always confirm your own site's ventilation plan. Fan curves and duct friction factor here follow the same P₀(1−(Q/Qmax)²) and Atkinson R=k·per·L/A³ forms used in Weeks 3 and 5; a booster simply adds its own pressure in series with the main fan's, the same way two batteries in series add voltage.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BOOSTER FAN SAFETY ============ -->
+<section id="safety" class="section-pad">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">05 · The catch</span></div>
+    <h2 class="sec-title">Why coal mines are wary of the exact fix that helps.</h2>
+    <p class="sec-dek">A booster fan solves the long-duct problem cleanly. It also concentrates real risk at one point deep underground — which is exactly what Oxcroft and Auchengeich were about.</p>
+
+    <div class="reg-grid">
+      <div class="reg-card">
+        <div class="rc-eyebrow">If it stops</div>
+        <h4>Bypass, or it's a dead end behind a dead fan</h4>
+        <p>Modern regulation (e.g. NSW's coal mine ventilation guidance) requires a booster fan's bypass door to open automatically the instant the fan stops or loses power — with remote monitoring of the door position itself. Oxcroft's door was closed by hand and stayed that way.</p>
+      </div>
+      <div class="reg-card">
+        <div class="rc-eyebrow">If it fails</div>
+        <h4>Explosion-protected, continuously monitored</h4>
+        <p>Booster fan motors and electrics in gassy coal mines are required to be explosion-protected, with continuous gas monitoring that stops non-protected equipment above roughly 0.25% methane, plus vibration and temperature trips. Auchengeich's fan was neither protected nor sitting in a non-combustible roadway.</p>
+      </div>
+      <div class="reg-card">
+        <div class="rc-eyebrow">Coal vs. metal mines</div>
+        <h4>The same fan, very different rulebook</h4>
+        <p>Underground metal and non-metal mines use booster fans comparatively routinely — without methane and coal dust in the air, a stopped or failed fan is a productivity problem, not an explosion risk. In coal, the same piece of equipment sits inside an entirely different, far stricter regulatory regime.</p>
+      </div>
+      <div class="reg-card">
+        <div class="rc-eyebrow">Why not just skip boosters</div>
+        <h4>Because the alternative is a longer, weaker duct</h4>
+        <p>Ban booster fans outright and the only remaining lever is a bigger single fan or a bigger duct — both with real cost and physical limits. The regulatory answer isn't "never use one," it's "use one, engineered so its failure mode can't become the next Auchengeich."</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <b>Why this matters</b>
+      A booster fan is a real, standard engineering answer to the reach problem in today's second calculator. It is also machinery running unattended, underground, for years — which is precisely why the regulatory response to two fan disasters four decades apart was "make the failure mode safe," not "make the fan illegal."
+    </div>
+  </div>
+</section>
+
+<!-- ============ POSITIVE EXAMPLE ============ -->
+<section id="positive" class="section-pad" style="background:var(--paper-raised);">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">06 · Done right, at scale</span></div>
+    <h2 class="sec-title">What a modern booster installation actually looks like.</h2>
+
+    <div class="positive-card">
+      <div>
+        <h4>Agnew Gold Mine, Western Australia</h4>
+        <p>An underground gold mine running primary and booster fans in series, automated with variable inlet vane control, powered in part by the mine's own renewable grid. Figures below are from the equipment manufacturer's published case study, not an independent audit — useful for scale, not as an academic citation.</p>
+      </div>
+      <div class="positive-stats">
+        <div class="ps-row">Airflow: <b>280 m³/s</b> (up to 350 m³/s)</div>
+        <div class="ps-row">System pressure: <b>~3,700 Pa</b></div>
+        <div class="ps-row">Fan power: <b>2 × 1,100 kW</b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ QUIZ ============ -->
+<section id="quiz" class="section-pad">
+  <div class="wrap" style="max-width:760px;">
+    <div class="kicker-row"><span class="eyebrow">07 · Checkpoint</span></div>
+    <h2 class="sec-title">Six scenarios, one hundred metres at a time.</h2>
+    <p class="sec-dek">Pulling on today's configurations, calculators, and case files.</p>
+
+    <div class="quiz-shell">
+      <div class="quiz-progress"><div class="quiz-progress-fill" id="quiz-progress-fill"></div></div>
+      <div class="quiz-body" id="quiz-body"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DISCUSSION ============ -->
+<section id="discuss" class="section-pad" style="background:var(--paper-raised);">
+  <div class="wrap">
+    <div class="kicker-row"><span class="eyebrow">08 · Debrief</span></div>
+    <h2 class="sec-title">For the last 15 minutes: talk it through.</h2>
+    <p class="sec-dek">In pairs or small groups.</p>
+
+    <div class="disc-grid">
+      <div class="disc-item">
+        <div class="dn">1</div>
+        <div><span class="dtag">Design tradeoff</span><p>Forcing systems dilute gas fastest at the face but send dust and fumes back over the crew; exhaust systems protect the crew but depend on precise duct placement. If you had to pick one default for a gassy coal heading versus a dusty (but gas-free) metal heading, would your choice differ? Why?</p></div>
+      </div>
+      <div class="disc-item">
+        <div class="dn">2</div>
+        <div><span class="dtag">Risk transfer</span><p>A booster fan solves a real airflow problem but creates a new failure point deep underground. Is this a trade you'd always take if the alternative is "the face doesn't get enough air," or are there situations where the answer should be no?</p></div>
+      </div>
+      <div class="disc-item">
+        <div class="dn">3</div>
+        <div><span class="dtag">Regulation</span><p>Oxcroft (1919) and Auchengeich (1959) are forty years apart, yet both are booster-fan disasters. What does that gap suggest about how long it takes an industry to actually absorb a safety lesson — and what would you want to see to feel confident the lesson has finally stuck?</p></div>
+      </div>
+      <div class="disc-item">
+        <div class="dn">4</div>
+        <div><span class="dtag">Economics</span><p>Reducing leakage (better duct, tighter joints) and adding a booster fan both increase delivered airflow. One is a maintenance discipline problem, the other is a capital equipment decision. Which would you reach for first, and what would change your answer?</p></div>
+      </div>
+      <div class="disc-item">
+        <div class="dn">5</div>
+        <div><span class="dtag">Hazard</span><p>The R&amp;D Coal Company case wasn't a broken fan — it was a plan that permitted 65 feet, and a heading driven to 377. What does that tell you about where the real risk in auxiliary ventilation usually sits: the equipment, or the discipline around it?</p></div>
+      </div>
+    </div>
+
+    <div class="lookahead">
+      <span class="lw">Still ahead</span>
+      <span>Week 11, Dust Control, picks up the other half of what a duct carries away from the face — respirable dust, rock dusting, and the explosion-suppression layer that was missing at Upper Big Branch back in Week 1.</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    Mine Ventilation — Week 6 seminar material. Auxiliary ventilation configurations per Semin, Faynburg &amp; Levin, "Auxiliary ventilation in underground mines," Frontiers in Built Environment (2026). Duct leakage benchmarks per Le Roux, Notes on Mine Environmental Control, and Holtzhausen, "Impact of Leakage in an Underground Mine" (2025) — field-derived industry figures, not a universal formula. Booster fan case histories and regulatory detail per NSW Resources Regulator, Technical Reference Guide: Main Fans, Booster Fans and Auxiliary Fans in Underground Coal Mines (2021), and independently cross-checked against Northern Mine Research Society records. Agnew Gold Mine figures per Minetek vendor case study — treat as illustrative scale, not an audited source. Always verify friction factors, leakage rates, and regulatory thresholds against your own site's ventilation plan and jurisdiction.
+  </div>
+</footer>
+
+<button id="instr-toggle" aria-haspopup="dialog" aria-controls="instr-panel">▲ Instructor view</button>
+<div id="instr-panel" role="dialog" aria-modal="true" aria-labelledby="instr-title">
+  <div class="instr-card">
+    <button class="instr-close" id="instr-close" aria-label="Close instructor view">✕</button>
+    <span class="eyebrow" style="color:var(--hazard);">For the instructor</span>
+    <h3 id="instr-title">Suggested 90-minute run of show</h3>
+    <table class="run-table">
+      <tr><th>Time</th><th>Segment</th></tr>
+      <tr><td class="tt">0:00–0:08</td><td>Open on the hero schematic. Ask cold: "the main fan at the shaft moves huge volumes of air — so why does a heading 1.5 km down still need its own dedicated fan?"</td></tr>
+      <tr><td class="tt">0:08–0:18</td><td>Three configuration cards. Have students predict which one a real coal mine would mandate, then reveal why (fastest gas dilution at the face beats crew comfort when methane is the bigger risk).</td></tr>
+      <tr><td class="tt">0:18–0:30</td><td>Case files in three small groups, one each. Report back: what failed, and what the regulatory fix was.</td></tr>
+      <tr><td class="tt">0:30–0:42</td><td>Leakage calculator in pairs. Have them find how much "good vs. poor" installation quality alone changes delivered airflow at a fixed length.</td></tr>
+      <tr><td class="tt">0:42–1:00</td><td>Booster reach calculator. Push duct length to maximum with the booster off, then on — then shrink duct diameter and show that a booster doesn't fix an undersized duct.</td></tr>
+      <tr><td class="tt">1:00–1:08</td><td>Booster safety cards + callout — connect straight back to the Oxcroft and Auchengeich case files from earlier.</td></tr>
+      <tr><td class="tt">1:08–1:20</td><td>Run the 6-question checkpoint as a live class poll.</td></tr>
+      <tr><td class="tt">1:20–1:27</td><td>Small-group discussion prompts.</td></tr>
+      <tr><td class="tt">1:27–1:30</td><td>Close on the "still ahead" note.</td></tr>
+    </table>
+    <p style="margin-top:1.4rem; color:var(--ink-soft); font-size:0.9rem;">Safe to project this page directly to students — this panel is only visible to whoever clicks the button.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var fill = document.getElementById('topbar-fill');
+  function onScroll(){
+    var h = document.documentElement;
+    var scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    fill.style.width = scrolled + '%';
+  }
+  document.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  /* ---------- case files accordion ---------- */
+  var cases = document.querySelectorAll('.case');
+  cases.forEach(function(c){
+    var head = c.querySelector('.case-head');
+    head.addEventListener('click', function(){
+      var wasOpen = c.classList.contains('open');
+      cases.forEach(function(o){ o.classList.remove('open'); });
+      if(!wasOpen) c.classList.add('open');
+    });
+  });
+
+  /* ---------- Calculator 1: duct leakage ---------- */
+  var LEAK_TABLE = {
+    flexible: { band0:{good:15, average:25, poor:35}, band1:{good:25, average:35, poor:45}, band2:{good:30, average:40, poor:50} },
+    rigid:    { band0:{good:3.5, average:7.5, poor:12.5}, band1:{good:6.5, average:10, poor:16}, band2:{good:10, average:13.5, poor:20} }
+  };
+  var Q_SUPPLY = 20;
+  var lkState = { type:'flexible', quality:'average' };
+  var lkLenInput = document.getElementById('lk-l');
+  var typeBtns = document.querySelectorAll('.toggle-btn[data-group="type"]');
+  var qualityBtns = document.querySelectorAll('.toggle-btn[data-group="quality"]');
+
+  function bandFor(L){
+    if(L < 300) return 'band0';
+    if(L <= 1000) return 'band1';
+    return 'band2';
+  }
+  function bandLabel(band){
+    if(band === 'band0') return '< 300 m';
+    if(band === 'band1') return '300–1000 m';
+    return '> 1000 m';
+  }
+
+  function calcLeakage(){
+    var L = parseFloat(lkLenInput.value);
+    var band = bandFor(L);
+    document.getElementById('lk-l-val').textContent = L.toFixed(0) + ' m (band: ' + bandLabel(band) + ')';
+
+    var pct = LEAK_TABLE[lkState.type][band][lkState.quality];
+    var Qface = Q_SUPPLY * (1 - pct/100);
+    var Qlost = Q_SUPPLY - Qface;
+
+    document.getElementById('lk-pct').textContent = pct.toFixed(1).replace(/\.0$/,'') + '%';
+    document.getElementById('lk-face').textContent = Qface.toFixed(1) + ' m³/s';
+    document.getElementById('lk-lost').textContent = Qlost.toFixed(1) + ' m³/s';
+  }
+
+  typeBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      typeBtns.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      lkState.type = btn.getAttribute('data-val');
+      calcLeakage();
+    });
+  });
+  qualityBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      qualityBtns.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      lkState.quality = btn.getAttribute('data-val');
+      calcLeakage();
+    });
+  });
+  lkLenInput.addEventListener('input', calcLeakage);
+  calcLeakage();
+
+  /* ---------- Calculator 2: booster reach ---------- */
+  var K_DUCT = 0.002;
+  var FAN_MAIN = { P0:3000, Qmax:40 };
+  var FAN_BOOST = { P0:2500, Qmax:35 };
+  var QMIN = 12;
+
+  var boLenInput = document.getElementById('bo-l');
+  var boDiaInput = document.getElementById('bo-d');
+  var boOffBtn = document.getElementById('bo-off');
+  var boOnBtn = document.getElementById('bo-on');
+  var boosterOn = true;
+
+  function ductResistance(D, L){
+    var A = Math.PI * Math.pow(D/2, 2);
+    var per = Math.PI * D;
+    return (K_DUCT * per * L) / Math.pow(A, 3);
+  }
+
+  function solveBooster(){
+    var L = parseFloat(boLenInput.value);
+    var D = parseFloat(boDiaInput.value);
+    document.getElementById('bo-l-val').textContent = L.toFixed(0) + ' m';
+    document.getElementById('bo-d-val').textContent = D.toFixed(2) + ' m';
+
+    var R = ductResistance(D, L);
+    var Q;
+    if(boosterOn){
+      var P0sum = FAN_MAIN.P0 + FAN_BOOST.P0;
+      var denom = R + FAN_MAIN.P0/(FAN_MAIN.Qmax*FAN_MAIN.Qmax) + FAN_BOOST.P0/(FAN_BOOST.Qmax*FAN_BOOST.Qmax);
+      Q = Math.sqrt(P0sum/denom);
+    } else {
+      var denom2 = R + FAN_MAIN.P0/(FAN_MAIN.Qmax*FAN_MAIN.Qmax);
+      Q = Math.sqrt(FAN_MAIN.P0/denom2);
+    }
+
+    document.getElementById('bo-r').textContent = R.toFixed(2);
+    document.getElementById('bo-q').textContent = Q.toFixed(1) + ' m³/s';
+
+    var flag = document.getElementById('bo-flag');
+    if(Q >= QMIN){
+      flag.className = 'result-flag ok';
+      flag.textContent = boosterOn ? 'Sufficient — booster fan closes the gap' : 'Sufficient — single fan still keeps up';
+    } else {
+      flag.className = 'result-flag bad';
+      flag.textContent = boosterOn ? 'Still insufficient — duct is too narrow or too long even with a booster' : 'Insufficient — this heading needs a booster fan';
+    }
+
+    drawBooster(Q, L, D);
+  }
+
+  function drawBooster(Q, L, D){
+    var svg = document.getElementById('bo-svg');
+    while(svg.firstChild){ svg.removeChild(svg.firstChild); }
+    var svgns = "http://www.w3.org/2000/svg";
+    function el(tag, attrs){ var e = document.createElementNS(svgns, tag); for(var k in attrs){ e.setAttribute(k, attrs[k]); } return e; }
+
+    var qFrac = Math.max(0.1, Math.min(1, Q/35));
+    var w = 3 + qFrac*10;
+    var ductColor = Q >= QMIN ? 'var(--good)' : 'var(--hazard)';
+
+    // main fan
+    svg.appendChild(el('circle',{cx:30,cy:70,r:16,fill:'var(--paper-raised)',stroke:'var(--ink)','stroke-width':2}));
+    svg.appendChild(el('path',{d:'M30,57 L37,68 L23,68 Z M30,83 L37,72 L23,72 Z', fill:'var(--ink)'}));
+    var t1 = el('text',{x:30,y:98,'font-family':'Overpass Mono, monospace','font-size':8,fill:'var(--ink-faint)','text-anchor':'middle','font-weight':700}); t1.textContent='MAIN'; svg.appendChild(t1);
+
+    // duct segment 1 (fan to booster or face)
+    var boosterX = boosterOn ? 210 : 370;
+    svg.appendChild(el('rect',{x:48, y:70-w/2, width:(boosterX-48), height:w, rx:w/2, fill:ductColor}));
+
+    if(boosterOn){
+      // booster fan
+      svg.appendChild(el('circle',{cx:boosterX+18,cy:70,r:14,fill:'var(--paper-raised)',stroke:'var(--ink)','stroke-width':2}));
+      svg.appendChild(el('path',{d:'M'+(boosterX+18)+',59 L'+(boosterX+24)+',68 L'+(boosterX+12)+',68 Z M'+(boosterX+18)+',81 L'+(boosterX+24)+',72 L'+(boosterX+12)+',72 Z', fill:'var(--ink)'}));
+      var t2 = el('text',{x:boosterX+18,y:96,'font-family':'Overpass Mono, monospace','font-size':8,fill:'var(--ink-faint)','text-anchor':'middle','font-weight':700}); t2.textContent='BOOST'; svg.appendChild(t2);
+      // duct segment 2 (booster to face)
+      svg.appendChild(el('rect',{x:boosterX+32, y:70-w/2, width:(370-(boosterX+32)), height:w, rx:w/2, fill:ductColor}));
+    }
+
+    // face
+    svg.appendChild(el('rect',{x:378, y:30, width:8, height:80, fill:'var(--ink)'}));
+    var t3 = el('text',{x:382,y:120,'font-family':'Overpass Mono, monospace','font-size':8,fill:'var(--ink-faint)','text-anchor':'middle','font-weight':700}); t3.textContent='FACE'; svg.appendChild(t3);
+
+    var t4 = el('text',{x:200,y:35,'font-family':'Overpass Mono, monospace','font-size':10,fill:ductColor,'text-anchor':'middle','font-weight':700}); t4.textContent=Q.toFixed(1)+' m³/s to face'; svg.appendChild(t4);
+    var t5 = el('text',{x:200,y:120,'font-family':'Overpass Mono, monospace','font-size':9,fill:'var(--ink-faint)','text-anchor':'middle'}); t5.textContent=L.toFixed(0)+' m · Ø'+D.toFixed(2)+' m duct'; svg.appendChild(t5);
+  }
+
+  boOffBtn.addEventListener('click', function(){ boosterOn = false; boOffBtn.classList.add('active'); boOnBtn.classList.remove('active'); solveBooster(); });
+  boOnBtn.addEventListener('click', function(){ boosterOn = true; boOnBtn.classList.add('active'); boOffBtn.classList.remove('active'); solveBooster(); });
+  boLenInput.addEventListener('input', solveBooster);
+  boDiaInput.addEventListener('input', solveBooster);
+  solveBooster();
+
+  /* ---------- QUIZ ---------- */
+  var QUESTIONS = [
+    {
+      scenario: "A gassy coal heading is being driven forward, and methane control at the face is the top priority.",
+      q: "Which auxiliary ventilation configuration is usually mandated in this situation, and why?",
+      options: [
+        "Exhaust — because it keeps dust away from the crew.",
+        "Forcing (blower) — because fresh air reaches the face fastest, diluting methane right where it's made.",
+        "Overlap — because it's always the safest choice regardless of gas conditions.",
+        "None — dead-end headings in gassy mines are never ventilated with ducts."
+      ],
+      correct: 1,
+      feedback: "Forcing systems deliver fresh air directly to the face fastest, which is why gassy mines often require them even though it means dust and fumes travel back over the crew on the way out."
+    },
+    {
+      scenario: "You measure the same duct length and quality twice — once as flexible/fabric duct, once as rigid steel duct.",
+      q: "Which one typically loses less air to leakage over the same distance?",
+      options: [
+        "Flexible duct — it's more airtight.",
+        "Rigid steel duct — fewer joints and a stiffer seal typically mean much lower leakage percentages.",
+        "They lose exactly the same amount — material doesn't affect leakage.",
+        "It depends only on fan power, not duct material."
+      ],
+      correct: 1,
+      feedback: "Field data consistently shows rigid steel duct leaking far less than flexible duct at the same length and installation quality — single digits to ~25% versus 10–55% for flexible duct."
+    },
+    {
+      scenario: "In the booster reach calculator, you increase duct length while leaving diameter and both fans unchanged.",
+      q: "What happens to the airflow reaching the face, and why?",
+      options: [
+        "It increases, because a longer duct holds more air.",
+        "It decreases, because duct resistance grows with length (R = k·per·L/A³), and higher resistance means less flow for the same fan pressure.",
+        "It stays exactly the same — length doesn't affect resistance.",
+        "It becomes impossible to calculate."
+      ],
+      correct: 1,
+      feedback: "The Atkinson equation makes resistance directly proportional to length. Longer duct, more resistance, less airflow for a fixed fan pressure — exactly the pattern the calculator shows."
+    },
+    {
+      scenario: "You shrink the duct diameter from 1.6 m to 0.8 m while keeping length fixed at 1600 m, with the booster fan installed.",
+      q: "Based on what you saw in the calculator, what's the likely outcome?",
+      options: [
+        "Airflow barely changes — diameter has a small effect on resistance.",
+        "Airflow increases — smaller ducts always move air faster.",
+        "Airflow drops sharply, and even the booster fan may not be enough — because resistance depends on the cube of area.",
+        "The booster fan automatically compensates for any diameter, no matter how small."
+      ],
+      correct: 2,
+      feedback: "Because resistance scales with the cube of cross-sectional area, halving the diameter (roughly quartering the area) can increase resistance by more than an order of magnitude — enough that adding a second fan still isn't sufficient. Boosters fix a fan-power shortfall, not an undersized duct."
+    },
+    {
+      scenario: "Two historical disasters — Oxcroft Colliery (1919) and Auchengeich Colliery (1959) — both involved underground booster fans, four decades apart.",
+      q: "What specific failure did each expose, and what did regulation change as a result?",
+      options: [
+        "Both were caused by identical electrical faults, leading to a total ban on booster fans everywhere.",
+        "Oxcroft: a bypass door left closed when the fan stopped, cutting off ventilation. Auchengeich: the fan itself overheated and started a fire that spread through combustible roadway lagging. Regulation now requires automatic bypass doors and explosion-protected, monitored booster fan equipment.",
+        "Both were caused by workers ignoring gas alarms, leading to mandatory gas alarm training.",
+        "Neither incident actually involved a booster fan — they involved main surface fans."
+      ],
+      correct: 1,
+      feedback: "Oxcroft showed what happens when a fan's failure mode (a manually closed bypass door) cuts ventilation instead of maintaining it. Auchengeich showed the fan itself becoming an ignition and fire-spread source. Together they're why modern regulation requires automatic bypass doors and explosion-protected, continuously monitored booster equipment."
+    },
+    {
+      scenario: "A colleague argues booster fans should simply be banned everywhere underground, since two historical disasters involved them.",
+      q: "What's the strongest counter-argument, based on today's material?",
+      options: [
+        "There is no counter-argument — banning them entirely is the correct, safest policy.",
+        "Booster fans are never actually needed in real mining, so banning them costs nothing.",
+        "Banning them removes a real engineering solution to the long-duct reach problem, forcing mines toward bigger single fans or bigger ducts with their own costs and limits — which is why regulation instead focused on making the failure mode safe (automatic bypass doors, explosion protection) rather than banning the equipment.",
+        "Booster fans are only used in metal mines, so coal mine regulation doesn't need to address them at all."
+      ],
+      correct: 2,
+      feedback: "The calculator shows booster fans solving a real, common problem — a single fan running out of reach over a long duct. The regulatory answer that emerged from Oxcroft and Auchengeich was engineering the failure mode to be safe, not prohibiting a genuinely useful piece of equipment."
+    }
+  ];
+
+  var qState = { i:0, score:0, answered:false };
+  var quizBody = document.getElementById('quiz-body');
+  var quizFill = document.getElementById('quiz-progress-fill');
+
+  function renderQuiz(){
+    if(qState.i >= QUESTIONS.length){ renderResult(); return; }
+    var item = QUESTIONS[qState.i];
+    qState.answered = false;
+    quizFill.style.width = (qState.i / QUESTIONS.length * 100) + '%';
+
+    var html = '';
+    html += '<div class="quiz-q-num">Question ' + (qState.i+1) + ' of ' + QUESTIONS.length + '</div>';
+    html += '<div class="quiz-scenario">' + item.scenario + '</div>';
+    html += '<div class="quiz-question">' + item.q + '</div>';
+    html += '<div class="quiz-options">';
+    item.options.forEach(function(opt, idx){
+      var letter = String.fromCharCode(65+idx);
+      html += '<button class="quiz-opt" data-idx="'+idx+'"><span class="qletter">'+letter+'</span><span>'+opt+'</span></button>';
+    });
+    html += '</div>';
+    html += '<div class="quiz-feedback" id="quiz-feedback"></div>';
+    html += '<div class="quiz-nav"><button class="btn" id="quiz-next" disabled>Next →</button></div>';
+    quizBody.innerHTML = html;
+
+    var opts = quizBody.querySelectorAll('.quiz-opt');
+    opts.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(qState.answered) return;
+        qState.answered = true;
+        var idx = parseInt(btn.getAttribute('data-idx'),10);
+        opts.forEach(function(o){ o.disabled = true; });
+        if(idx === item.correct){
+          btn.classList.add('correct');
+          qState.score++;
+        } else {
+          btn.classList.add('incorrect');
+          opts[item.correct].classList.add('correct');
+        }
+        var fb = document.getElementById('quiz-feedback');
+        fb.textContent = item.feedback;
+        fb.classList.add('show');
+        document.getElementById('quiz-next').disabled = false;
+      });
+    });
+    document.getElementById('quiz-next').addEventListener('click', function(){
+      qState.i++;
+      renderQuiz();
+    });
+  }
+
+  function renderResult(){
+    quizFill.style.width = '100%';
+    var msg;
+    if(qState.score === QUESTIONS.length) msg = "Perfect run. You could size a duct and defend a booster-fan proposal to a regulator today.";
+    else if(qState.score >= QUESTIONS.length - 2) msg = "Solid. Go back and shrink the duct diameter in the booster calculator if you haven't — watching the booster fail to compensate makes the missed questions click.";
+    else msg = "This is exactly why the tools come before the quiz. Scroll back up, run the leakage calculator through all three qualities, then push the booster calculator to its extremes.";
+
+    quizBody.innerHTML =
+      '<div class="quiz-result">' +
+        '<div class="quiz-q-num">Checkpoint complete</div>' +
+        '<div class="score-big">' + qState.score + ' / ' + QUESTIONS.length + '</div>' +
+        '<p>' + msg + '</p>' +
+        '<div class="quiz-nav" style="justify-content:center; margin-top:1.6rem;"><button class="btn ghost" id="quiz-retry">Retry checkpoint</button></div>' +
+      '</div>';
+    document.getElementById('quiz-retry').addEventListener('click', function(){
+      qState = {i:0, score:0, answered:false};
+      renderQuiz();
+    });
+  }
+  renderQuiz();
+
+  /* ---------- instructor panel ---------- */
+  var instrToggle = document.getElementById('instr-toggle');
+  var instrPanel = document.getElementById('instr-panel');
+  var instrClose = document.getElementById('instr-close');
+  instrToggle.addEventListener('click', function(){ instrPanel.classList.add('open'); });
+  instrClose.addEventListener('click', function(){ instrPanel.classList.remove('open'); });
+  instrPanel.addEventListener('click', function(e){ if(e.target === instrPanel) instrPanel.classList.remove('open'); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') instrPanel.classList.remove('open'); });
+
+})();
+</script>
